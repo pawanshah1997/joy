@@ -47,8 +47,6 @@ const LoadingScene = (props) => {
     let text = props.show ? progressTextFromLoadingState(props.loadingState) : ''
     let percentage = props.show ? 100 * (props.loadingState + 1) / (Object.keys(LoadingState).length) : 0
 
-
-
     return (
         <FullScreenContainer> { /** Dropping fadeout: className={!props.show ? 'fadeout' : ''} **/}
             <SplashProgress progressText={text}

@@ -19,7 +19,9 @@ const Table = (props) => {
     return (
         <div className="my_table">
             <div className="column-headers"> {to_header_elements(props.column_titles)} </div>
-            {props.children}
+            <div className="content osx_scrollbar">
+              {props.children}
+            </div>
         </div>
     )
 

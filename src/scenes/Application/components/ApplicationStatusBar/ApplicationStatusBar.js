@@ -11,11 +11,11 @@ const ApplicationStatusBar = observer((props) => {
 
     return (
 
-        <StatusBar show={props.store.torrentsBeingLoaded.length > 0}
+        <StatusBar show={props.show}
                    bottom={true}
         >
             <ProgressStatusPanel title={'Loading torrents'}
-                                 percentageProgress={props.store.startingTorrentCheckingProgressPercentage}
+                                 percentageProgress={props.startingTorrentCheckingProgressPercentage}
             />
 
         </StatusBar>
@@ -23,7 +23,8 @@ const ApplicationStatusBar = observer((props) => {
 })
 
 ApplicationStatusBar.propTypes = {
-    store : PropTypes.object.isRequired
+    startingTorrentCheckingProgressPercentage : PropTypes.number.isRequired,
+    show : PropTypes.bool.isRequired
 }
 
 export default ApplicationStatusBar

@@ -15,13 +15,13 @@ const ToggleStatus = observer((props) => {
     let onClick
     let tooltip
 
-    if(props.torrent.canStart) {
+    if(props.canStart) {
         className = "toggle_status-start"
-        onClick = () => { props.torrent.start() }
+        onClick = props.start
         tooltip = "Start"
-    } else if(props.torrent.canStop) {
+    } else if(props.canStop) {
         className = "toggle_status-stop"
-        onClick = () => { props.torrent.stop() }
+        onClick = props.stop
         tooltip = "Stop"
     } else
         return null //
@@ -32,7 +32,10 @@ const ToggleStatus = observer((props) => {
 })
 
 ToggleStatus.propTypes = {
-    torrent : PropTypes.object.isRequired, // TorrentStore really
+  canStart : PropTypes.bool.isRequired,
+  canStop : PropTypes.bool.isRequired,
+  start : PropTypes.func.isRequired,
+  stop : PropTypes.func.isRequired
 }
 
 export default ToggleStatus

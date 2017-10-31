@@ -2,13 +2,12 @@
  * Created by bedeho on 13/06/17.
  */
 
-var assert = require('assert')
 var BaseMachine = require('../../../BaseMachine')
 var LibtorrentInteraction = require('joystream-node').LibtorrentInteraction
 var TorrentState = require('joystream-node').TorrentState
-
 var Common = require('./../Common')
 var DeepInitialState = require('../DeepInitialState')
+var assert = require('assert')
 
 var Loading = new BaseMachine({
 
@@ -17,139 +16,121 @@ var Loading = new BaseMachine({
     states: {
 
         AddingToSession : {
+  
+          addedToSession: function (client, torrent) {
+            
+            // Hold on to torrent
+            client.joystreamNodeTorrent = torrent
 
-            addTorrentResult: function (client, err, torrent) {
+            // Hook into torrent events
 
-                if (err) {
-                    this.transition(client, 'FailedAdding')
+            torrent.on('metadata', (torrentInfo) => {
+                client._submitInput('metadataReady', torrentInfo)
+            })
 
-                } else {
-                    // Hold on to torrent
-                    client.torrent = torrent
+            torrent.on('resumedata', (resumeData) => {
+                client._submitInput('resumeDataGenerated', resumeData)
+            })
 
-                    // Hook into torrent events
+            torrent.on('resumedata_error', function(err) {
+                client._submitInput('resumeDataGenerationFailed', err)
+            })
 
-                    torrent.on('metadata', (metadata) => {
-                        client.processStateMachineInput('metadataReady', metadata)
-                    })
+            // Update store when status changes
+            torrent.on('status_update', (status) => {
 
-                    torrent.on('resumedata', (resumeData) => {
-                        client.processStateMachineInput('resumeDataGenerated', resumeData)
-                    })
-
-                    torrent.on('resumedata_error', function(err) {
-                        client.processStateMachineInput('resumeDataGenerationFailed', err)
-                    })
-
-                    // Update store when status changes
-                    torrent.on('status_update', (status) => {
-                        client.store.setStatus(status)
-
-                        // Workaround used in place of finished alert not being reliable due to a bug
-                        // in libtorrent
-                        if (status.state === TorrentState.finished || status.state === TorrentState.seeding) {
-                          client.processStateMachineInput('downloadFinished')
-                        }
-                    })
-
-                    // This alert is generated when a torrent switches from being a downloader to a seed.
-                    // It will only be generated once per torrent.
-                    torrent.on('finished', function () {
-                        client.processStateMachineInput('downloadFinished')
-                    })
-
-                    // This alert is posted when a torrent completes checking. i.e. when it transitions out of
-                    // the checking files state into a state where it is ready to start downloading
-                    torrent.on('torrentChecked', function () {
-                        client.processStateMachineInput('checkFinished')
-                    })
-
-                    torrent.on('peerPluginStatusUpdates', function (peerStatuses) {
-                      client.processStateMachineInput('processPeerPluginStatuses', peerStatuses)
-                    })
-
-                    torrent.on('sellerTermsUpdated', function (alert) {
-                      client.processStateMachineInput('processSellerTermsUpdated', alert.terms)
-                    })
-
-                    torrent.on('buyerTermsUpdated', function (alert) {
-                      client.processStateMachineInput('processBuyerTermsUpdated', alert.terms)
-                    })
-
-                    torrent.on('uploadStarted', function (alert) {
-                      client.processStateMachineInput('uploadStarted', alert)
-                    })
-
-                    torrent.on('anchorAnnounced', function (alert) {
-                      client.processStateMachineInput('anchorAnnounced', alert)
-                    })
-
-                    torrent.on('lastPaymentReceived', function (alert) {
-                        client.processStateMachineInput('lastPaymentReceived', alert)
-                    })
-
-                    torrent.on('validPaymentReceived', function (alert) {
-                      client.processStateMachineInput('processValidPaymentReceived', alert)
-                    })
-
-                    torrent.on('sentPayment', function (alert) {
-                      client.processStateMachineInput('processSentPayment', alert)
-                    })
-
-                    torrent.on('downloadStarted', function (alert) {
-                      client.processStateMachineInput('paidDownloadInitiationCompleted', alert)
-                    })
-
-                    torrent.on('allSellersGone', function (alert) {
-                      client.processStateMachineInput('allSellersGone', alert)
-                    })
-
-                    // DO we have new peers
-                    /* torrent.on('dhtGetPeersReply', function (peers) {
-                      for (var i in peers) {
-                        console.log(peers[i])
-                        torrent.connectPeer(peers[i])
-                      }
-                      console.log(peers)
-                    }) */
-
-                    // If we don´t have metadata, wait for it
-                    if(client.metadata && client.metadata.isValid()) {
-                        this.transition(client, 'CheckingPartialDownload')
-                        const torrentInfo = client.torrent.handle.torrentFile()
-
-                        client.store.setMetadata(client.metadata)
-                        client.store.setTorrentFiles(torrentInfo.files())
-                    } else {
-                        this.transition(client, 'WaitingForMetadata')
-                    }
+                // Workaround used in place of finished alert not being reliable due to a bug
+                // in libtorrent
+                if (status.state === TorrentState.finished || status.state === TorrentState.seeding) {
+                  client._submitInput('downloadFinished')
                 }
 
+                //client._set
+
+            })
+
+            // This alert is generated when a torrent switches from being a downloader to a seed.
+            // It will only be generated once per torrent.
+            torrent.on('finished', function () {
+                client._submitInput('downloadFinished')
+            })
+
+            // This alert is posted when a torrent completes checking. i.e. when it transitions out of
+            // the checking files state into a state where it is ready to start downloading
+            torrent.on('torrentChecked', function () {
+                client._submitInput('checkFinished')
+            })
+
+            torrent.on('peerPluginStatusUpdates', function (peerStatuses) {
+              client._submitInput('processPeerPluginStatuses', peerStatuses)
+            })
+
+            torrent.on('sellerTermsUpdated', function (alert) {
+              client._submitInput('processSellerTermsUpdated', alert.terms)
+            })
+
+            torrent.on('buyerTermsUpdated', function (alert) {
+              client._submitInput('processBuyerTermsUpdated', alert.terms)
+            })
+
+            torrent.on('uploadStarted', function (alert) {
+              client._submitInput('uploadStarted', alert)
+            })
+
+            torrent.on('anchorAnnounced', function (alert) {
+              client._submitInput('anchorAnnounced', alert)
+            })
+
+            torrent.on('lastPaymentReceived', function (alert) {
+              client._submitInput('lastPaymentReceived', alert)
+            })
+
+            torrent.on('validPaymentReceived', function (alert) {
+              client._submitInput('processValidPaymentReceived', alert)
+            })
+
+            torrent.on('sentPayment', function (alert) {
+              client._submitInput('processSentPayment', alert)
+            })
+
+            torrent.on('downloadStarted', function (alert) {
+              client._submitInput('paidDownloadInitiationCompleted', alert)
+            })
+
+            // DO we have new peers
+            /* torrent.on('dhtGetPeersReply', function (peers) {
+              for (var i in peers) {
+                console.log(peers[i])
+                torrent.connectPeer(peers[i])
+              }
+              console.log(peers)
+            }) */
+
+            // If we don´t have metadata, wait for it
+            if(client.torrentInfo && client.torrentInfo.isValid()) {
+
+              this.transition(client, 'CheckingPartialDownload')
+
+              const torrentInfo = client.joystreamNodeTorrent.handle.torrentFile()
+
+              client._setTorrentInfo(torrentInfo)
+
+            } else {
+                this.transition(client, 'WaitingForMetadata')
             }
+          }
         },
-
-        FailedAdding : {
-
-            // This handler is input sink, preventing any further processing by parent. In the future we may add some handling of secondary attempts
-            '*' : function(client) {
-                //
-            }
-        },
-
+  
         WaitingForMetadata : {
 
-            metadataReady : function (client, metadata) {
+            metadataReady : function (client, torrentInfo) {
 
-                // Hold on to metadata, is required when shutting down
-                client.metadata = metadata
+              //const torrentInfo = client.joystreamNodeTorrent.handle.torrentFile()
 
-                const torrentInfo = client.torrent.handle.torrentFile()
+              // Hold on to metadata, is required when shutting down
+              client._setTorrentInfo(torrentInfo)
 
-                // Update store
-                client.store.setMetadata(metadata)
-                client.store.setTorrentFiles(torrentInfo.files())
-
-                this.transition(client, 'CheckingPartialDownload')
+              this.transition(client, 'CheckingPartialDownload')
             }
         },
 
@@ -158,8 +139,8 @@ var Loading = new BaseMachine({
             checkFinished: function (client) {
                 // If the saved initial state was stopped pause the torrent now after
                 // checking files completes
-                if (Common.isStopped(client.deepInitialState)) {
-                  client.torrent.handle.pause()
+                if (Common.isStopped(client._deepInitialState)) {
+                  client.joystreamNodeTorrent.handle.pause()
                 }
 
                 // By default, extension torrent plugins are constructed with
@@ -172,32 +153,30 @@ var Loading = new BaseMachine({
                 // - Preventing uploading to peers by
                 // -- sending (once) CHOCKED message in order to discourage inbound requests.
                 // -- cancel on_request() to make libtorrent blind to peer requests.
-                client.setLibtorrentInteraction(LibtorrentInteraction.BlockUploading)
+                Common.setLibtorrentInteraction(client, LibtorrentInteraction.BlockUploading)
 
                 // Determine whether we have a full download
 
-                var s = client.torrent.handle.status()
+                var s = client.joystreamNodeTorrent.handle.status()
 
                 if (s.state === TorrentState.seeding) {
 
-                    if(Common.isPassive(client.deepInitialState) || Common.isDownloading(client.deepInitialState)) {
+                    if(Common.isPassive(client._deepInitialState) || Common.isDownloading(client._deepInitialState)) {
 
                         // When there is a full download, and the user doesn't want to upload, then
                         // we just go to passive, even if the user really wanted to download.
-                        client.toObserveMode()
+                        Common.toObserveMode(client)
 
-                        client.deepInitialState = DeepInitialState.PASSIVE
+                        client._deepInitialState = DeepInitialState.PASSIVE
 
-                        client.startExtension()
+                        Common.startExtension(client)
 
                     } else { // isUploading
 
-                      console.log(client.sellerTerms)
+                      Common.toSellMode(client, client.sellerTerms)
 
-                        client.toSellMode(client.sellerTerms)
-
-                        if(!Common.isStopped(client.deepInitialState))
-                            client.startExtension()
+                      if(!Common.isStopped(client._deepInitialState))
+                          Common.startExtension(client)
                     }
 
                     goToDeepInitialState(this, client)
@@ -207,20 +186,20 @@ var Loading = new BaseMachine({
                     // We go to buy mode, regardless of what the user wanted (DeepInitialState),
                     // user will need to supply terms on their own.
 
-                    if(Common.isDownloading(client.deepInitialState))  {
+                    if(Common.isDownloading(client._deepInitialState))  {
 
-                        client.toBuyMode(client.buyerTerms)
+                        Common.toBuyMode(client, client.buyerTerms)
 
                         // When not paused, then start extension, otherwise leave extension un-started
-                        if(!Common.isStopped(client.deepInitialState))
-                            client.startExtension()
+                        if(!Common.isStopped(client._deepInitialState))
+                            Common.startExtension(client)
 
                         goToDeepInitialState(this, client)
 
                     } else { // isPassive || isUploading
 
                         // Overrule users wish, force (unpaid+started) downloading
-                        client.deepInitialState = DeepInitialState.DOWNLOADING.UNPAID.STARTED
+                        client._deepInitialState = DeepInitialState.DOWNLOADING.UNPAID.STARTED
 
                         this.transition(client, 'WaitingForMissingBuyerTerms')
                     }
@@ -232,16 +211,16 @@ var Loading = new BaseMachine({
 
         WaitingForMissingBuyerTerms : {
 
-            updateBuyerTerms: function(client, terms) {
+            missingBuyerTermsProvided: function(client, terms) {
+
+                Common.toBuyMode(client, terms)
 
                 // Hold on to terms
-                client.buyerTerms = terms
-
-                client.toBuyMode(terms)
+                client._setBuyerTerms(terms)
 
                 // When not paused, then start extension, otherwise leave extension un-started
-                if(!Common.isStopped(client.deepInitialState))
-                    client.startExtension()
+                if(!Common.isStopped(client._deepInitialState))
+                    Common.startExtension(client)
 
                 goToDeepInitialState(this, client)
             }
@@ -251,18 +230,18 @@ var Loading = new BaseMachine({
 
 function goToDeepInitialState(machine, client) {
 
-    let deepInitialState = client.deepInitialState
+    let deepInitialState = client._deepInitialState
 
     // Path to active substate we need to transition to
-    var path = relativePathFromDeepInitialState(client.deepInitialState)
+    var path = relativePathFromDeepInitialState(client._deepInitialState)
 
     // Transition to active state
     machine.go(client, path)
 
     // Drop temporary storage of inital state we want to load to
-    delete client.deepInitialState
+    delete client._deepInitialState
 
-    machine.emit('loaded', client, deepInitialState)
+    client.emit('loaded', deepInitialState)
 }
 
 function relativePathFromDeepInitialState(s) {

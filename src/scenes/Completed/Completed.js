@@ -10,6 +10,7 @@ import {
 } from './../../components/MiddleSection'
 
 import { TorrentTable } from './components'
+import {TorrentTableRowStore} from "../Common";
 
 function getStyles (props) {
   return {
@@ -21,50 +22,49 @@ function getStyles (props) {
   }
 }
 
-@observer
-class Completed extends Component {
-  componentWillMount () {
-    this.props.uiStore.resetNumberCompletedInBackgroundCounter()
+const Completed = observer((props) => {
+  
+  let styles = getStyles(props)
+  
+  let labelColorProps = {
+    backgroundColorLeft: props.middleSectionDarkBaseColor,
+    backgroundColorRight: props.middleSectionHighlightColor
   }
+  
+  return (
+    <div style={styles.root}>
+      
+      <MiddleSection backgroundColor={props.middleSectionBaseColor} height="120px">
+        
+        <MaxFlexSpacer />
 
-  render () {
-    let styles = getStyles(this.props)
-    let labelColorProps = {
-      backgroundColorLeft: this.props.middleSectionDarkBaseColor,
-      backgroundColorRight: this.props.middleSectionHighlightColor
-    }
-    return (
-      <div style={styles.root}>
-        <MiddleSection backgroundColor={this.props.middleSectionBaseColor}>
+        <LabelContainer>
+          <TorrentCountLabel
+            count={props.completedStore.torrentRowStores.length}
+            {...labelColorProps} />
 
-          <MaxFlexSpacer />
+          <CurrencyLabel
+            labelText={'SPENDING'}
+            satoshies={props.completedStore.totalSpent}
+            {...labelColorProps} />
 
-          <LabelContainer>
-            <TorrentCountLabel
-              count={this.props.store.torrentsCompleted.length}
-              {...labelColorProps} />
+          <CurrencyLabel
+            labelText={'REVENUE'}
+            satoshies={props.completedStore.totalRevenue}
+            {...labelColorProps} />
+        </LabelContainer>
+      </MiddleSection>
 
-            <CurrencyLabel
-              labelText={'SPENDING'}
-              satoshies={this.props.store.totalSpent}
-              {...labelColorProps} />
+      <TorrentTable completedStore={props.completedStore}/>
 
-            <CurrencyLabel
-              labelText={'REVENUE'}
-              satoshies={this.props.store.totalRevenue}
-              {...labelColorProps} />
-          </LabelContainer>
-        </MiddleSection>
-
-        <TorrentTable torrents={this.props.store.torrentsCompleted} store={this.props.store} />
-
-      </div>
-    )
-  }
-}
+    </div>
+  )
+  
+})
 
 Completed.propTypes = {
-  store: PropTypes.object.isRequired,
+  completedStore: PropTypes.object.isRequired, // HMR breaks instanceOf(TorrentTableRowStore)
+  
   middleSectionBaseColor: PropTypes.string.isRequired,
   middleSectionDarkBaseColor: PropTypes.string.isRequired,
   middleSectionHighlightColor: PropTypes.string.isRequired

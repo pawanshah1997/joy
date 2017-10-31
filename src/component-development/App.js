@@ -21,6 +21,10 @@ import ControllableApplicationStatusBar from './ApplicationStatusBar'
 import UpdaterFlow, {UpdaterLauncher} from './Updater'
 import ControllableFullScreenDialog from './FullScreenDialog'
 import ElevatedAutoLitButtonScenarios from './ElevatedAutoLitButton'
+import DialogScenario from './Dialog'
+import SendDialogScenarios from './SendDialog'
+import ReceiveDialogScenarios from './ReceiveDialog'
+import PaymentsTableScenarios from './PaymentsTable'
 
 // Workaround to get props passed to `Application` component when used with `Route`
 const ComponentWithStoreProp = (component, props) => {
@@ -67,6 +71,10 @@ const App = (props) => {
                         <Link to="elevated_auto_lit_button"> <RaisedButton label="Elevated auto lit button" style={style} /> </Link>
                         <Link to="onboarding"> <RaisedButton label="Onboarding" style={style} /> </Link>
                         <Link to="application_status_bar"> <RaisedButton label="ApplicationStatusBar" style={style} /> </Link>
+                        <Link to="dialog"> <RaisedButton label="Dialog" style={style} /> </Link>
+                        <Link to="send_dialog"> <RaisedButton label="Send Dialog" style={style} /> </Link>
+                        <Link to="receive_dialog"> <RaisedButton label="Receive Dialog" style={style} /> </Link>
+                        <Link to="payments_table"> <RaisedButton label="Payments Table" style={style} /> </Link>
 
                         <hr/>
 
@@ -88,6 +96,10 @@ const App = (props) => {
                         <Route path="/application_header" component={ApplicationHeaderScenarios} />
                         <Route path="/onboarding" component={Onboarding} />
                         <Route path="/application_status_bar" component={ControllableApplicationStatusBar} />
+                        <Route path="/dialog" component={DialogScenario} />
+                        <Route path="/send_dialog" component={SendDialogScenarios} />
+                        <Route path="/receive_dialog" component={ReceiveDialogScenarios} />
+                        <Route path="/payments_table" component={PaymentsTableScenarios} />
 
                     </div>
                 </HashRouter>

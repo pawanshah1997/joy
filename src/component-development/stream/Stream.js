@@ -2,8 +2,8 @@ import React, { Component } from 'react'
 import {ScenarioContainer} from '../common'
 import VideoPlayer, {TorrentStreamProgress} from '../../components/VideoPlayer'
 
-var MediaPlayerStore = require('../../core/MediaPlayerStore')
-var TorrentStore = require('../../core/Torrent/TorrentStore').default
+var MediaPlayerStore = require('../../scenes/VideoPlayer/Stores/MediaPlayerStore')
+var TorrentStore = require('../../core-stores/Torrent/TorrentStore').default
 
 class StreamScenarios extends Component {
 

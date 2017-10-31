@@ -9,20 +9,21 @@ import FullScreenContainer from '../../components/FullScreenContainer'
 import VideoPlayer from  '../../components/VideoPlayer'
 
 const VideoPlayerScene = observer((props) => {
-
-    if(!props.store.activeMediaPlayerStore)
-        return null
-
+    
     return (
+        props.activeMediaPlayerStore
+      ?
         <FullScreenContainer>
-            <VideoPlayer mediaPlayerStore={props.store.activeMediaPlayerStore}/>
+            <VideoPlayer mediaPlayerStore={props.activeMediaPlayerStore}/>
         </FullScreenContainer>
+        :
+        null
     )
 
 })
 
 VideoPlayerScene.propTypes = {
-    store : PropTypes.object.isRequired // streaming torrent video player store
+  activeMediaPlayerStore : PropTypes.object
 }
 
 export default VideoPlayerScene

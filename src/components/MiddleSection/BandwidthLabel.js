@@ -16,7 +16,7 @@ function getStyles(props) {
             marginRight : '3px'
         },
         unit : {
-
+          fontSize: '12px'
         }
     }
 

@@ -1,32 +1,32 @@
 import React, { Component } from 'react'
 import { Provider, observer } from 'mobx-react'
+import PropTypes from 'prop-types'
 
+// Utils
+import MobxReactDevTools from 'mobx-react-devtools'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import assert from 'assert'
 
-import Scene from '../../core/Scene'
-import State from '../../core/State'
+// Models
+import {UI_CONSTANTS} from '../../constants'
+import UIStore from '../UIStore'
+import ApplicationNavigationStore from './Stores'
 
 // Components
-import NavigationFrame from './components/NavigationFrame'
+import ApplicationHeader from './components/ApplicationHeader'
 import ApplicationStatusBar from './components/ApplicationStatusBar'
-
-import {UI_CONSTANTS} from '../../constants'
 
 // Our scenes
 import NotStartedScene from '../NotStarted'
-import LoadingScene, {LoadingState} from '../Loading'
-import TerminatingScene, {TerminatingState} from '../Terminating'
+import LoadingScene from '../Loading'
+import TerminatingScene from '../Terminating'
 import Downloading from '../Downloading'
 import Seeding from '../Seeding'
 import Completed from '../Completed'
 import Community from '../Community'
 import VideoPlayerScene from '../VideoPlayer'
-import isDev from 'electron-is-dev'
-
-// import Wallet from '../Wallet'
+import Wallet from '../Wallet'
 import { WelcomeScreen, DepartureScreen } from '../OnBoarding'
-
-let MobxReactDevTools = isDev ? require('mobx-react-devtools').default : null
 
 function getStyles (props) {
   return {
@@ -39,149 +39,188 @@ function getStyles (props) {
   }
 }
 
-@observer
-class Application extends Component {
-  render () {
-    let styles = getStyles(this.props)
+const Application = observer((props) => {
+  
+  let styles = getStyles(props)
 
-    return (
-      <MuiThemeProvider>
-        <Provider uiConstantsStore={UI_CONSTANTS}>
-          <div style={styles.innerRoot}>
+  return (
+    <MuiThemeProvider>
+      <Provider uiConstantsStore={UI_CONSTANTS} UIStore={props.UIStore}>
+        <div style={styles.innerRoot}>
+          
+          <AppView UIStore={props.UIStore} />
+          
+          {
+              props.displayMobxDevTools
+            ?
+              <div><MobxReactDevTools /></div>
+            :
+              null
+          }
+          
+        </div>
+      </Provider>
+    </MuiThemeProvider>
+  )
+})
 
-            { this.props.uiStore.onBoardingStore
-              ? <WelcomeScreen onBoardingStore={this.props.uiStore.onBoardingStore} />
-              : null }
-            { this.props.uiStore.onBoardingStore
-              ? <DepartureScreen onBoardingStore={this.props.uiStore.onBoardingStore} />
-              : null }
+Application.propTypes = {
+  UIStore : PropTypes.object.isRequired, // HMR breaks PropTypes.instanceOf(UIStore)
+  displayMobxDevTools : PropTypes.bool.isRequired
+}
 
-            <ApplicationStatusBar store={this.props.store} />
+const AppView = observer((props) => {
 
-            <VideoPlayerScene store={this.props.store} />
+  let elm = null
 
-            { this.renderActiveState() }
-
-            { isDev
-              ? <div><MobxReactDevTools /></div>
-              : null}
-
-          </div>
-        </Provider>
-      </MuiThemeProvider>
-    )
+  switch (props.UIStore.currentPhase) {
+    
+    case UIStore.PHASE.Idle:
+      elm = <NotStartedScene />
+      break
+     
+    case UIStore.PHASE.Loading:
+      elm =
+        <LoadingScene
+          show
+          loadingState={0}
+        />
+      break
+    
+    case UIStore.PHASE.Alive:
+      elm =
+        <StartedApp
+          UIStore={props.UIStore}
+        />
+      break
+    
+    case UIStore.PHASE.Terminating:
+      elm =
+        <TerminatingScene
+          show
+          terminatingState={0}
+          terminatingTorrentsProgressValue={0}
+        />
+      break
+    
+    default:
+      assert(false)
   }
+  
+  return (
+    elm
+  )
+ 
+})
 
-  renderActiveScene () {
-    let middleSectionColorProps = {
-      middleSectionBaseColor: UI_CONSTANTS.primaryColor,
-      middleSectionDarkBaseColor: UI_CONSTANTS.darkPrimaryColor,
-      middleSectionHighlightColor: UI_CONSTANTS.higlightColor
-    }
-
-    switch (this.props.uiStore.scene) {
-      case Scene.Downloading:
-        return <Downloading
-          torrents={this.props.store.torrentsDownloading}
-          spending={this.props.store.totalSpent}
-          downloadSpeed={this.props.store.totalDownloadSpeed}
-          torrentsBeingLoaded={this.props.store.torrentsBeingLoaded}
-          store={this.props.store}
-          downloadingStore={this.props.uiStore.downloadingStore}
-          {...middleSectionColorProps} />
-
-      case Scene.Uploading:
-        return <Seeding
-          store={this.props.store}
-          uiStore={this.props.uiStore}
-          {...middleSectionColorProps} />
-
-      case Scene.Completed:
-        return <Completed
-          store={this.props.store}
-          uiStore={this.props.uiStore}
-          {...middleSectionColorProps} />
-
-      case Scene.Community:
-        return <Community
-          store={this.props.store}
-          backgroundColor={UI_CONSTANTS.primaryColor} />
-    }
+const StartedApp = observer((props) => {
+  
+  let middleSectionColorProps = {
+    middleSectionBaseColor : UI_CONSTANTS.primaryColor,
+    middleSectionDarkBaseColor : UI_CONSTANTS.darkPrimaryColor,
+    middleSectionHighlightColor :UI_CONSTANTS.higlightColor
   }
-
-  renderActiveState () {
-    switch (this.props.store.currentState) {
-      case State.NotStarted:
-        return <NotStartedScene />
-
-      case State.Loading:
-        return (
-          <LoadingScene
-            show
-            loadingState={applicationStateToLoadingState(this.props.store.state)} />
-        )
-
-      case State.Started:
-        return (
-          <NavigationFrame app={this.props.store} uiStore={this.props.uiStore} >
-            { this.renderActiveScene() }
-          </NavigationFrame>
-        )
-
-      case State.ShuttingDown:
-        return (
-          <TerminatingScene
-            show
-            terminatingState={applicationStateToTerminatingState(this.props.store.state)}
-            terminatingTorrentsProgressValue={getTerminatingTorrentsProgressValue(this.props.store.torrentTerminatingProgress, this.props.store.torrentsToTerminate)} />
-        )
-
-      default:
-        return null
+  
+  let styles = {
+    root : {
+      height: "100%",
+      width: "100%",
+    },
+    applicationHeaderContainer: {
+      display: 'flex',
+      flexDirection: 'column',
+      flexGrow: 1,
+      height: "100%", // quick hack
     }
   }
-}
+  
+  //
+  let elm = null
+  
+  switch(props.UIStore.applicationNavigationStore.activeTab) {
+    
+    case ApplicationNavigationStore.TAB.Downloading:
+      
+      elm =
+        <Downloading
+          downloadingStore={props.UIStore.downloadingStore}
+          {...middleSectionColorProps}
+        />
+      break
+    
+    case ApplicationNavigationStore.TAB.Uploading:
+      
+      elm =
+        <Seeding
+          uploadingStore={props.UIStore.uploadingStore}
+          {...middleSectionColorProps}
+        />
+      break
+    
+    case ApplicationNavigationStore.TAB.Completed:
+      
+      elm =
+        <Completed
+          completedStore={props.UIStore.completedStore}
+          {...middleSectionColorProps}
+        />
+      break
+    
+    case ApplicationNavigationStore.TAB.Wallet:
+      
+      elm =
+        <Wallet
+          walletSceneStore={props.UIStore.walletSceneStore}
+          backgroundColor={UI_CONSTANTS.primaryColor}
+          {...middleSectionColorProps}
+        />
+      break
+    
+    case ApplicationNavigationStore.TAB.Community:
+      
+      elm =
+        <Community
+          UIStore={props.UIStore}
+          backgroundColor={UI_CONSTANTS.primaryColor}
+        />
+      break
+    
+    default:
+      assert(false)
+  }
+  
+  return (
+    <div style={styles.root}>
 
-function getTerminatingTorrentsProgressValue (torrentTerminatingProgress, torrentsToTerminate) {
-  return 100 * (torrentTerminatingProgress / torrentsToTerminate)
-}
-
-function applicationStateToLoadingState (s) {
-  let loadingState
-
-  if (s === 'Starting.uninitialized' || s === 'Starting.InitializingResources' || s === 'Starting.NotStarted')
-    loadingState = LoadingState.InitializingResources
-  else if (s === 'Starting.initializingApplicationDatabase')
-    loadingState = LoadingState.OpeningApplicationDatabase
-  else if (s === 'Starting.InitialializingSpvNode')
-    loadingState = LoadingState.InitializingSPVNode
-  else if (s === 'Starting.OpeningWallet')
-    loadingState = LoadingState.OpeningWallet
-  else if (s === 'Starting.ConnectingToBitcoinP2PNetwork')
-    loadingState = LoadingState.ConnectingToBitcoinP2PNetwork
-  else if (s.startsWith('Starting.LoadingTorrents'))
-    loadingState = LoadingState.LoadingTorrents
-
-  return loadingState
-}
-
-function applicationStateToTerminatingState (s) {
-  let terminatingState
-
-  if (s === 'Stopping.TerminatingTorrents' || s === 'Stopping.SavingTorrentsToDatabase' || s === 'Stopping.uninitialized')
-    terminatingState = TerminatingState.TerminatingTorrents
-  else if (s === 'Stopping.DisconnectingFromBitcoinNetwork')
-    terminatingState = TerminatingState.DisconnectingFromBitcoinNetwork
-  else if (s === 'Stopping.ClosingWallet')
-    terminatingState = TerminatingState.ClosingWallet
-  else if (s === 'Stopping.StoppingSpvNode')
-    terminatingState = TerminatingState.StoppingSpvNode
-  else if (s === 'Stopping.ClosingApplicationDatabase')
-    terminatingState = TerminatingState.ClosingApplicationDatabase
-  else if (s === 'Stopping.ClearingResources')
-    terminatingState = TerminatingState.ClearingResources
-
-  return terminatingState
-}
+      { /* Onboarding scenes */ }
+      <WelcomeScreen onBoardingStore={props.UIStore.onBoardingStore} />
+      <DepartureScreen onBoardingStore={props.UIStore.onBoardingStore} />
+      
+      <ApplicationStatusBar startingTorrentCheckingProgressPercentage={props.UIStore.torrentsFullyLoadedPercentage}
+                            show=
+                              {
+                                props.UIStore.torrentsBeingLoaded > 0
+                              &&
+                                (
+                                  props.UIStore.activeTab === UIStore.TAB.Downloading ||
+                                  props.UIStore.activeTab === UIStore.TAB.Uploading ||
+                                  props.UIStore.activeTab === UIStore.TAB.Completed
+                                )
+                              }
+      />
+      
+      <VideoPlayerScene activeMediaPlayerStore={props.UIStore.mediaPlayerStore} />
+  
+      <div style={styles.applicationHeaderContainer}>
+        <ApplicationHeader
+          UIStore={props.UIStore}
+          height={'90px'}
+          accentColor={UI_CONSTANTS.primaryColor} />
+        {elm}
+      </div>
+    </div>
+  )
+  
+})
 
 export default Application

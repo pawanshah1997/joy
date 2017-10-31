@@ -46,22 +46,22 @@ describe('Application Statemachine', function () {
 
     assertState('Starting.initializingApplicationDatabase')
 
-    assert(client.services.openDatabase.called)
+    assert(client.openDatabase.called)
 
     Promise.run()
 
     assertState('Starting.InitialializingSpvNode')
 
-    assert(client.services.spvnode.open.called)
+    assert(client.spvnode.open.called)
 
     // open spvnode successfully
-    client.services.spvnode.open.lastCall.args[0]()
+    client.spvnode.open.lastCall.args[0]()
 
     assertState('Starting.OpeningWallet')
 
-    assert(client.services.spvnode.getWallet.called)
+    assert(client.spvnode.getWallet.called)
 
-    let getWalletPromise = client.services.spvnode.getWallet.returnValues[0] // controlled promise
+    let getWalletPromise = client.spvnode.getWallet.returnValues[0] // controlled promise
 
     getWalletPromise.resolve({
       on: sinon.spy(),
@@ -72,18 +72,18 @@ describe('Application Statemachine', function () {
 
     assertState('Starting.ConnectingToBitcoinP2PNetwork')
 
-    assert(client.services.spvnode.connect.called)
+    assert(client.spvnode.connect.called)
 
-    client.services.spvnode.connect.returnValues[0].resolve()
+    client.spvnode.connect.returnValues[0].resolve()
 
     Promise.run()
 
     assertState('Starting.LoadingTorrents.AddingTorrents')
 
-    assert(client.services.db.getAll.called)
+    assert(client.db.getAll.called)
 
     // no torrents in db return empty array
-    client.services.db.getAll.returnValues[0].resolve([])
+    client.db.getAll.returnValues[0].resolve([])
 
     Promise.run()
 
@@ -98,15 +98,15 @@ describe('Application Statemachine', function () {
     // With no torrents in the session the statemachine will jump to DisconnectingFromBitcoinNetwork
     assertState('Stopping.DisconnectingFromBitcoinNetwork')
 
-    assert(client.services.spvnode.disconnect.called)
+    assert(client.spvnode.disconnect.called)
 
-    client.services.spvnode.disconnect.returnValues[0].resolve()
+    client.spvnode.disconnect.returnValues[0].resolve()
 
     Promise.run()
 
-    assert(client.services.spvnode.close.called)
+    assert(client.spvnode.close.called)
 
-    client.services.spvnode.close.returnValues[0].resolve()
+    client.spvnode.close.returnValues[0].resolve()
 
     Promise.run()
 
@@ -129,14 +129,6 @@ function NewMockedClient (isFirstTimeRun) {
     ASM.queuedHandle(client, ...args)
   }
 
-  client.getWalletBalance = function () {
-
-  }
-
-  client.topUpWalletFromFaucet = function () {
-
-  }
-
   client.factories = null
 
   client.config = {
@@ -144,8 +136,6 @@ function NewMockedClient (isFirstTimeRun) {
     logLevel: 'error',
     network: 'testnet'
   }
-
-  var services = client.services = {}
 
   var db = {
     getAll: sinon.spy(function () {

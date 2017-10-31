@@ -13,7 +13,6 @@ function getStyles(props) {
             position: 'absolute',
             left: '0px',
             top: '0px',
-            display: "flex",
             flexDirection: "column",
             justifyContent: "center",
             alignItems: 'center',

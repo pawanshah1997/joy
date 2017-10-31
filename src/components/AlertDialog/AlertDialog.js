@@ -46,8 +46,6 @@ class AlertDialogButton extends Component {
                 {this.props.title}
             </div>
         )
-
-
     }
 }
 

@@ -14,8 +14,9 @@ function getStyles(props) {
             //borderBottom : '2px solid hsl(219, 41%, 60%)',
             display: 'flex',
             flexDirection: 'row',
-            flex: '0 0 100px',
+            flex: '0 0 ' + props.height,
             alignItems: 'center',
+            justifyContent: 'center'
         }
     }
 }
@@ -33,7 +34,12 @@ const MiddleSection = (props) => {
 }
 
 MiddleSection.propTypes = {
-    backgroundColor : PropTypes.string.isRequired
+  backgroundColor : PropTypes.string.isRequired,
+  height : PropTypes.string,
+}
+
+MiddleSection.defaultProps = {
+    height : '100px'
 }
 
 export default MiddleSection

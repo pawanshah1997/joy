@@ -42,6 +42,51 @@ class BitcoinQuantity {
 }
  */
 
+
+// bcoin
+//var base58 = require('bcoin').base58
+
+// /utils/base58
+
+/**
+ * Converts a BCash p2pkh address string to a public key hash.
+ * @param {String} string - BCash p2pkh address string
+ * @return {Hash}
+ */
+function BCashP2PKHAddressStringToPubKeyHash(string) {
+
+  if(string.length === 2)
+    throw new Error('example of random error')
+
+  /**
+  assert(typeof data === 'string')
+
+  let decoded = base58.decode(data)
+
+  this.fromRaw()
+
+
+
+  if (network && !this.verifyNetwork(network))
+    throw new Error('Network mismatch for address.');
+  return this;
+   */
+}
+
+/**
+ * Concerts
+ * @return {String} address string
+ */
+function PubKeyHashToBCashP2PKHAddressString(pubKeyHash) {
+
+
+  if(pubKeyHash.length === 2)
+    throw new Error('example of random error')
+
+
+
+}
+
 /**
  * Most compact Bitcoin unit string for given representation
  *
@@ -49,6 +94,9 @@ class BitcoinQuantity {
  * a suitable thing for it, replace in the future.
  */
 function getCompactBitcoinUnits(satoshis) {
+
+    if(typeof satoshis !== 'number' || satoshis < 0)
+      throw new Error('Invalid parameters passed: ' + satoshis)
     
     let value = 0
     let unit = null

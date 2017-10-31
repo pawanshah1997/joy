@@ -14,11 +14,11 @@ const PlaySection = observer((props) => {
     let className
     let onClick
 
-    if(props.torrent.playableIndexfiles.length > 0) {
+    if(props.canPlay) {
         className = "play"
-        // Will later let the user pick which file to play. By default it is the
-        // first one.
-        onClick = () => { props.torrent.play(props.torrent.playableIndexfiles[0]) }
+        
+        // Will later let the user pick which file to play. By default it is the first one.
+        onClick = props.play
     } else {
         className = "play-disabled"
         onClick = null
@@ -30,7 +30,8 @@ const PlaySection = observer((props) => {
 })
 
 PlaySection.propTypes = {
-    torrent : PropTypes.object.isRequired, // TorrentStore really
+  canPlay : PropTypes.bool.isRequired,
+  play : PropTypes.func.isRequired
 }
 
 export default PlaySection

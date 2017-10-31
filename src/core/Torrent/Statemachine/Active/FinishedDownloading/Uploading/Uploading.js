@@ -13,37 +13,44 @@ var Uploading = new BaseMachine({
         Uninitialized : {},
 
         Started: {
+
+            /**
             _onEnter: function (client) {
                 client.store.setSellerPrice(client.sellerTerms)
             },
+            */
 
             stop: function (client) {
 
-                client.stopExtension()
-                client.stopLibtorrentTorrent()
-                this.transition(client, 'Stopped')
+              Common.stopExtension(client)
+
+              // Stop libtorrent torrent
+              client.joystreamNodeTorrent.handle.pause()
+
+              this.transition(client, 'Stopped')
             },
 
             updateSellerTerms: function(client, sellerTerms) {
 
-                // Keep new terms
-                client.sellerTerms = sellerTerms
+              // We dont allow user to just update seller terms currently
 
-                // Tell user to change seller terms
-                client.updateSellerTerms(sellerTerms)
+              throw Error('not yet supported')
             },
 
             processSellerTermsUpdated: function (client, terms) {
-                client.store.setSellerPrice(terms)
+
+              // Since `updateSellerTerms` is not implemented, this should never happen
+
+              throw Error('not yet supported')
             },
 
             processValidPaymentReceived: function (client, alert) {
-                client.store.setSellerRevenue(alert.pid, alert.totalAmountPaid)
+              client._handleValidPaymentReceivedAlert(alert)
             },
 
             goToPassive: function(client) {
 
-                client.toObserveMode()
+                Common.toObserveMode(client)
 
                 this.go(client, '../Passive')
             }
@@ -53,17 +60,20 @@ var Uploading = new BaseMachine({
 
             start: function (client) {
 
-                client.startLibtorrentTorrent()
-                client.startExtension()
+              client.joystreamNodeTorrent.handle.resume()
 
-                this.transition(client, 'Started')
+              Common.startExtension(client)
+
+              this.transition(client, 'Started')
             },
 
             goToPassive: function (client) {
 
-                client.startLibtorrentTorrent()
-                client.startExtension()
-                client.toObserveMode()
+                client.joystreamNodeTorrent.handle.resume()
+
+                Common.startExtension(client)
+
+                Common.toObserveMode(client)
 
                 this.go(client, '../Passive')
             }

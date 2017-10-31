@@ -7,32 +7,54 @@ import PropTypes from 'prop-types'
 import {observer} from 'mobx-react'
 import {getCompactBitcoinUnits} from './../../../../common'
 
+var bcoin = require('bcoin')
+var currencyFormatter = require('currency-formatter')
+
 function getStyles(props) {
 
-    return {
-        root :  {
-            display: 'flex',
-            flexDirection :  'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        balance : {
-            color : props.balanceColor,
-            marginRight : '10px',
-            fontSize : '24px',
-            fontWeight: 'bold'
-        },
-        units : {
-            color : props.balanceColor,
-        },
-        subtitle : {
-            color: props.subtitleColor,
-            fontSize: '11px',
-            fontWeight: 'bold',
-            //top: '-5px',
-            position: 'relative'
-        }
+  return {
+    root :  {
+      display: 'flex',
+      flexDirection :  'column',
+      //alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cryptoBalance : {
+      fontFamily: 'Helvetica neue',
+      fontSize: '30px',
+      color: 'white',
+      fontWeight: '400',
+      marginLeft : '3px'
+    },
+    cryptoUnit : {
+      paddingTop: '9px',
+      color : '#7d8b91',
+      fontSize: '12px'
+    },
+    subtitle : {
+      color: props.subtitleColor,
+      fontSize: '11px',
+      fontWeight: 'bold',
+      //top: '-5px',
+      position: 'relative'
+    },
+    fiatRow : {
+      display : 'flex',
+      fontSize: '12px',
+      marginBottom: '-5px'
+    },
+    cryptoRow : {
+      display : 'flex'
+    },
+    fiatUnit : {
+      color : '#7d8b91',
+    },
+    fiatBalance : {
+      color : '#7d8b91',
+      marginLeft : '3px',
+      fontWeight : 'bold'
     }
+  }
 }
 
 @observer
@@ -50,30 +72,31 @@ class BalancePanel extends Component {
 
         let style = getStyles(this.props)
 
-        let representation = getCompactBitcoinUnits(this.props.applicationStore.unconfirmedBalance)
-        let balanceText = "BALANCE"
+        let prettyBalanceInFiat = currencyFormatter.format(this.props.applicationNavigationStore.balanceInFiat, { code: 'USD', symbol : '' });
 
+        let balanceInBTC = this.props.applicationNavigationStore.balanceInBTC
+      
         return (
-            <div style={style.root}>
-                <div>
-                    <span style={style.balance}>{representation.value}</span>
-                    <span style={style.units}>{representation.unit}</span>
-                </div>
-                <div style={style.subtitle}>{balanceText}</div>
+          <div style={style.root}>
+            <div style={style.fiatRow}>
+              <span style={style.fiatUnit}>USD</span>
+              <span style={style.fiatBalance}>{prettyBalanceInFiat}</span>
             </div>
+            <div style={style.cryptoRow}>
+              <span style={style.cryptoUnit}>BTC</span>
+              <span style={style.cryptoBalance}>{balanceInBTC}</span>
+            </div>
+          </div>
         )
     }
 }
 
 BalancePanel.propTypes = {
-    applicationStore : PropTypes.object.isRequired,
+    walletStore : PropTypes.object,
+    priceFeedStore : PropTypes.object,
 
     balanceColor : PropTypes.string.isRequired,
     subtitleColor : PropTypes.string.isRequired
-}
-
-function getBalanceUnits(unconfirmedBalance, balanceUnits) {
-    return 'bits'
 }
 
 import LinearProgress from 'material-ui/LinearProgress'
@@ -133,8 +156,8 @@ const WalletPanel = observer((props) => {
         root : {
             display: 'flex',
             flex: '0 0 220px',
-            alignItems: 'center',
-            justifyContent: 'center',
+            //alignItems: 'center',
+            //justifyContent: 'center',
             backgroundColor: props.backgroundColor
         }
     }
@@ -150,20 +173,21 @@ const WalletPanel = observer((props) => {
 
     return (
         <div style={styles.root}>
-                <BalancePanel applicationStore={props.applicationStore}
-                      balanceColor={props.balanceColor}
-                      subtitleColor={props.subtitleColor} />
+                <BalancePanel applicationNavigationStore={props.applicationNavigationStore}
+                              balanceColor={props.balanceColor}
+                              subtitleColor={props.subtitleColor}
+                />
             {props.children}
         </div>
     )
 })
 
 WalletPanel.propTypes = {
-    applicationStore : PropTypes.object.isRequired,
+  applicationNavigationStore : PropTypes.object,
 
-    backgroundColor : PropTypes.string.isRequired,
-    balanceColor : PropTypes.string.isRequired,
-    subtitleColor : PropTypes.string.isRequired
+  backgroundColor : PropTypes.string.isRequired,
+  balanceColor : PropTypes.string.isRequired,
+  subtitleColor : PropTypes.string.isRequired
 }
 
 export default WalletPanel

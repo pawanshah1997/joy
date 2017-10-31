@@ -12,6 +12,8 @@ import MaxFlexSpacer from './MaxFlexSpacer'
 import TorrentCountLabel from './TorrentCountLabel'
 import CurrencyLabel from './CurrencyLabel'
 import BandwidthLabel from './BandwidthLabel'
+import WalletStatusLabel from './WalletStatusLabel'
+import AddTorrentIcon from './AddTorrentIcon'
 
 export {
     Label,
@@ -23,5 +25,7 @@ export {
     MaxFlexSpacer,
     TorrentCountLabel,
     CurrencyLabel,
-    BandwidthLabel
+    BandwidthLabel,
+    WalletStatusLabel,
+    AddTorrentIcon
 }

@@ -2,343 +2,314 @@
  * Created by bedeho on 11/07/17.
  */
 
-var EventEmitter = require('events').EventEmitter
-var util = require('util')
-
+import {EventEmitter} from 'events'
 var TorrentStatemachine = require('./Statemachine/Torrent')
-
-/// Torrent class
-
-// Make event emitter
-util.inherits(Torrent, EventEmitter)
+import FileSegmentStreamFactory from './FileSegmentStreamFactory'
+import Common from './Statemachine/Common'
+import {deepInitialStateFromActiveState} from './Statemachine/DeepInitialState'
 
 /**
- * Constructor
- * @param session
- * @constructor
+ * Torrent
+ *
+ * Note: This is a bad library interface,
+ * https://github.com/JoyStream/joystream-desktop/issues/665
+ *
+ * emits loaded({DeepInitialState}) -  torrent has been loaded with given state
+ * emits viabilityOfPaidDownloadInSwarm({ViabilityOfPaidDownloadInSwarm})
+ * emits buyerTerms({BuyerTerns}) - updated terms of client side
+ * emits sellerTerms({SellerTerms}
+ * emits torrentInfo({TorrentInfo}) - updated metadata
+ * emits validPaymentReceived({ValidPAymentReceivedAlert})
+ * emits paymentSent({PaymentSentAlert})
+ * emits failedToMakeSignedContract({err , tx}) - when
+ *
+ * These two are not reliable, as they are based on
+ * snapshots of plugin state at regular intervals.
+ * The arrival & disappearance of peer plugins may be missed
+ * in theory:
+ * emits peerPluginPresent({Peer}) - when peer plugin is first seens as present
+ * emits peerPluginGone({PID}) - when peer plugin is first seens as gone
  */
-function Torrent(store, privateKeyGenerator, publicKeyHashGenerator, contractGenerator, getStandardSellerTerms, broadcastRawTransaction) {
+class Torrent extends EventEmitter {
 
-    EventEmitter.call(this)
+  /**
+   * {String} Current state of the state machine
+   */
+  state
 
-    this._client = new TorrentStatemachineClient(
-      store,
-      privateKeyGenerator,
-      publicKeyHashGenerator,
-      contractGenerator,
-      getStandardSellerTerms,
-      broadcastRawTransaction)
+  /**
+   * {String}
+   */
+  infoHash
 
-    // Set initial state of store
-    store.setState(TorrentStatemachine.compositeState(this._client))
+  /**
+   * {String}
+   */
+  name
 
-    // Hook into state transitions in the machine
-    TorrentStatemachine.on('transition', (data) => {
+  /**
+   * {String}
+   */
+  savePath
 
-        // Check that the transition is on this torrent
-        if(data.client != this._client)
-            return
+  /**
+   * {Buffer?}
+   */
+  resumeData
 
-        // Get current state
-        let stateString = TorrentStatemachine.compositeState(this._client)
+  /**
+   * {TorrentInfo}
+   */
+  torrentInfo
 
-        // Updat state in store
-        store.setState(stateString)
+  /**
+   * {joystream-node.TorrentStatus} The most recent status for this status
+   */
+  torrentStatusUpdate
 
-        // Relay events for others to consume
-        this.emit('transition', {
-          transition : data,
-          state : stateString
-        })
+  /**
+   * {joystream-node.Torrent} joystream-node torrent
+   */
+  joystreamNodeTorrent
 
-        this.emit('enter-' + stateString, data)
+  /**
+   * {SellerTerms}
+   */
+  sellerTerms
 
-        // Detect functional events?
-        //  - Loaded: Lots of destination events?
-        //  - 'Loading.WaitingForMissingBuyerTerms'
-        //  - Terminated: emit event with payload client.deepInitialState
+  /**
+   * {BuyerTerms}
+   */
+  buyerTerms
 
-        //console.log(data.fromState + ' -> ' + data.toState)
-    })
+  /**
+   * {Map.<String, Peer>}
+   */
+  peers
 
+  /**
+   * {ViabilityOfPaidDownloadInSwarm}
+   */
+  viabilityOfPaidDownloadInSwarm
 
-    // Relay convenience signal about loading event
-    // ****** This is hack in two ways ******
-    // 1) Due to machinajs not being able to properly propagate
-    // child signals when used in BehavioralFSM mode, we have to dig inside state hierearchy
-    // and grab the child state object to listen to.
-    // 2) Due to machinajs state machine reorging their child structuer after their first
-    // usage, we have to conditionally detect where signal is emitted.
+  /**
+   * {FileSegmentStreamFactory} Current active file segment factory, only set iff
+   * a stream has been started.
+   *
+   * NB: Only one allowed at a time
+   */
+  fileSegmentStreamFactory
+  
+  constructor(settings, privateKeyGenerator, publicKeyHashGenerator, contractGenerator, broadcastRawTransaction) {
 
-    let source =
-        TorrentStatemachine.states.Loading._child.on
-            ?
-        TorrentStatemachine.states.Loading._child
-            :
-        TorrentStatemachine.states.Loading._child.instance
+    super()
 
-    source.on('loaded', (client, deepInitialState) => {
+    this.state = this._compositeStateAsString()
+    this.infoHash = settings.infoHash
+    this.name = settings.name
+    this.savePath = settings.savePath
+    this.resumeData = settings.resumeData
+    this.torrentInfo = settings.torrentInfo
+    this._deepInitialState = settings.deepInitialState
+    
+    // Check that compatibility in deepInitialState and {buyerTerms, sellerTerms},
+    // and store terms on client
+    if(Common.isDownloading(settings.deepInitialState)) {
+    
+      if(settings.extensionSettings.buyerTerms)
+        this.buyerTerms = settings.extensionSettings.buyerTerms
+      else
+        throw Error('DownloadIncomplete state requires buyer terms')
+    
+    } else if(Common.isUploading(settings.deepInitialState)) {
+    
+      if(settings.extensionSettings.sellerTerms)
+        this.sellerTerms = settings.extensionSettings.sellerTerms
+      else
+        throw Error('Uploading state requires seller terms')
+    
+    }
+    
+    this.joystreamNodeTorrent = null
+    this.fileSegmentStreamFactory = null
 
-        if(client === this._client)
-            this.emit('loaded', deepInitialState)
-    })
-
-}
-
-/**
- * Begin torrent lifetime
- * @param infoHash
- * @param name
- * @param savePath
- * @param resumeData
- * @param metadata
- * @param deepInitialState
- * @param extensionSettings
- */
-Torrent.prototype.startLoading = function(infoHash, name, savePath, resumeData, metadata, deepInitialState, extensionSettings) {
-    this._client.processStateMachineInput('startLoading', infoHash, name, savePath, resumeData, metadata, deepInitialState, extensionSettings)
-}
-
-Torrent.prototype.addTorrentResult = function(err, torrent) {
-    this._client.processStateMachineInput('addTorrentResult', err, torrent)
-}
-
-/**
- * Terminate torrent lifetime
- * @param generateResumeData whether generating resume data is wanted. Notice that even,
- * if this is true, resume data will not be generated.
- */
-Torrent.prototype.terminate = function(generateResumeData) {
-    this._client.processStateMachineInput('terminate', generateResumeData)
-}
-
-Torrent.prototype.currentState = function () {
-  return TorrentStatemachine.compositeState(this._client)
-}
-
-Torrent.prototype.start = function () {
-  this._client.processStateMachineInput('start')
-}
-
-Torrent.prototype.stop = function () {
-  this._client.processStateMachineInput('stop')
-}
-
-Torrent.prototype.updateBuyerTerms = function (buyerTerms) {
-  this._client.processStateMachineInput('updateBuyerTerms', buyerTerms)
-}
-
-Torrent.prototype.updateSellerTerms = function (sellerTerms) {
-  this._client.processStateMachineInput('updateSellerTerms', sellerTerms)
-}
-
-Torrent.prototype.startPaidDownload = function (peerSorter) {
-  this._client.processStateMachineInput('startPaidDownload', peerSorter)
-}
-
-Torrent.prototype.beginUpload = function () {
-  this._client.processStateMachineInput('goToStartedUploading')
-}
-
-Torrent.prototype.endUpload = function () {
-  this._client.processStateMachineInput('goToPassive')
-}
-
-Torrent.prototype.play = function (fileIndex) {
-  this._client.processStateMachineInput('play', fileIndex)
-}
-
-Torrent.prototype.close = function () {
-  this._client.processStateMachineInput('close')
-}
-
-Torrent.prototype.openFolder = function () {
-  this._client.processStateMachineInput('openFolder')
-}
-
-Torrent.prototype.remove = function (deleteData) {
-  this._client.processStateMachineInput('remove', deleteData)
-}
-
-/// TorrentStateMachineClient
-/// Holds state and external messaging implementations for a (behavoural machinajs) Torrent state machine instance
-
-function TorrentStatemachineClient(store, privateKeyGenerator, publicKeyHashGenerator, contractGenerator, getStandardSellerTerms, broadcastRawTransaction) {
-    this.store = store
+    // Hooks for state machine
     this._privateKeyGenerator = privateKeyGenerator
     this._publicKeyHashGenerator = publicKeyHashGenerator
     this._contractGenerator = contractGenerator
-    this._getStandardSellerTerms = getStandardSellerTerms
     this._broadcastRawTransaction = broadcastRawTransaction
-}
 
-TorrentStatemachineClient.prototype.processStateMachineInput = function (...args) {
-  TorrentStatemachine.queuedHandle(this, ...args)
-}
+    // Hook into Machinajs state transitions in the machine
+    TorrentStatemachine.on('transition', (data) => {
 
-TorrentStatemachineClient.prototype.stopExtension = function() {
+      // Check that the transition is on this torrent
+      if (data.client != this)
+        return
 
-    this.torrent.stopPlugin( (err, res) => {
+      // Get current state
+      let stateString = this._compositeStateAsString()
 
-        LOG_ERROR("stopExtension", err)
+      // Update public state
+      this.state = stateString
 
-        this.processStateMachineInput('stopExtensionResult', err, res)
+      console.log('Torrent: ' + stateString)
+
+      this.emit('state', stateString)
+      this.emit(stateString, data)
     })
+    
+  }
+  
+  start() {
+    this._submitInput('start')
+  }
+
+  stop() {
+    this._submitInput('stop')
+  }
+
+  updateBuyerTerms(buyerTerms) {
+    this._submitInput('updateBuyerTerms', buyerTerms)
+  }
+
+  updateSellerTerms(sellerTerms) {
+    this._submitInput('updateSellerTerms', sellerTerms)
+  }
+
+  provideMissingBuyerTerms(buyerTerms) {
+    this._submitInput('missingBuyerTermsProvided', buyerTerms)
+  }
+
+  startPaidDownload(peerSorter, fn) {
+
+    /**
+     * API HACK
+     * https://github.com/JoyStream/joystream-desktop/issues/665
+     */
+
+    this._submitInput('startPaidDownload', peerSorter)
+  }
+
+  beginUpload(sellerTerms){
+    this._submitInput('goToStartedUploading', sellerTerms)
+  }
+
+  endUpload() {
+    this._submitInput('goToPassive')
+  }
+
+  /**
+   * Create a stream factory
+   * Only possible when active, and a stream not already active.
+   *
+   * @param fileIndex {Number} - index of file
+   * @returns {FileSegmentStreamFactory}
+   */
+  createStreamFactory(fileIndex) {
+
+    /**
+     * API HACK
+     * https://github.com/JoyStream/joystream-desktop/issues/665
+     */
+
+    if(!this.state.startsWith('Active'))
+      throw Error('Cannot be done in current state')
+    else if(this.fileSegmentStreamFactory)
+      throw Error('A stream factory is already active')
+
+    // Check that index of file is valid
+    let numFiles = this.joystreamNodeTorrent.handle.torrentFile().files().numFiles()
+
+    if(fileIndex >= numFiles)
+      throw Error('Invalid file index, max index: ' + (numFiles - 1))
+
+    // Determine
+    let completed = this.state.startsWith('Active.FinishedDownloading')
+
+    // Create factory and set
+    this.fileSegmentStreamFactory = new FileSegmentStreamFactory(client.joystreamNodeTorrent, fileIndex, completed)
+
+    return this.fileSegmentStreamFactory
+  }
+
+  /**
+   * End stream
+   */
+  endStream() {
+
+    if(!this.fileSegmentStreamFactory)
+      throw Error('Cannot end a stream, none started')
+
+    //this.fileSegmentStreamFactory.stop()
+
+    this.fileSegmentStreamFactory = null
+  }
+
+  deepInitialState() {
+    return deepInitialStateFromActiveState(this.state)
+  }
+  
+  _addedToSession(torrent) {
+    this._submitInput('', torrent)
+  }
+  
+  _terminate(generateResumeData) {
+    this._submitInput('terminate', generateResumeData)
+  }
+
+  _submitInput(...args) {
+    TorrentStatemachine.queuedHandle(this, ...args)
+  }
+
+  _compositeStateAsString() {
+    return TorrentStatemachine.compositeState(this)
+  }
+
+  _setViabilityOfPaidDownloadInSwarm(viabilityOfPaidDownloadInSwarm) {
+    this.viabilityOfPaidDownloadInSwarm = viabilityOfPaidDownloadInSwarm
+    this.emit('viabilityOfPaidDownloadInSwarm', viabilityOfPaidDownloadInSwarm)
+  }
+
+  _setBuyerTerms(terms) {
+    this.buyerTerms = terms
+    this.emit('buyerTerms' , terms)
+  }
+
+  _setSellerTerms(terms) {
+    this.sellerTerms = terms
+    this.emit('sellerTerms', terms)
+  }
+
+  _setResumeData(resumeData) {
+    this.resumeData = resumeData
+    this.emit('resumeData', resumeData)
+  }
+
+  _setTorrentInfo(torrentInfo) {
+    this.torrentInfo = torrentInfo
+    this.emit('torrentInfo', torrentInfo)
+  }
+
+  _setTorrentStatusUpdate(torrentStatusUpdate) {
+    this.torrentStatusUpdate = torrentStatusUpdate
+    this.emit('torrentStatusUpdate', torrentStatusUpdate)
+  }
+
+  _handleValidPaymentReceivedAlert(alert) {
+    this.emit('validPaymentReceived', alert) // (alert.pid, alert.totalAmountPaid)
+  }
+
+  _handlePaymentSentAlert(alert) {
+    this.emit('paymentSent', alert) // (alert.pid, alert.totalAmountPaid)
+  }
+
+  _lastPaymentReceived(alert) {
+    // store ?? alert.settlementTx
+
+    this.emit('lastPaymentReceived', alert)
+  }
 
 }
 
-TorrentStatemachineClient.prototype.startExtension = function() {
-
-    this.torrent.startPlugin((err, resp) => {
-
-        LOG_ERROR("startExtension", err)
-
-        // Silent
-        // this.processStateMachineInput('startExtensionResult', err, res)
-    })
-}
-
-TorrentStatemachineClient.prototype.startLibtorrentTorrent = function() {
-
-    this.torrent.handle.resume()
-}
-
-TorrentStatemachineClient.prototype.stopLibtorrentTorrent = function() {
-
-    this.torrent.handle.pause()
-}
-
-TorrentStatemachineClient.prototype.hasOutstandingResumeData = function () {
-
-  return this.torrent.handle.needSaveResumeData()
-}
-
-TorrentStatemachineClient.prototype.generateResumeData = function() {
-
-    this.torrent.handle.saveResume_data()
-}
-
-TorrentStatemachineClient.prototype.setLibtorrentInteraction = function(mode) {
-
-    this.torrent.setLibtorrentInteraction (mode, (err) => {
-
-        LOG_ERROR("setLibtorrentInteraction", err)
-
-        // Silent
-        // this.processStateMachineInput('setLibtorrentInteractionResult', err, res) // 'blocked'
-    })
-}
-
-TorrentStatemachineClient.prototype.toObserveMode = function() {
-
-    this.torrent.toObserveMode((err, res) => {
-
-        LOG_ERROR("toObserveMode", err)
-
-        // Silent
-        // this.processStateMachineInput('toObserveModeResult', err, res)
-    })
-}
-
-TorrentStatemachineClient.prototype.toSellMode = function(sellerTerms) {
-
-    this.torrent.toSellMode(sellerTerms, (err, res) => {
-
-        LOG_ERROR("toSellMode", err)
-
-        // Silent
-        // this.processStateMachineInput('toSellModeResult', err, res)
-    })
-}
-
-TorrentStatemachineClient.prototype.toBuyMode = function(buyerTerms) {
-    this.torrent.toBuyMode(buyerTerms, (err, res) => {
-
-        LOG_ERROR("toBuyMode", err)
-
-        // Silent
-        // this.processStateMachineInput('toBuyModeResult', err, res)
-    })
-}
-
-TorrentStatemachineClient.prototype.updateSellerTerms = function() {
-    console.log('not yet implemented in bindings library')
-
-    // Make silent
-}
-
-TorrentStatemachineClient.prototype.updateBuyerTerms = function() {
-    console.log('not yet implemented in bindings library')
-
-    // Make silent
-}
-
-TorrentStatemachineClient.prototype.startUploading = function(connectionId, buyerTerms, contractSk, finalPkHash) {
-
-    this.torrent.startUploading(connectionId, buyerTerms, contractSk, finalPkHash, (err, res) => {
-        this.processStateMachineInput('startUploadingResult', err, res)
-    })
-}
-
-TorrentStatemachineClient.prototype.makeSignedContract = function(contractOutputs, contractFeeRate) {
-
-    var contract = this._contractGenerator(contractOutputs, contractFeeRate)
-
-    contract.then((tx) => {
-      this.processStateMachineInput('makeSignedContractResult', null, tx)
-    })
-
-    contract.catch((err) => {
-      this.processStateMachineInput('makeSignedContractResult', err)
-    })
-}
-
-TorrentStatemachineClient.prototype.contractSigningFailed = function (err) {
-  LOG_ERROR("makeSignedContract", err)
-}
-
-TorrentStatemachineClient.prototype.generateContractPrivateKey = function() {
-
-    return this._privateKeyGenerator()
-}
-
-TorrentStatemachineClient.prototype.generatePublicKeyHash = function() {
-
-    return this._publicKeyHashGenerator()
-}
-
-TorrentStatemachineClient.prototype.getStandardSellerTerms = function() {
-    return this._getStandardSellerTerms()
-}
-
-TorrentStatemachineClient.prototype.startDownloading = function(contract, downloadInfoMap) {
-
-    this.torrent.startDownloading(contract, downloadInfoMap, (err, res) => {
-        this.processStateMachineInput('startDownloadingResult', err, res)
-    })
-}
-
-TorrentStatemachineClient.prototype.getSavePath = function() {
-
-    return this.torrent.handle.savePath()
-}
-
-TorrentStatemachineClient.prototype.getTorrentInfo = function() {
-  return this.torrent.handle.torrentFile()
-}
-
-TorrentStatemachineClient.prototype.getFiles = function() {
-  // Get the files
-}
-
-TorrentStatemachineClient.prototype.broadcastRawTransaction = function (tx) {
-  return this._broadcastRawTransaction(tx)
-}
-
-function LOG_ERROR(source, err) {
-
-    if(err)
-        console.error(source,": Error found in callback:", err)
-}
 
 export default Torrent

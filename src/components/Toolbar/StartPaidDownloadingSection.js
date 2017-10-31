@@ -24,11 +24,30 @@ import ViabilityOfPaidDownloadingTorrent from '../../core/Torrent/ViabilityOfPai
 
 const StartPaidDownloadingSection = observer((props) => {
 
+
+    /**
+     * Bizarre!!!!!: HMR seems to break the use instanceof
+     * ---------
+     * of [instanceof StartPaidDownloadingViability.*] here, totally unablw
+     * to figure out what is going on. Before a reload, everything works,
+     * after reload, it breaks. Primary hypothesis is that reload is
+     * some how leading to some constructor functions to get reloaded in some part
+     * of the codebase, which is creating new prototypes for them, but that
+     * other parts of the codebase are using older constructors with other prototypes, breaking
+     * instanceof.
+     *
+     * Using constructor.name === for now
+     */
+
+    // This one breaks
+    //console.log(props.torrent.startPaidDownloadViability instanceof StartPaidDownloadViability.NoJoyStreamPeerConnections)
+    //console.log(props.torrent.startPaidDownloadViability.constructor.name === 'NoJoyStreamPeerConnections')
+    
     // Derive ButtonSection props
     let className
     let onClick
-
-    if(props.torrent.viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart) { // props.torrent.canStartPaidDownloading && props.store.unconfirmedBalance > 0
+  
+    if(props.torrent.viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart) {
         className = "start_paid_downloading"
         onClick = () => { props.torrent.startPaidDownload() }
     } else {
@@ -38,15 +57,12 @@ const StartPaidDownloadingSection = observer((props) => {
 
     return (
         <ButtonSection className={className} tooltip="Start paid speedup" onClick={onClick}>
-            <BlockedStartBadge viabilityOfPaidDownloadingTorrent={props.torrent.viabilityOfPaidDownloadingTorrent}
-                               spvChainSynced={props.store.spvChainSynced}
-            />
+            <BlockedStartBadge viabilityOfPaidDownloadingTorrent={props.torrent.viabilityOfPaidDownloadingTorrent}/>
         </ButtonSection>
     )
 })
 
 StartPaidDownloadingSection.propTypes = {
-    store : PropTypes.object.isRequired, // ApplicationStore really
     torrent : PropTypes.object.isRequired, // TorrentStore really
 }
 
@@ -71,7 +87,7 @@ const AlertIcon = (props) => {
 
 const BlockedStartBadge = (props) => {
 
-    let content = blockedBadgeContent(props.viabilityOfPaidDownloadingTorrent, props.spvChainSynced)
+    let content = blockedBadgeContent(props.viabilityOfPaidDownloadingTorrent)
 
     if(!content)
         return null
@@ -81,7 +97,7 @@ const BlockedStartBadge = (props) => {
     )
 }
 
-function blockedBadgeContent(viabilityOfPaidDownloadingTorrent, spvChainSynced)  {
+function blockedBadgeContent(viabilityOfPaidDownloadingTorrent)  {
 
     if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart ||
         viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.AlreadyStarted ||
@@ -122,7 +138,7 @@ function blockedBadgeContent(viabilityOfPaidDownloadingTorrent, spvChainSynced) 
         }
 
     } else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'InsufficientFunds')
-        tooltip = "Insufficient funds" + ( spvChainSynced ?  "" : ", wait for wallet to synch" )
+        tooltip = "Insufficient funds"
     else {
 
         console.log('should not come here')
