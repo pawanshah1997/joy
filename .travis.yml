@@ -31,12 +31,8 @@ before_install:
   # Install pip
   - if [ "$TRAVIS_OS_NAME" = osx ]; then pip install conan; else pip install --user conan; fi
   - conan remote add joystream https://conan.joystream.co:9300 True
-  - conan user travis -p trav444 -r=joystream
 install:
-  - npm install -g electron-forge
-  # make sure to install same version as electron in package.json to test version which will be published
-  - npm install -g electron-prebuilt-compile@1.6.14
-  - npm install -g electron-rebuild
+
 
 before_script:
   # fix for electron-mocha unit tests to work
@@ -49,7 +45,7 @@ script:
   # Fix so python can find conan modules when its running under electron-rebuild env
   - if [ "$TRAVIS_OS_NAME" = linux ]; then ln -s $HOME/.local $HOME/.electron-gyp/.local; fi
   # rebuild native addons for electron - unit tests use electron-mocha
-  - electron-rebuild
+  - npm run rebuild
   - npm test
 
 before_deploy:
@@ -61,7 +57,7 @@ after_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: electron-forge publish
+  script: npm run publish
   on:
     branch:
       - release*

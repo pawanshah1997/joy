@@ -52,7 +52,8 @@ module.exports = {
       ".travis",
       "appveyor.yml",
       "README.md",
-      "deploy_scripts"
+      "deploy_scripts",
+      ".idea"
     ],
     "overwrite": true,
     "appCategoryType": "public.app-category.utilities",

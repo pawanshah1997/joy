@@ -15,7 +15,7 @@ import Seeding from './seeding'
 import Completed from './completed'
 import StartDownloadingFlowScenarios from './startDownloadingFlow'
 import ApplicationHeaderScenarios from './ApplicationHeader'
-import Onboarding from './Onboarding'
+import Onboarding from './onboarding'
 import ControllableApplicationStatusBar from './ApplicationStatusBar'
 
 import UpdaterFlow, {UpdaterLauncher} from './Updater'

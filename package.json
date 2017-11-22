@@ -11,7 +11,9 @@
     "force-onboarding": "env FORCE_ONBOARDING=True NODE_ENV=development electron-forge start",
     "test": "xvfb-maybe electron-mocha renderer --recursive ./test",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "rebuild": "electron-rebuild",
+    "publish": "electron-forge publish"
   },
   "keywords": [
     "Joystream",
@@ -41,16 +43,17 @@
     "babel-preset-stage-0": "^6.22.0",
     "chai": "^4.0.2",
     "cmake-js": "^3.4.1",
+    "electron-forge": "^4.1.2",
     "electron-mocha": "3.5.0",
     "electron-prebuilt-compile": "1.6.14",
     "mobx-react-devtools": "^4.2.11",
     "node-gyp": "^3.6.0",
     "promise-mock": "^1.1.1",
+    "react-hot-loader": "^3.0.0-beta.6",
     "rimraf": "^2.6.1",
     "sinon": "^2.3.6",
     "webpack": "^2.3.1",
-    "xvfb-maybe": "^0.2.1",
-    "react-hot-loader": "^3.0.0-beta.6"
+    "xvfb-maybe": "^0.2.1"
   },
   "dependencies": {
     "babel-polyfill": "^6.23.0",
@@ -64,7 +67,7 @@
     "electron-is-dev": "^0.1.2",
     "electron-squirrel-startup": "^1.0.0",
     "humanize-duration": "^3.10.0",
-    "joystream-node": "git+ssh://git@github.com/JoyStream/joystream-node.git#development",
+    "joystream-node": "0.1.0",
     "jquery": "^3.2.1",
     "level-namespace": "^0.1.0",
     "leveldown": "^1.6.0",

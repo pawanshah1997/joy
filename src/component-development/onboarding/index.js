@@ -1,6 +1,6 @@
 import React from 'react'
 import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card'
-import WelcomeScreenContent from '../../scenes/Onboarding/WelcomeScreen/WelcomeScreenContent'
+import WelcomeScreenContent from '../../scenes/OnBoarding/WelcomeScreen/WelcomeScreenContent'
 
 const Onboarding = () => {
 

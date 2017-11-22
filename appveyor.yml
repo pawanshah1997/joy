@@ -27,21 +27,17 @@ install:
   # https://github.com/exogen/postinstall-build/issues/29
   - npm install -g npm@4.6.1
   - npm config set loglevel warn
-  - npm install -g electron-forge
-  - npm install -g electron-prebuilt-compile@1.6.14
-  - npm install -g electron-rebuild
   - pip install conan
   - conan remote add joystream https://conan.joystream.co:9300 True
-  - conan user travis -p trav444 -r=joystream
 
 build_script:
   - npm install --no-optional
   - mkdir C:\Users\appveyor\.electron-gyp
   - mklink /J C:\Users\appveyor\.electron-gyp\.conan C:\Users\appveyor\.conan
-  - electron-rebuild
+  - npm run rebuild
 
 deploy_script:
-  - electron-forge publish
+  - npm run publish
 
 test: on
 
