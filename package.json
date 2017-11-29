@@ -1,12 +1,13 @@
 {
   "name": "joystream",
   "productName": "Joystream",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "A new BitTorrent client, with faster speeds, streaming and paid seeding.",
   "homepage": "https://joystream.co",
   "main": "src/main.js",
   "scripts": {
     "start": "electron-forge start",
+    "start-magnet": "electron-forge start -- magnet:?xt=urn:btih:6a9759bffd5c0af65319979fb7832189f4f3c35d&dn=sintel.mp4",
     "component-development": "env COMPONENT_DEVELOPMENT_MODE=True NODE_ENV=development electron-forge start",
     "force-onboarding": "env FORCE_ONBOARDING=True NODE_ENV=development electron-forge start",
     "test": "xvfb-maybe electron-mocha renderer --recursive ./test",
@@ -29,7 +30,7 @@
     "url": "https://joystream.co"
   },
   "bugs": {
-    "url": "https://github.com/JoyStream/joystream-electron/issues"
+    "url": "https://github.com/JoyStream/joystream-desktop/issues"
   },
   "license": "MIT",
   "devDependencies": {
@@ -74,6 +75,7 @@
     "levelup": "^1.3.5",
     "lodash": "^4.17.4",
     "machina": "^2.0.0",
+    "magnet-uri": "^5.1.7",
     "material-ui": "0.19.2",
     "mkdirp": "^0.5.1",
     "mobx": "^3.1.7",

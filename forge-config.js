@@ -43,10 +43,8 @@ module.exports = {
   "electronPackagerConfig": {
     "asar": true,
     "icon": "src/assets/appicon/icon",
-    "protocol": [
-      "joystream",
-      "magnet"
-    ],
+    "protocol": ["magnet", "joystream"],
+    "protocolName": ["BitTorrent Magnet URL", "Joystream Magnet URL"],
     "ignore": [
       ".gitignore",
       ".travis",
@@ -77,6 +75,7 @@ module.exports = {
     "categories": [
       "Utility"
     ],
+    "mimeType": ["application/x-bittorrent", "x-scheme-handler/magnet"],
     "bin" : "Joystream"
   },
   "electronInstallerDMG": {
@@ -100,7 +99,7 @@ module.exports = {
   },
   "github_repository": {
     "owner": "JoyStream",
-    "name": "joystream-electron",
+    "name": "joystream-desktop",
     "draft": true,
     "prerelease": false
   },

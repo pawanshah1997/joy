@@ -4,7 +4,7 @@ process.env.BCOIN_NO_NATIVE = '1'
 
 // Disable workers which are not available in electron
 require('bcoin').set({ useWorkers: false })
-import {ipcRenderer} from 'electron'
+import {ipcRenderer, webFrame} from 'electron'
 
 // babel-polyfill for generator (async/await)
 import 'babel-polyfill'
@@ -45,6 +45,7 @@ function render (store) {
       document.getElementById('root')
     )
   } else {
+
     ReactDOM.render(
       <ApplicationScene store={store} />,
       document.getElementById('root')

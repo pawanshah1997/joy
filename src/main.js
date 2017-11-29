@@ -4,6 +4,7 @@ const path = require('path')
 const url = require('url')
 const isDev = require('electron-is-dev')
 const updater = require('./updater')
+const protocol = require('./protocol')
 
 import {enableLiveReload} from 'electron-compile'
 
@@ -72,8 +73,6 @@ ipcMain.on('set-bounds', (event, arg) => {
 ipcMain.on('power-save-blocker', (event, arg) => {
     const {enable, disable} = require('./power-save-blocker')
 
-    console.log(arg)
-
     if (arg.enable) {
       // Enable blocker
       enable()
@@ -84,6 +83,9 @@ ipcMain.on('power-save-blocker', (event, arg) => {
 })
 
 function createWindow () {
+
+    // Not really usefull for now :)
+    protocol.init()
 
     if (isDev) {
 
@@ -177,8 +179,6 @@ let separateUpdateWindow = null
 
 // Listen for async message from renderer process
 ipcMain.on('component-development', (event, arg) => {
-
-    console.log(arg)
 
     if(arg === 'open-updater-window') {
 

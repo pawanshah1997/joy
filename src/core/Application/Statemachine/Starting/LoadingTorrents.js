@@ -2,6 +2,7 @@ const BaseMachine = require('../../../BaseMachine')
 const TorrentInfo = require('joystream-node').TorrentInfo
 
 const Common = require('../Common')
+const debugApplication = require('debug')('application:starting:loadingTorrents')
 
 var LoadingTorrents = new BaseMachine({
   namespace: 'LoadingTorrents',
@@ -18,6 +19,7 @@ var LoadingTorrents = new BaseMachine({
 
     AddingTorrents: {
       _onEnter: async function (client) {
+        debugApplication('Adding Torrents from database !')
         try {
           // Read all torrents from database
           var torrents = await client.services.db.getAll('torrents')
@@ -34,6 +36,7 @@ var LoadingTorrents = new BaseMachine({
       },
 
       gotTorrents: function (client, savedTorrents) {
+        debugApplication('We got the torrents from the database')
 
         // Create core torrent objects and stores, initialize with loading settings,
         // and prepare torrent add parameters
@@ -54,6 +57,8 @@ var LoadingTorrents = new BaseMachine({
       },
 
       torrentLoaded: function (client) {
+        debugApplication('Verify if all the torrents are correctly added')
+
         var allTorrentsLoaded = true
 
         client.torrents.forEach(function (torrent, infoHash) {

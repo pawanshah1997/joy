@@ -5,9 +5,12 @@
 //const TorrentState = require('joystream-node').TorrentState
 const TorrentInfo = require('joystream-node').TorrentInfo
 const assert = require('assert')
+const magnet = require('magnet-uri')
+const isDev = require('electron-is-dev')
 import {remote} from 'electron'
 import path from 'path'
 const {shell} = require('electron')
+const debugApplicationAddTorrent = require('debug')('application:addTorrent')
 
 // Either Common should be exported, or .is* functions should be exported,
 // or these values should be here. Calling TorrentCommon is just a temporary fix until this is fixed
@@ -17,12 +20,17 @@ const TorrentCommon = require('../../Torrent/Statemachine/Common')
 const TorrentStatemachine = require('../../Torrent/Statemachine')
 
 function addTorrent(client, settings) {
+    debugApplicationAddTorrent('Adding torrent : ', settings.name)
 
     const infoHash = settings.infoHash
 
     let store = client.factories.torrentStore(infoHash, settings.savePath)
 
+    debugApplicationAddTorrent('Torrent store created')
+
     let coreTorrent = client.factories.torrent(store)
+
+    debugApplicationAddTorrent('Core torrent created')
 
     // Assign core torrent as action handler
     store.setTorrent(coreTorrent)
@@ -36,6 +44,7 @@ function addTorrent(client, settings) {
 
     // When torrent cannot be added to libtorrent session
     coreTorrent.on('enter-Loading.FailedAdding', function (data) {
+      debugApplicationAddTorrent('Failed adding :', data)
         console.log('Catastrophic failure, failed adding torrent.')
         assert(false)
     })
@@ -51,12 +60,17 @@ function addTorrent(client, settings) {
     })
 
     // settings.metadata has to be a TorrentInfo object
-    assert(settings.metadata instanceof TorrentInfo)
+    if (settings.metadata) {
+      assert(settings.metadata instanceof TorrentInfo)
+    }
 
     if (settings.resumeData) {
         var resumeData = Buffer.from(settings.resumeData, 'base64')
     }
 
+    debugApplicationAddTorrent('Start loading')
+
+    // TODO: Need to have the settings.url handle here because settings.metadata is actually null.
     coreTorrent.startLoading(infoHash, settings.name, settings.savePath, resumeData, settings.metadata, settings.deepInitialState, settings.extensionSettings)
 
     client.torrents.set(infoHash, coreTorrent)
@@ -67,6 +81,10 @@ function addTorrent(client, settings) {
         name: settings.name,
         savePath: settings.savePath,
         ti: settings.metadata
+    }
+
+    if (settings.url) {
+      params.url = settings.url
     }
 
     // joystream-node decoder doesn't correctly check if resumeData propery is undefined, it only checks
@@ -96,6 +114,8 @@ function addTorrent(client, settings) {
     }
 
     client.services.session.addTorrent(params, function (err, torrent) {
+        debugApplicationAddTorrent('Torrent %s added', settings.name)
+
         // Is this needed ?
         //client.processStateMachineInput('torrentAdded', err, torrent, coreTorrent)
         coreTorrent.addTorrentResult(err, torrent)
@@ -144,6 +164,32 @@ function removeTorrent(client, infoHash, deleteData) {
 
 }
 
+function isMagnetUri (stringToCheck) {
+  if (stringToCheck) {
+    return stringToCheck.startsWith('magnet')
+  }
+  return false
+}
+
+function hasMagnetUri () {
+
+  let magnetLink = null
+
+  if (isDev) {
+    // Get the magnet link if exist
+    if (isMagnetUri(remote.process.argv[2])) {
+      magnetLink = remote.process.argv[2]
+    }
+  } else {
+    // Get the magnet link if exist
+    if (isMagnetUri(remote.process.argv[1])) {
+      magnetLink = remote.process.argv[1]
+    }
+  }
+
+  return magnetLink
+}
+
 function showNativeTorrentFilePickerDialog () {
 
     return remote.dialog.showOpenDialog({
@@ -154,6 +200,24 @@ function showNativeTorrentFilePickerDialog () {
         ],
         properties: ['openFile']}
     )
+}
+
+function getSettingsFromMagnetUri (magnetUri, defaultSavePath) {
+
+    let terms = getStandardBuyerTerms()
+    var parsed = magnet.decode(magnetUri)
+
+    return {
+        infoHash: parsed.infoHash,
+        url: magnetUri,
+        resumeData : null,
+        savePath: defaultSavePath,
+        name: parsed.infoHash,
+        deepInitialState: TorrentStatemachine.DeepInitialState.DOWNLOADING.UNPAID.STARTED,
+        extensionSettings : {
+            buyerTerms: terms
+        }
+    }
 }
 
 function getStartingDownloadSettings(torrentInfo, defaultSavePath) {
@@ -220,7 +284,9 @@ export {
     getStandardSellerTerms,
     addTorrent,
     removeTorrent,
+    hasMagnetUri,
     showNativeTorrentFilePickerDialog,
+    getSettingsFromMagnetUri,
     getStartingDownloadSettings,
     getStartingUploadSettings
 }

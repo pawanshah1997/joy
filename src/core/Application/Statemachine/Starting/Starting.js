@@ -9,6 +9,8 @@ const constants = require('../../../../constants')
 const OnboardingStore = require('../../../OnboardingStore')
 const packageFile = require('../../../../../package.json')
 
+const debugApplication = require('debug')('application:starting')
+
 var Starting = new BaseMachine({
   namespace: 'Starting',
   initializeMachine : function (options) {
@@ -20,6 +22,8 @@ var Starting = new BaseMachine({
     },
     InitializingResources: {
       _onEnter: function (client) {
+        debugApplication('Starting application: InitializingResources')
+
         try {
           // Get directories service resource
           client.directories = client.factories.directories(client.config.appDirectory)
@@ -88,6 +92,7 @@ var Starting = new BaseMachine({
 
     initializingApplicationDatabase: {
       _onEnter: async function (client) {
+        debugApplication('Starting: Initializing application database')
           try {
             client.services.db = await client.services.openDatabase()
           } catch (err) {
@@ -97,9 +102,13 @@ var Starting = new BaseMachine({
           client.processStateMachineInput('databaseInitializationSuccess')
       },
       databaseInitializationSuccess: function (client) {
+        debugApplication('Starting: Application database successfully initialized')
+
         this.transition(client, 'InitialializingSpvNode')
       },
       databaseInitializationFailure: function (client, err) {
+        debugApplication('Starting: Application database failed to initialize')
+
         client.reportError(err)
         this.go(client, '../Stopping/ClosingApplicationDatabase')
       },
@@ -108,6 +117,8 @@ var Starting = new BaseMachine({
 
     InitialializingSpvNode: {
       _onEnter: function (client) {
+        debugApplication('Starting: Initialializing SPV node')
+
         // change to use async/await after http/net fix in bcoin
         client.services.spvnode.open((err) => {
           if (err) {
@@ -118,9 +129,13 @@ var Starting = new BaseMachine({
         })
       },
       initialializingSpvNodeSuccess: function (client) {
+        debugApplication('Starting: SPV node successfully initialized')
+
         this.transition(client, 'OpeningWallet')
       },
       initialializingSpvNodeFailure: function (client, err) {
+        debugApplication('Starting: SPV node failed to initialize')
+
         client.reportError(err)
         this.go(client, '../Stopping/StoppingSpvNode')
       },
@@ -129,6 +144,8 @@ var Starting = new BaseMachine({
 
     OpeningWallet: {
       _onEnter: async function (client) {
+        debugApplication('Starting: Opening Wallet')
+
         try {
           client.services.wallet = await client.services.spvnode.getWallet()
         } catch (err) {
@@ -143,9 +160,13 @@ var Starting = new BaseMachine({
         }
       },
       openingWalletSuccess: function (client) {
+        debugApplication('Starting: Wallet successfully opened')
+
         this.transition(client, 'ConnectingToBitcoinP2PNetwork')
       },
       openingWalletFailure: function (client, err) {
+        debugApplication('Starting: Wallet failed to open')
+
         client.reportError(err)
         this.go(client, '../Stopping/ClosingWallet')
       },
@@ -154,6 +175,8 @@ var Starting = new BaseMachine({
 
     ConnectingToBitcoinP2PNetwork: {
       _onEnter: async function (client) {
+        debugApplication('Starting: Connecting to Bitcoin P2P network')
+
         try {
           await client.services.spvnode.connect()
         } catch (err) {
@@ -163,6 +186,7 @@ var Starting = new BaseMachine({
         client.processStateMachineInput('connectingToBitcoinP2PNetworkSuccess')
       },
       connectingToBitcoinP2PNetworkSuccess: function (client) {
+        debugApplication('Starting: Bitcoin P2P network sucessfully connected')
 
         // Version migration
         migrate(packageFile.version, client.applicationSettings)
@@ -194,6 +218,8 @@ var Starting = new BaseMachine({
 
       },
       connectingToBitcoinP2PNetworkFailure: function (client, err) {
+        debugApplication('Starting: Bitcoin P2P network failed to connect')
+
         client.reportError(err)
         this.go(client, '../Stopping/DisconnectingFromBitcoinP2PNetwork')
       },

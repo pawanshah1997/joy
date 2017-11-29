@@ -1,11 +1,17 @@
-dist: trusty
-sudo: false
 language: node_js
+
 node_js:
   - "7"
-os:
-  - osx
-  - linux
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: false
+    - os: osx
+      osx_image: xcode7.3
+      sudo: false
+
 addons:
   apt:
     sources:
@@ -28,9 +34,9 @@ before_install:
       export CPPFLAGS="-I/usr/local/opt/openssl/include";
       export LDFLAGS="-L/usr/local/opt/openssl/lib";
     fi
-  # Install pip
-  - if [ "$TRAVIS_OS_NAME" = osx ]; then pip install conan; else pip install --user conan; fi
-  - conan remote add joystream https://conan.joystream.co:9300 True
+  # Install conan
+  - if [ "$TRAVIS_OS_NAME" = osx ]; then pip install "conan==0.28.1"; else pip install --user "conan==0.28.1"; fi
+  - conan remote add joystream https://api.bintray.com/conan/joystream/joystream True
 install:
 
 

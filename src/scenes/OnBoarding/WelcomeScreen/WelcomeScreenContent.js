@@ -130,13 +130,21 @@ const WelcomeScreenContent = (props) => {
 
                 <div style={styles.buttonContainer}>
 
+                    {
+                      /**
+
                     <TransparentButton label="No thank you"
-                                       onClick={() => { props.onboardingStore.skipAddingExampleTorrents() }}
+                                       onClick={() => {
+                                         props.onboardingStore.skipAddingExampleTorrents()
+                                       }}
                     />
 
-                    <div style={styles.buttonSpacer}>
-                        <span>or</span>
+                    < div style={styles.buttonSpacer}>
+                    <span>or</span>
                     </div>
+
+                       **/
+                    }
 
                     <ElevatedAutoLitButton title={"Lets go!"}
                                            onClick={() => { props.onboardingStore.acceptAddingExampleTorrents() }}

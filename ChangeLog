@@ -1,3 +1,8 @@
+0.5.3 release - Tuesday November 28th 2017
+
+  * Force adding of example torrents during on-boarding
+  * Added magnet link support (works well on Windows and Linux)
+
 0.5.2 release - Thursday November 2nd 2017
 
   * Improved media player
