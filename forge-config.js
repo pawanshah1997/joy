@@ -43,8 +43,14 @@ module.exports = {
   "electronPackagerConfig": {
     "asar": true,
     "icon": "src/assets/appicon/icon",
-    "protocol": ["magnet", "joystream"],
-    "protocolName": ["BitTorrent Magnet URL", "Joystream Magnet URL"],
+    "protocols" : [
+      {
+        "name": "BitTorrent Magnet URL",
+        "schemes": [
+            "magnet"
+        ]
+      }
+    ],
     "ignore": [
       ".gitignore",
       ".travis",
