@@ -51,13 +51,13 @@
     "mobx-react-devtools": "^4.2.11",
     "node-gyp": "^3.6.0",
     "promise-mock": "^1.1.1",
-    "react-hot-loader": "^4.0.0-beta.6",
     "rimraf": "^2.6.1",
     "sinon": "^2.3.6",
     "webpack": "^2.3.1",
     "xvfb-maybe": "^0.2.1"
   },
   "dependencies": {
+    "react-hot-loader": "^4.0.0-beta.6",
     "babel-polyfill": "^6.23.0",
     "bcoin": "1.0.0-beta.12",
     "bitcoin-convert": "^1.0.4",
