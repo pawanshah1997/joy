@@ -6,7 +6,6 @@ import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import Dialog from 'material-ui/Dialog'
 
-import SvgIcon from 'material-ui/SvgIcon'
 import DefaultIcon from './DefaultIcon'
 
 class AlertDialogButton extends Component {
@@ -187,7 +186,7 @@ AlertDialog.propTypes = {
 }
 
 AlertDialog.defaultProps = {
-    SVGIcon : ( <DefaultIcon /> )
+    SVGIcon : ( <DefaultIcon titleColor={titleColor}/> )
 }
 
 export default AlertDialog
