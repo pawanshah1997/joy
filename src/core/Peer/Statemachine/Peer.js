@@ -71,9 +71,7 @@ var Peer = new BaseMachine({
 
                 if(!status.connection || (
                     status.connection.innerState !== ConnectionInnerState.WaitingToStart &&
-                    status.connection.innerState !== ConnectionInnerState.ReadyForPieceRequest &&
-                    status.connection.innerState !== ConnectionInnerState.LoadingPiece &&
-                    status.connection.innerState !== ConnectionInnerState.WaitingForPayment)) {
+                    status.connection.innerState !== ConnectionInnerState.ServicingPieceRequests)) {
 
                   return this.transition(client, 'ReadyForStartPaidUploadAttempt')
                 }

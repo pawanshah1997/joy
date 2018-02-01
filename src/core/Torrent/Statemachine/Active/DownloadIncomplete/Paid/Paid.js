@@ -14,12 +14,10 @@ var Paid = new BaseMachine({
 
         Started : {
 
-            // Future hook for when all paid peers left _before_
+            // When all paid peers left _before_
             // we completed the download
-            // NB: Doing anything here may require complementary
-            // changes in protocol_session/extension.
-            lastSellerLeft : function(client) {
-                // add later!!
+            allSellersGone : function(client) {
+                this.go(client, '../Unpaid/Started/ReadyForStartPaidDownloadAttempt')
             },
 
             /**
