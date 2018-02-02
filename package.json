@@ -1,7 +1,7 @@
 {
   "name": "joystream",
   "productName": "Joystream",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "A new BitTorrent client, with faster speeds, streaming and paid seeding.",
   "homepage": "https://joystream.co",
   "main": "src/main.js",
@@ -69,7 +69,7 @@
     "electron-is-dev": "^0.1.2",
     "electron-squirrel-startup": "^1.0.0",
     "humanize-duration": "^3.10.0",
-    "joystream-node": "0.1.0",
+    "joystream-node": "0.2.0",
     "jquery": "^3.2.1",
     "level-namespace": "^0.1.0",
     "leveldown": "^1.6.0",
