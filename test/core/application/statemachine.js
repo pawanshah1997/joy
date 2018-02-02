@@ -89,32 +89,10 @@ describe('Application Statemachine', function () {
 
     // With no torrents to load, starting has completed and we should go to the
     // default scene in Started state
-    assertState('Started.OnDownloadingScene.idle')
-  })
-
-  it('can change scenes', function () {
-    ASM.go(client, 'Started/OnDownloadingScene/idle')
-
-    assertState('Started.OnDownloadingScene.idle')
-
-    handle('completed_scene_selected')
-    assertState('Started.OnCompletedScene.idle')
-
-    assert.equal(client.store.setNumberCompletedInBackground.callCount, 1)
-    assert.deepEqual(client.store.setNumberCompletedInBackground.getCall(0).args[0], 0)
-
-    handle('uploading_scene_selected')
-    assertState('Started.OnUploadingScene.idle')
-
-    handle('downloading_scene_selected')
-    assertState('Started.OnDownloadingScene.idle')
+    assertState('Started')
   })
 
   it('stops', function () {
-    ASM.go(client, 'Started/OnDownloadingScene/idle')
-
-    assertState('Started.OnDownloadingScene.idle')
-
     handle('stop')
 
     // With no torrents in the session the statemachine will jump to DisconnectingFromBitcoinNetwork
