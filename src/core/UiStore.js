@@ -36,6 +36,7 @@ class UiStore {
 
     // Create onBoarding store if it is the first time running the app
     if (this.applicationStore.applicationSettings.isFirstTimeRun()) {
+      this.applicationStore.applicationSettings.setIsFirstTimeRun(false)
       this.onBoardingStore = new OnBoardingStore(applicationStore)
     }
 
