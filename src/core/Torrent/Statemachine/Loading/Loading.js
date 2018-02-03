@@ -100,6 +100,10 @@ var Loading = new BaseMachine({
                       client.processStateMachineInput('paidDownloadInitiationCompleted', alert)
                     })
 
+                    torrent.on('allSellersGone', function (alert) {
+                      client.processStateMachineInput('allSellersGone', alert)
+                    })
+
                     // DO we have new peers
                     /* torrent.on('dhtGetPeersReply', function (peers) {
                       for (var i in peers) {
@@ -187,6 +191,8 @@ var Loading = new BaseMachine({
                         client.startExtension()
 
                     } else { // isUploading
+
+                      console.log(client.sellerTerms)
 
                         client.toSellMode(client.sellerTerms)
 

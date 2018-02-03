@@ -20,9 +20,14 @@ const TorrentCommon = require('../../Torrent/Statemachine/Common')
 const TorrentStatemachine = require('../../Torrent/Statemachine')
 
 function addTorrent(client, settings) {
-    debugApplicationAddTorrent('Adding torrent : ', settings.name)
-
     const infoHash = settings.infoHash
+
+    if (client.torrents.has(infoHash)) {
+      debugApplicationAddTorrent('Adding torrent: ', settings.name, 'skipped. Duplicate infoHash')
+      return
+    }
+
+    debugApplicationAddTorrent('Adding torrent : ', settings.name)
 
     let store = client.factories.torrentStore(infoHash, settings.savePath)
 
@@ -45,8 +50,9 @@ function addTorrent(client, settings) {
     // When torrent cannot be added to libtorrent session
     coreTorrent.on('enter-Loading.FailedAdding', function (data) {
       debugApplicationAddTorrent('Failed adding :', data)
-        console.log('Catastrophic failure, failed adding torrent.')
-        assert(false)
+      console.log('Catastrophic failure, failed adding torrent.')
+      console.log(data)
+      //assert(false)
     })
 
     // When torrent is missing buyer terms
@@ -57,6 +63,7 @@ function addTorrent(client, settings) {
     // When torrent has completed downloading
     coreTorrent.on('enter-Active.FinishedDownloading.Passive', function (data) {
         client.processStateMachineInput('torrentFinishedDownloading', infoHash)
+        client.store.emit('torrentFinished')
     })
 
     // settings.metadata has to be a TorrentInfo object
@@ -117,8 +124,7 @@ function addTorrent(client, settings) {
         debugApplicationAddTorrent('Torrent %s added', settings.name)
 
         // Is this needed ?
-        //client.processStateMachineInput('torrentAdded', err, torrent, coreTorrent)
-        coreTorrent.addTorrentResult(err, torrent)
+        client.processStateMachineInput('torrentAdded', err, torrent, coreTorrent)
     })
 
     // Return core torrent, typically so user can setup their own context

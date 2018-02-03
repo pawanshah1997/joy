@@ -1,18 +1,16 @@
-const electron = require('electron')
-const {app, BrowserWindow, ipcMain, crashReporter} = require('electron')
+const {app, BrowserWindow, ipcMain, crashReporter, Menu} = require('electron')
 const path = require('path')
 const url = require('url')
 const isDev = require('electron-is-dev')
 const updater = require('./updater')
 const protocol = require('./protocol')
 
+import { createTemplate } from './menu'
 import {enableLiveReload} from 'electron-compile'
-
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win = null
-
 
 // This method makes your application a Single Instance Application -
 // instead of allowing multiple instances of your app to run,
@@ -47,7 +45,7 @@ if (shouldQuit) {
 // Listen to broadcast channel from main window
 ipcMain.on('main-window-channel', (event, arg) => {
 
-    if(arg == 'user-closed-app') {
+    if(arg === 'user-closed-app') {
 
         // Exit application
         updater.quit()
@@ -108,6 +106,13 @@ function createWindow () {
       show : true
   })
 
+  var template = createTemplate(win)
+
+  // Set Menu application from menu.js
+  // Need to be created after win has been initialized
+  const menu = Menu.buildFromTemplate(template)
+  Menu.setApplicationMenu(menu)
+
   /**
   // Delay actually showing window until we are ready to show
   // https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
@@ -118,17 +123,19 @@ function createWindow () {
 
   if (isDev) {
 
+    // Add Devtron to chrome dev tool
+    // https://electron.atom.io/devtron/
+    require('devtron').install()
+
     // Open the DevTools.
     win.webContents.openDevTools()
 
   } else {
-
     // Maximize window
     win.maximize()
 
     // Handle squirrel event. Avoid calling for updates when install
     if(require('electron-squirrel-startup')) {
-      console.log('Squirrel events handle')
       app.quit()
       // Hack because app.quit() is not immediate
       process.exit(0)

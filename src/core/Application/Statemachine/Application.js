@@ -4,15 +4,15 @@
 
 const BaseMachine = require('../../BaseMachine')
 const Starting = require('./Starting/Starting')
-const Started = require('./Started/Started')
 const Stopping = require('./Stopping/Stopping')
 const TorrentInfo = require('joystream-node').TorrentInfo
 const Common = require('./Common')
 const Doorbell = require('../../Doorbell')
-const exampleTorrents = require('../../../constants').EXAMPLE_TORRENTS
 const fs = require('fs')
 const magnet = require('magnet-uri')
 const debugApplication = require('debug')('application')
+
+import DeepInitialState from '../../../core/Torrent/Statemachine/DeepInitialState'
 
 var ApplicationStateMachine = new BaseMachine({
   namespace: 'Application',
@@ -64,8 +64,6 @@ var ApplicationStateMachine = new BaseMachine({
     },
 
     Started: {
-      _child: Started,
-
       _onEnter: function (client) {
         debugApplication('The application has started')
         // listen for changes in wallet balance
@@ -145,30 +143,56 @@ var ApplicationStateMachine = new BaseMachine({
         client.store.setSpvChainSynced(false)
       },
 
-      addExampleTorrents: function (client) {
+      addTorrentFile: function (client, torrentFileName) {
+        let torrentInfo
 
-          for (var i = 0; i < exampleTorrents.length; i++) {
+        try {
+            const data = fs.readFileSync(torrentFileName)
+            torrentInfo = new TorrentInfo(data)
+        } catch (e) {
+            console.log('Failed to load torrent file: ' + torrentFileName)
+            console.log(e)
+        }
 
-              // Load torrent file
-              let torrentFileName = exampleTorrents[i]
+        let savePath = client.store.applicationSettings.getDownloadFolder()
+        let settings = Common.getStartingDownloadSettings(torrentInfo, savePath)
 
-              let torrentInfo
+        // and start adding torrent
+        Common.addTorrent(client, settings)
+      },
 
-              try {
-                  const data = fs.readFileSync(torrentFileName)
-                  torrentInfo = new TorrentInfo(data)
-              } catch (e) {
-                  console.log('Failed to load torrent file: ' + torrentFileName)
-                  console.log(e)
-                  continue
-              }
+      addTorrent: function (client, settings) {
 
-              let settings = Common.getStartingDownloadSettings(torrentInfo, client.directories.defaultSavePath())
+        let torrentStm = Common.addTorrent(client, settings)
 
-              // and start adding torrent
-              Common.addTorrent(client, settings)
+        // -----
+
+        // When loading either succeeds, or fails due to no complete download,
+        // we detect this and process event
+        torrentStm.once('loaded', (deepInitialState) => {
+
+          if (deepInitialState === DeepInitialState.UPLOADING.STARTED) {
+            client.processStateMachineInput('loadedSuccessfully', torrentStm)
+            // client.store.emit('loadedSuccessfully')
+          } else {
+            client.processStateMachineInput('failedStartUploadDueToIncompleteDownload', torrentStm)
+            // client.store.emit('failedStartUploadDueToIncompleteDownload')
           }
+        })
 
+        client.store.emit('loadingTorrentForUploading')
+      },
+
+      torrentAdded: function (client, err, torrent, coreTorrent) {
+        coreTorrent.addTorrentResult(err, torrent)
+      },
+
+      loadedSuccessfully: function (client, coreTorrent) {
+        client.store.emit('loadedSuccessfully')
+      },
+
+      failedStartUploadDueToIncompleteDownload: function (client, coreTorrent) {
+        client.store.emit('failedStartUploadDueToIncompleteDownload')
       },
 
       startDownloadWithTorrentFileFromMagnetUri: function (client, magnetUri) {
@@ -184,12 +208,13 @@ var ApplicationStateMachine = new BaseMachine({
           return
         }
 
-        let settings = Common.getSettingsFromMagnetUri(magnetUri, client.directories.defaultSavePath())
+        let savePath = client.store.applicationSettings.getDownloadFolder() || client.directories.defaultSavePath()
+
+        let settings = Common.getSettingsFromMagnetUri(magnetUri, savePath)
 
         debugApplication('Settings with magnet URI successfully initialized. Readdy to add the torrent.')
 
         Common.addTorrent(client, settings)
-
       }
 
     },
@@ -211,14 +236,8 @@ function beginStopping(machine, client, event) {
 
     blockMainWindowUnload(event)
 
-    // When onboarding is enabled,
-    if(client.onboardingStore) {
-
-      // we display shutdown message
-      client.onboardingStore.displayShutdownMessage()
-
-    } else // Directly initiate stopping
-        machine.handle(client, 'stop')
+    // Directly initiate stopping
+    machine.handle(client, 'stop')
 
 }
 

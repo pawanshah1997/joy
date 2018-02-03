@@ -11,13 +11,13 @@ import {OnboardingStore} from '../../../core'
 import WelcomeScreenContent from './WelcomeScreenContent'
 
 const WelcomeScreen = observer((props) => {
+    console.log(props.onBoardingStore.state)
 
     return (
-        props.store.onboardingStore &&
-        props.store.onboardingStore.state === OnboardingStore.State.WelcomeScreen
+        props.onBoardingStore.state === OnboardingStore.State.WelcomeScreen
             ?
         <FullScreenContainer>
-            <WelcomeScreenContent onboardingStore={props.store.onboardingStore} />
+            <WelcomeScreenContent onboardingStore={props.onBoardingStore} />
         </FullScreenContainer>
             :
         null
@@ -26,7 +26,7 @@ const WelcomeScreen = observer((props) => {
 })
 
 WelcomeScreen.propTypes = {
-    store : PropTypes.object.isRequired
+    onBoardingStore : PropTypes.object.isRequired
 }
 
 export default WelcomeScreen

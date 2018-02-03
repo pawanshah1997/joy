@@ -68,7 +68,8 @@ module.exports = {
     "iconUrl": "https://download.joystream.co/appicon/icon.ico",
     "loadingGif": "src/assets/img/windows-installer-screen.png",
     "certificateFile": getSigningCertFilePath(),
-    "certificatePassword": getSigningCertPassword()
+    "certificatePassword": getSigningCertPassword(),
+    "remoteReleases": "https://github.com/JoyStream/joystream-desktop"
   },
   "electronInstallerDebian": {
     "icon": "src/assets/appicon/icon.png",

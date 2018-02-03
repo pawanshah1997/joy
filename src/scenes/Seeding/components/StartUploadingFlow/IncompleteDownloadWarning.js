@@ -2,101 +2,94 @@
  * Created by bedeho on 30/09/17.
  */
 
-import React, { Component } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 
-import {InnerDialogHeading, TransparentButton} from '../../../../components/FullScreenDialog'
+import { InnerDialogHeading, TransparentButton } from '../../../../components/FullScreenDialog'
 import ElevatedAutoLitButton from '../../../../components/ElevatedAutoLitButton'
 
-function getStyles(props) {
-
-    return {
-        container : {
-            display : 'flex',
-            flexDirection : 'column',
-            alignItems: 'center'
-        },
-        subtitle : {
-            padding : '20px',
-            marginTop: '30px',
-            width: '800px'
-        },
-        completedText : {
-            fontWeight : 'bold'
-        },
-        folderLocationContainer : {
-            display : 'flex',
-            justifyContent : 'center',
-            marginTop: '30px'
-        },
-        folderLocation : {
-            textAlign : 'center',
-            padding : '10px',
-            paddingLeft : '30px',
-            paddingRight : '30px',
-            borderRadius : '60px',
-            backgroundColor : 'hsla(0, 0%, 90%, 1)',
-            fontSize : '22px',
-            fontWeight : 'bold'
-        },
-        buttonContainer : {
-            display : 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: '50px'
-        },
-        buttonSpacer : {
-            width: '100px',
-            display: 'flex',
-            justifyContent :'center',
-            alignItems: 'center',
-            fontSize: '24px',
-            fontStyle: 'italic'
-        }
+function getStyles (props) {
+  return {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
+    },
+    subtitle: {
+      padding: '20px',
+      marginTop: '30px',
+      width: '800px'
+    },
+    completedText: {
+      fontWeight: 'bold'
+    },
+    folderLocationContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      marginTop: '30px'
+    },
+    folderLocation: {
+      textAlign: 'center',
+      padding: '10px',
+      paddingLeft: '30px',
+      paddingRight: '30px',
+      borderRadius: '60px',
+      backgroundColor: 'hsla(0, 0%, 90%, 1)',
+      fontSize: '22px',
+      fontWeight: 'bold'
+    },
+    buttonContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: '50px'
+    },
+    buttonSpacer: {
+      width: '100px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      fontSize: '24px',
+      fontStyle: 'italic'
     }
+  }
 }
 
 const IncompleteDownloadWarning = (props) => {
+  let styles = getStyles(props)
 
-    let styles = getStyles(props)
+  let savePath = props.uploadingStore.torrentWithBadSavePathDuringStartUploadFlow.savePath
 
-    let savePath = props.store.torrentWithBadSavePathDuringStartUploadFlow.savePath
+  return (
+    <InnerDialogHeading title='Missing download'>
+      <div style={styles.container}>
 
-    return (
-        <InnerDialogHeading title="Missing download">
+        <div style={styles.subtitle}>
+          Downloading was started since you are missing a <span style={styles.completedText}>complete</span> download in the provided folder.
+        </div>
 
-            <div style={styles.container}>
+        <div style={styles.folderLocationContainer}>
+          <div style={styles.folderLocation}>{savePath}</div>
+        </div>
 
-                <div style={styles.subtitle}>
-                    Downloading was started since you are missing a <span style={styles.completedText}>complete</span> download in the provided folder.
-                </div>
+        <div style={styles.buttonContainer}>
 
-                <div style={styles.folderLocationContainer}>
-                    <div style={styles.folderLocation}>{savePath}</div>
-                </div>
+          <TransparentButton label='Drop download'
+            onClick={() => { props.uploadingStore.dropDownloadClicked() }} />
 
-                <div style={styles.buttonContainer}>
+          <div style={styles.buttonSpacer}>
+            <span>or</span>
+          </div>
 
-                    <TransparentButton label="Drop download"
-                                       onClick={() => { props.store.dropDownloadClicked()}}
-                    />
+          <ElevatedAutoLitButton title='Ok, keep going'
+            onClick={() => { props.uploadingStore.keepDownloadingClicked() }}
+            hue={212}
+            saturation={100} />
 
-                    <div style={styles.buttonSpacer}>
-                        <span>or</span>
-                    </div>
-
-                    <ElevatedAutoLitButton title="Ok, keep going"
-                                           onClick={() => { props.store.keepDownloadingClicked() }}
-                                           hue={212}
-                                           saturation={100}
-                    />
-
-                </div>
-
-            </div>
-
-        </InnerDialogHeading>
-    )
+        </div>
+      </div>
+    </InnerDialogHeading>
+  )
 }
 
 /**
@@ -110,7 +103,7 @@ saturation={100}
 */
 
 IncompleteDownloadWarning.propTypes = {
-    store : PropTypes.object.isRequired,
+  uploadingStore: PropTypes.object.isRequired
 }
 
 export default IncompleteDownloadWarning

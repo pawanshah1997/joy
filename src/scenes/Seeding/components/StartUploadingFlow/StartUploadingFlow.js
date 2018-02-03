@@ -3,79 +3,71 @@
  */
 
 import React from 'react'
-import { inject, observer } from 'mobx-react'
+import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 
 import FullScreenDialog from '../../../../components/FullScreenDialog'
-import UserSelectingTorrentFileOrRawContentScene from './UserSelectingTorrentFileOrRawContentScene'
 import LoadingTorrentForUploading from './LoadingTorrentForUploading'
 import UserPickingSavePath from './UserPickingSavePath'
 import IncompleteDownloadWarning from './IncompleteDownloadWarning'
 
+import UploadingStore from '../../../../core/UploadingStore'
+
 import {
-    InvalidTorrentFileAlertDialog,
-    TorrentAlreadyAddedAlertDialog,
-    IncompleteDownloadAlertDialog
+  InvalidTorrentFileAlertDialog,
+  TorrentAlreadyAddedAlertDialog
 } from '../../../../components/AlertDialog'
 
-function getStyles(props) {
-
-    return {
-
-    }
-}
-
 const StartUploadingFlow = observer((props) => {
+  let state = props.uploadingStore.state
 
-    let state = props.store.state
+  let fullScreenDialogContent
+  let enableCloseButton = true
+  let fullScreen =
+  // state === 'Started.OnUploadingScene.UserSelectingTorrentFileOrRawContent' ||
+  // state === 'Started.OnUploadingScene.TorrentFileWasInvalid' ||
+  // state === 'Started.OnUploadingScene.TorrentAlreadyAdded' ||
+  state === UploadingStore.State.UserPickingSavePath ||
+  state === UploadingStore.State.LoadingTorrentForUploading ||
+  state === UploadingStore.State.TellUserAboutIncompleteDownload
 
-    console.log(state)
+  switch (state) {
+    case UploadingStore.State.UserPickingSavePath:
+      fullScreenDialogContent = <UserPickingSavePath {...props} />
+      break
+    case UploadingStore.State.LoadingTorrentForUploading:
+      fullScreenDialogContent = <LoadingTorrentForUploading {...props} />
+      break
+    case UploadingStore.State.TellUserAboutIncompleteDownload:
+      fullScreenDialogContent = <IncompleteDownloadWarning uploadingStore={props.uploadingStore} />
+      break
+    default:
+      fullScreenDialogContent = null
+  }
 
-    let fullScreenDialogContent = null
-    let enableCloseButton = true
-    let fullScreen =
-        //state === 'Started.OnUploadingScene.UserSelectingTorrentFileOrRawContent' ||
-        //state === 'Started.OnUploadingScene.TorrentFileWasInvalid' ||
-        //state === 'Started.OnUploadingScene.TorrentAlreadyAdded' ||
-        state === 'Started.OnUploadingScene.UserPickingSavePath' ||
-        state === 'Started.OnUploadingScene.LoadingTorrentForUploading' ||
-        state === 'Started.OnUploadingScene.TellUserAboutIncompleteDownload'
+  return (
+    <div>
+      <InvalidTorrentFileAlertDialog
+        open={state === UploadingStore.State.TorrentFileWasInvalid}
+        onAcceptClicked={() => { props.uploadingStore.acceptTorrentFileWasInvalid() }}
+        onRetryClicked={() => { props.uploadingStore.retryPickingTorrentFile() }} />
 
-    if(state === 'Started.OnUploadingScene.UserPickingSavePath')
-        fullScreenDialogContent = <UserPickingSavePath {...props} />
-    else if(state === 'Started.OnUploadingScene.LoadingTorrentForUploading')
-        fullScreenDialogContent = <LoadingTorrentForUploading {...props}/>
-    else if(state === 'Started.OnUploadingScene.TellUserAboutIncompleteDownload')
-        fullScreenDialogContent = <IncompleteDownloadWarning store={props.store} />
+      <TorrentAlreadyAddedAlertDialog
+        open={state === UploadingStore.State.TorrentAlreadyAdded}
+        onOkClicked={() => { props.uploadingStore.acceptTorrentWasAlreadyAdded() }} />
 
-    return (
-        <div>
-            <InvalidTorrentFileAlertDialog store={props.store}
-                                           open={state === 'Started.OnUploadingScene.TorrentFileWasInvalid'}
-                                           onAcceptClicked={() => { props.store.acceptTorrentFileWasInvalid() }}
-                                           onRetryClicked={() => { props.store.retryPickingTorrentFile() }}
-            />
-            <TorrentAlreadyAddedAlertDialog store={props.store}
-                                            open={props.store.state === "Started.OnUploadingScene.TorrentAlreadyAdded"}
-                                            onOkClicked={() => { props.store.acceptTorrentWasAlreadyAdded()} }
-
-            />
-
-            <FullScreenDialog closeClick={() => { props.store.exitStartUploadingFlow()}}
-                              open={fullScreen}
-                              enableCloseButton={enableCloseButton}
-            >
-                { fullScreenDialogContent }
-            </FullScreenDialog>
-        </div>
-    )
-
+      <FullScreenDialog
+        closeClick={() => { props.uploadingStore.exitStartUploadingFlow() }}
+        open={fullScreen}
+        enableCloseButton={enableCloseButton} >
+        { fullScreenDialogContent }
+      </FullScreenDialog>
+    </div>
+  )
 })
 
-
-
 StartUploadingFlow.propTypes = {
-    store : PropTypes.object.isRequired
+  uploadingStore: PropTypes.object.isRequired
 }
 
 export default StartUploadingFlow

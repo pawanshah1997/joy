@@ -16,6 +16,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 
 import Application from './core/Application'
+import UiStore from './core/UiStore'
 
 /**
  * Some components use react-tap-event-plugin to listen for touch events because onClick is not
@@ -28,8 +29,9 @@ var injectTapEventPlugin = require('react-tap-event-plugin')
 injectTapEventPlugin()
 
 const application = new Application()
+const uiStore = new UiStore(application.store)
 
-function render (store) {
+function render (store, uiStore) {
 
   // NB: We have to re-require Application every time, or else this won't work
   const ApplicationScene = require('./scenes/Application').default
@@ -39,7 +41,7 @@ function render (store) {
 
     ReactDOM.render(
       <AppContainer>
-        <ApplicationScene store={store} />
+        <ApplicationScene store={store} uiStore={uiStore} />
       </AppContainer>
       ,
       document.getElementById('root')
@@ -47,17 +49,17 @@ function render (store) {
   } else {
 
     ReactDOM.render(
-      <ApplicationScene store={store} />,
+      <ApplicationScene store={store} uiStore={uiStore} />,
       document.getElementById('root')
     )
   }
 }
 
 if (module.hot) {
-  module.hot.accept(render.bind(null, application.store))
+  module.hot.accept(render.bind(null, application.store, uiStore))
 }
 
-render(application.store)
+render(application.store, uiStore)
 
 var config = require('./config')
 
@@ -72,8 +74,20 @@ application.start(config)
 // be triggered yet another time
 window.onbeforeunload = function(e) {
 
-    // Tell state machine
-    application.onBeforeUnloadMainWindow(e)
+  // Tell state machine
+  application.onBeforeUnloadMainWindow(e)
+
+  return
+
+  // hotfix for v0.5.4 - disabling departure screen for now
+
+    if (uiStore.onBoardingStore) {
+      // Showing onBoarding departure screen if we have the on boarding
+      uiStore.onBoardingStore.displayShutdownMessage()
+    } else  {
+      // Tell state machine
+      application.onBeforeUnloadMainWindow(e)
+    }
 
     return
 }

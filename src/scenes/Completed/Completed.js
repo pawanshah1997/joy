@@ -1,92 +1,73 @@
 import React, { Component } from 'react'
-import { inject, observer } from 'mobx-react'
+import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
-
 import {
-    Label,
-    LabelContainer,
-    MiddleSection,
-    SimpleLabel,
-    Toolbar,
-    ToolbarButton,
-    MaxFlexSpacer,
-    TorrentCountLabel,
-    CurrencyLabel,
-    BandwidthLabel
-} from  './../../components/MiddleSection'
+  LabelContainer,
+  MiddleSection,
+  MaxFlexSpacer,
+  TorrentCountLabel,
+  CurrencyLabel
+} from './../../components/MiddleSection'
 
 import { TorrentTable } from './components'
 
-function getStyles(props) {
-
-    return {
-        root : {
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1
-        }
+function getStyles (props) {
+  return {
+    root: {
+      display: 'flex',
+      flexDirection: 'column',
+      flexGrow: 1
     }
-
+  }
 }
 
-const Completed = observer((props) => {
+@observer
+class Completed extends Component {
+  componentWillMount () {
+    this.props.uiStore.resetNumberCompletedInBackgroundCounter()
+  }
 
-    let styles = getStyles(props)
-
+  render () {
+    let styles = getStyles(this.props)
     let labelColorProps = {
-        backgroundColorLeft : props.middleSectionDarkBaseColor,
-        backgroundColorRight : props.middleSectionHighlightColor
+      backgroundColorLeft: this.props.middleSectionDarkBaseColor,
+      backgroundColorRight: this.props.middleSectionHighlightColor
     }
-
     return (
-        <div style={styles.root}>
+      <div style={styles.root}>
+        <MiddleSection backgroundColor={this.props.middleSectionBaseColor}>
 
-            <MiddleSection backgroundColor={props.middleSectionBaseColor}>
+          <MaxFlexSpacer />
 
-                <MaxFlexSpacer />
+          <LabelContainer>
+            <TorrentCountLabel
+              count={this.props.store.torrentsCompleted.length}
+              {...labelColorProps} />
 
-                <LabelContainer>
+            <CurrencyLabel
+              labelText={'SPENDING'}
+              satoshies={this.props.store.totalSpent}
+              {...labelColorProps} />
 
-                    <TorrentCountLabel count={props.store.torrentsCompleted.length}
-                                   {...labelColorProps}
-                    />
+            <CurrencyLabel
+              labelText={'REVENUE'}
+              satoshies={this.props.store.totalRevenue}
+              {...labelColorProps} />
+          </LabelContainer>
+        </MiddleSection>
 
-                    <CurrencyLabel labelText={"SPENDING"}
-                                 satoshies={props.store.totalSpent}
-                                 {...labelColorProps}
-                    />
-                    <CurrencyLabel labelText={"REVENUE"}
-                                satoshies={props.store.totalRevenue}
-                                {...labelColorProps}
-                    />
-                    { /**
-                     <BandwidthLabel labelText={'DOWNLOAD SPEED'}
-                     bytesPerSecond={props.store.totalDownloadSpeed}
-                     {...labelColorProps}
-                     />
+        <TorrentTable torrents={this.props.store.torrentsCompleted} store={this.props.store} />
 
-                     <BandwidthLabel labelText={'UPLOAD SPEED'}
-                     bytesPerSecond={props.store.totalUploadSpeed}
-                     {...labelColorProps}
-                     />
-                     **/
-                    }
-
-                </LabelContainer>
-
-            </MiddleSection>
-
-            <TorrentTable torrents={props.store.torrentsCompleted} store={props.store} />
-
-        </div>
+      </div>
     )
-})
+  }
+}
 
 Completed.propTypes = {
-    store : PropTypes.object.isRequired,
-    middleSectionBaseColor : PropTypes.string.isRequired,
-    middleSectionDarkBaseColor : PropTypes.string.isRequired,
-    middleSectionHighlightColor : PropTypes.string.isRequired
+  store: PropTypes.object.isRequired,
+  middleSectionBaseColor: PropTypes.string.isRequired,
+  middleSectionDarkBaseColor: PropTypes.string.isRequired,
+  middleSectionHighlightColor: PropTypes.string.isRequired
 }
 
 export default Completed

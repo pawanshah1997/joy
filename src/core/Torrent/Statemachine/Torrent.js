@@ -32,6 +32,8 @@ var Torrent = new BaseMachine({
 
                 } else if(Common.isUploading(deepInitialState)) {
 
+                  console.log(extensionSettings.sellerTerms)
+
                     if(extensionSettings.sellerTerms)
                         client.sellerTerms = extensionSettings.sellerTerms
                     else

@@ -33,6 +33,7 @@ const Row = (props) => {
     return (
         <div className={props.className ? " " + props.className : ""}
              style={styles.root}
+             {...props.mouseEvents}
         >
             {props.children}
         </div>

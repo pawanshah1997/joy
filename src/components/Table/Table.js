@@ -19,7 +19,7 @@ const Table = (props) => {
     return (
         <div className="my_table">
             <div className="column-headers"> {to_header_elements(props.column_titles)} </div>
-            <div className="content"> {props.children} </div>
+            {props.children}
         </div>
     )
 

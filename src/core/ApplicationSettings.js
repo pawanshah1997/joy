@@ -1,32 +1,49 @@
 /**
  * Created by bedeho on 05/10/2017.
  */
+import ElectronConfig from 'electron-config'
+import { ipcRenderer, shell } from 'electron'
 
-const ElectronConfig = require('electron-config')
+const FIRST_TIME_RUN_KEY = 'firstTimeRun' // Whether
+const LAST_VERSION_OF_APP_RUN_KEY = 'lastVersionOfAppRun'
+const DOWNLOAD_FOLDER = 'downloadFolder'
 
-const FIRST_TIME_RUN_KEY = "firstTimeRun" // Whether
-const LAST_VERSION_OF_APP_RUN_KEY = "lastVersionOfAppRun"
+class ApplicationSettings {
+  constructor () {
+    this._electronConfigStore = new ElectronConfig()
 
-function ApplicationSettings() {
+    ipcRenderer.on('openPreferences', this.openInEditor.bind(this))
+  }
 
-    this.electronConfigStore = new ElectronConfig()
-}
-
-ApplicationSettings.prototype.isFirstTimeRun = function () {
+  isFirstTimeRun () {
     // Read whether its a first time run, if no key is set, we pretend it is
-    return this.electronConfigStore.get(FIRST_TIME_RUN_KEY, true)
+    return process.env.FORCE_ONBOARDING || this._electronConfigStore.get(FIRST_TIME_RUN_KEY, true)
+  }
+
+  setIsFirstTimeRun (firstTimeRun) {
+    this._electronConfigStore.set(FIRST_TIME_RUN_KEY, firstTimeRun)
+  }
+
+  lastVersionOfAppRun () {
+    return this._electronConfigStore.get(LAST_VERSION_OF_APP_RUN_KEY)
+  }
+
+  setLastVersionOfAppRun (version) {
+    this._electronConfigStore.set(LAST_VERSION_OF_APP_RUN_KEY, version)
+  }
+
+  getDownloadFolder () {
+    return this._electronConfigStore.get(DOWNLOAD_FOLDER)
+  }
+
+  setDownloadFolder (downloadFolder) {
+    this._electronConfigStore.set(DOWNLOAD_FOLDER, downloadFolder)
+  }
+
+  openInEditor () {
+    shell.openItem(this._electronConfigStore.path)
+  }
+
 }
 
-ApplicationSettings.prototype.setIsFirstTimeRun = function(firstTimeRun) {
-    this.electronConfigStore.set(FIRST_TIME_RUN_KEY, firstTimeRun)
-}
-
-ApplicationSettings.prototype.lastVersionOfAppRun = function() {
-    this.electronConfigStore.get(LAST_VERSION_OF_APP_RUN_KEY)
-}
-
-ApplicationSettings.prototype.setLastVersionOfAppRun = function(version) {
-    this.electronConfigStore.set(LAST_VERSION_OF_APP_RUN_KEY, version)
-}
-
-module.exports.ApplicationSettings = ApplicationSettings
+export default ApplicationSettings
