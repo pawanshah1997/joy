@@ -74,6 +74,13 @@ application.start(config)
 // be triggered yet another time
 window.onbeforeunload = function(e) {
 
+  // Tell state machine
+  application.onBeforeUnloadMainWindow(e)
+
+  return
+
+  // hotfix for v0.5.4 - disabling departure screen for now
+
     if (uiStore.onBoardingStore) {
       // Showing onBoarding departure screen if we have the on boarding
       uiStore.onBoardingStore.displayShutdownMessage()
@@ -81,7 +88,6 @@ window.onbeforeunload = function(e) {
       // Tell state machine
       application.onBeforeUnloadMainWindow(e)
     }
-
 
     return
 }
