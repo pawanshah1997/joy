@@ -20,9 +20,14 @@ const TorrentCommon = require('../../Torrent/Statemachine/Common')
 const TorrentStatemachine = require('../../Torrent/Statemachine')
 
 function addTorrent(client, settings) {
-    debugApplicationAddTorrent('Adding torrent : ', settings.name)
-
     const infoHash = settings.infoHash
+
+    if (client.torrents.has(infoHash)) {
+      debugApplicationAddTorrent('Adding torrent: ', settings.name, 'skipped. Duplicate infoHash')
+      return
+    }
+
+    debugApplicationAddTorrent('Adding torrent : ', settings.name)
 
     let store = client.factories.torrentStore(infoHash, settings.savePath)
 
