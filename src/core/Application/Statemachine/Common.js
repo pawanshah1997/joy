@@ -45,9 +45,9 @@ function addTorrent(client, settings) {
     // When torrent cannot be added to libtorrent session
     coreTorrent.on('enter-Loading.FailedAdding', function (data) {
       debugApplicationAddTorrent('Failed adding :', data)
-        console.log('Catastrophic failure, failed adding torrent.')
-        console.log(data)
-        assert(false)
+      console.log('Catastrophic failure, failed adding torrent.')
+      console.log(data)
+      //assert(false)
     })
 
     // When torrent is missing buyer terms
