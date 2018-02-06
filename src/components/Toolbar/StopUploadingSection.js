@@ -10,19 +10,13 @@ import ButtonSection from './ButtonSection'
 
 const StopUploadingSection = observer((props) => {
 
-    // Derive ButtonSection props
-    let className = "stop-sell"
-
-    let onClick = () => { props.torrent.endUploading() }
-    let tooltip = "Stop paid uploading"
-
     return (
-        <ButtonSection className={className} tooltip={tooltip} onClick={onClick} />
+        <ButtonSection className={'stop-sell'} tooltip={'Stop paid uploading'} onClick={props.onClick} />
     )
 })
 
 StopUploadingSection.propTypes = {
-    torrent : PropTypes.object.isRequired, // TorrentStore really
+    onClick : PropTypes.func.isRequired,
 }
 
 export default StopUploadingSection

@@ -20,7 +20,7 @@ function Peer(pid, torrent, status, privateKeyGenerator, publicKeyHashGenerator)
 }
 
 Peer.prototype.newStatus = function(status) {
-    this._client.processStateMachineInput('newStatus', status)
+    this._client._submitInput('newStatus', status)
 }
 
 Peer.prototype.compositeState = function() {
@@ -28,11 +28,11 @@ Peer.prototype.compositeState = function() {
 }
 
 Peer.prototype.anchorAnnounced = function (alert) {
-  this._client.processStateMachineInput('anchorAnnounced', alert)
+  this._client._submitInput('anchorAnnounced', alert)
 }
 
 Peer.prototype.uploadStarted = function (alert) {
-  this._client.processStateMachineInput('uploadStarted', alert)
+  this._client._submitInput('uploadStarted', alert)
 }
 
 /// PeerStatemachineClient class
@@ -45,7 +45,7 @@ function PeerStatemachineClient(pid, torrent, privateKeyGenerator, publicKeyHash
     this._publicKeyHashGenerator = publicKeyHashGenerator
 }
 
-PeerStatemachineClient.prototype.processStateMachineInput = function (...args) {
+PeerStatemachineClient.prototype._submitInput = function (...args) {
   PeerStatemachine.queuedHandle(this, ...args)
 }
 

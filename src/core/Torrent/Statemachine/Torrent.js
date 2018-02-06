@@ -6,54 +6,15 @@ var Loading = require('./Loading/Loading')
 var Active = require('./Active')
 var Common = require('./Common')
 var DeepInitialState = require('./DeepInitialState')
-var Doorbell = require('../../Doorbell')
 
 const assert = require('assert')
-const {shell} = require('electron')
 
 var Torrent = new BaseMachine({
 
-    initialState: "WaitingToLoad",
+    initialState: "Loading",
 
     states: {
-
-        WaitingToLoad :  {
-
-            startLoading : function (client, infoHash, name, savePath, resumeData, metadata, deepInitialState, extensionSettings) {
-
-                // Check that compatibility in deepInitialState and {buyerTerms, sellerTerms},
-                // and store terms on client
-                if(Common.isDownloading(deepInitialState)) {
-
-                    if(extensionSettings.buyerTerms)
-                        client.buyerTerms = extensionSettings.buyerTerms
-                    else
-                        throw new Error('DownloadIncomplete state requires buyer terms')
-
-                } else if(Common.isUploading(deepInitialState)) {
-
-                  console.log(extensionSettings.sellerTerms)
-
-                    if(extensionSettings.sellerTerms)
-                        client.sellerTerms = extensionSettings.sellerTerms
-                    else
-                        throw new Error('Uploading state requires seller terms')
-
-                }
-
-                // Store state information about loading
-                client.infoHash = infoHash
-                client.name = name
-                client.savePath = savePath
-                client.resumeData = resumeData
-                client.metadata = metadata
-                client.deepInitialState = deepInitialState
-
-                // Go to loading state
-                this.transition(client, 'Loading')
-            }
-        },
-
+        
         Loading : {
 
             _child : Loading,
@@ -75,19 +36,15 @@ var Torrent = new BaseMachine({
 
             terminate: function(client, generateResumeData) {
 
-                // Determine and keep what state to start in when we start next time,
-                // and hold on to state to get back to when starting
-                client.deepInitialState = deepInitialStateFromActiveState(this.compositeState(client))
+              client._generateResumeDataOnTermination = generateResumeData
 
-                client.generateResumeDataOnTermination = generateResumeData
+              Common.stopPlugin(client)
 
-                client.stopExtension()
-
-                this.transition(client, 'StoppingExtension')
+              this.transition(client, 'StoppingExtension')
             },
 
             processPeerPluginStatuses: function (client, statuses) {
-                Common.processPeerPluginStatuses(client, statuses)
+              Common.processPeerPluginStatuses(client, statuses)
             },
 
             uploadStarted: function (client, alert) {
@@ -101,16 +58,14 @@ var Torrent = new BaseMachine({
             },
 
             lastPaymentReceived: function (client, alert) {
+
                 if (!alert.settlementTx) {
                   // A settlement transaction is only created if it is worthwile
                   console.log('Last Payment Received: No Settlement will be made')
                   return
                 }
 
-                client.broadcastRawTransaction(alert.settlementTx)
-            },
-            openFolder: function (client) {
-              shell.openItem(client.getSavePath())
+                client._broadcastRawTransaction(alert.settlementTx)
             }
         },
 
@@ -120,11 +75,12 @@ var Torrent = new BaseMachine({
 
             stopExtensionResult: function (client) {
 
-                client.stopLibtorrentTorrent()
+              // Stop libtorrent torrent
+              client.joystreamNodeTorrent.handle.pause()
 
-                if (client.generateResumeDataOnTermination && client.hasOutstandingResumeData()) {
+                if (client._generateResumeDataOnTermination && client.hasOutstandingResumeData()) {
 
-                    client.generateResumeData()
+                    client.joystreamNodeTorrent.handle.saveResume_data()
 
                     this.transition(client, 'GeneratingResumeData')
 
@@ -135,27 +91,28 @@ var Torrent = new BaseMachine({
             },
 
             lastPaymentReceived: function (client, alert) {
+
               if (!alert.settlementTx) {
                 // A settlement transaction is only created if it is worthwile
                 console.log('Last Payment Received: No Settlement will be made')
                 return
               }
 
-              client.broadcastRawTransaction(alert.settlementTx)
+              client._lastPaymentReceived(alert)
             }
         },
 
         GeneratingResumeData : {
             resumeDataGenerated : function (client, resumeData) {
 
-                client.resumeData = resumeData
+                client._setResumeData(resumeData)
 
                 this.transition(client, 'Terminated')
             },
 
             resumeDataGenerationFailed: function (client, error_code) {
 
-                client.resumeData = null
+              client._setResumeData(null)
 
                 this.transition(client, 'Terminated')
             }
@@ -172,59 +129,5 @@ var Torrent = new BaseMachine({
     }
 })
 
-// NB: Do recursive version later, when we figure out how
-// do to proper navigation
-function deepInitialStateFromActiveState(stateString) {
-
-    var states = stateString.split('.')
-
-    var assertMsg = "unexpected machine structure"
-
-    // states[0] == 'Active'
-
-    if(states[1] == 'DownloadIncomplete') {
-
-        if(states[2] == "Unpaid") {
-
-            if(states[3] == "Started")
-                return DeepInitialState.DOWNLOADING.UNPAID.STARTED
-            else if(states[3] == "Stopped")
-                return DeepInitialState.DOWNLOADING.UNPAID.STOPPED
-            else
-                assert(false, assertMsg)
-
-        } else if(states[2] == "Paid") {
-
-            /**
-             * If we are paying, we will just go to unpaid
-             * started mode. Starting in paid mode is not allowed.
-             */
-
-            return DeepInitialState.DOWNLOADING.UNPAID.STARTED
-
-        }
-        else
-            assert(false, assertMsg)
-
-    } else if(states[1] == "FinishedDownloading") {
-
-        if(states[2] == "Passive")
-            return DeepInitialState.PASSIVE
-        else if(states[2] == "Uploading") {
-
-            if(states[3] == "Started")
-                return DeepInitialState.UPLOADING.STARTED
-            else if(states[3] == "Stopped")
-                return DeepInitialState.UPLOADING.STOPPED
-            else
-                assert(false, assertMsg)
-
-        } else
-            assert(false, assertMsg)
-
-    } else
-        assert(false, assertMsg)
-
-}
 
 module.exports = Torrent

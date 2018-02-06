@@ -12,7 +12,7 @@ const Label = (props) => {
         root : {
             display : 'flex',
             direction : 'row',
-            borderRadius: '5px',
+            borderRadius: '35px',
             overflow: 'hidden',
             height: props.height,
             marginLeft: '20px'

@@ -1,11 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
+// babel-polyfill for generator (async/await)
+import 'babel-polyfill'
 
 /**
- * Isolated application store just for powering components
+ * Isolated application store just for powering Components
  */
-import ApplicationStore from '../core/Application/ApplicationStore'
+import ApplicationStore from '../core-stores/Application/ApplicationStore'
 import Scene from '../core/Application/Scene'
 
 var applicationStore = new ApplicationStore(
@@ -41,7 +43,7 @@ var applicationStore = new ApplicationStore(
     })
 
 /**
- * Some components use react-tap-event-plugin to listen for touch events because onClick is not
+ * Some Components use react-tap-event-plugin to listen for touch events because onClick is not
  * fast enough This dependency is temporary and will eventually go away.
  * Until then, be sure to inject this plugin at the start of your app.
  *

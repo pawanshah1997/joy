@@ -10,15 +10,13 @@ import ButtonSection from './ButtonSection'
 
 const OpenFolderSection = observer((props) => {
 
-    // onClick={props.torrent.openFolder}
-
     return (
-        <ButtonSection className={"open-folder"} tooltip="Open folder" onClick={() => { props.torrent.openFolder()}} />
+        <ButtonSection className={"open-folder"} tooltip="Open folder" onClick={props.onClick} />
     )
 })
 
 OpenFolderSection.propTypes = {
-    torrent : PropTypes.object.isRequired, // TorrentStore really
+    onClick : PropTypes.func.isRequired
 }
 
 export default OpenFolderSection

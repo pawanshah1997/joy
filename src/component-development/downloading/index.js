@@ -6,9 +6,9 @@ import React from 'react'
 
 import {ScenarioContainer} from '../common'
 
-import TorrentTable from '../../scenes/Downloading/TorrentTable'
-import TorrentToolbar from '../../scenes/Downloading/TorrentToolbar'
-import TorrentContextMenu from '../../scenes/Downloading/TorrentContextMenu'
+import TorrentTable from '../../scenes/Downloading/components/TorrentTable'
+import TorrentToolbar from '../../scenes/Downloading/components/TorrentToolbar'
+import TorrentContextMenu from '../../scenes/Downloading/components/TorrentContextMenu'
 
 class MockTorrent {
 

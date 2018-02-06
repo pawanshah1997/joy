@@ -31,9 +31,8 @@ const Row = (props) => {
     let styles = getStyles(props)
 
     return (
-        <div className={props.className ? " " + props.className : ""}
-             style={styles.root}
-             {...props.mouseEvents}
+        <div style={styles.root}
+             {...props}
         >
             {props.children}
         </div>
@@ -41,12 +40,12 @@ const Row = (props) => {
 }
 
 Row.propTypes = {
-    className : PropTypes.string,
-    backgroundColor : PropTypes.string
+  backgroundColor : PropTypes.string,
+  rowProps : PropTypes.object
 }
 
 Row.defaultPropTypes = {
-    backgroundColor : 'white'
+  backgroundColor : 'white'
 }
 
 export default Row

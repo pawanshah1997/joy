@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 
@@ -10,11 +10,12 @@ import {
     MaxFlexSpacer,
     TorrentCountLabel,
     CurrencyLabel,
-    BandwidthLabel
-} from './../../components/MiddleSection'
+    BandwidthLabel,
+    AddTorrentIcon
+} from  './../../components/MiddleSection'
 
-import TorrentTable from './TorrentTable'
-import StartUploadingFlow from './components/StartUploadingFlow'
+import TorrentTable from './Components/TorrentTable'
+import StartUploadingFlow from './Components/StartUploadingFlow'
 
 function getStyles (props) {
   return {
@@ -26,56 +27,57 @@ function getStyles (props) {
   }
 }
 
-@observer
-class Seeding extends Component {
-  startUplodingClicked = () => {
-    this.props.uiStore.uploadingStore.uploadTorrentFile()
+const Seeding = observer((props) => {
+  
+  let styles = getStyles(props)
+
+  let labelColorProps = {
+    backgroundColorRight: props.middleSectionHighlightColor,
+    backgroundColorLeft: props.middleSectionDarkBaseColor
   }
 
-  render () {
-    let styles = getStyles(this.props)
+  return (
+    <div style={styles.root}>
+      
+      <MiddleSection backgroundColor={props.middleSectionBaseColor} height="120px">
+        
+        <Toolbar>
+          
+          <ToolbarButton title="add upload"
+                         onClick={() => { props.uploadingStore.uploadTorrentFile() }}
+                         iconNode={<AddTorrentIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}} />}
+          />
+          
+        </Toolbar>
+        
+        <MaxFlexSpacer />
 
-    let labelColorProps = {
-      backgroundColorRight: this.props.middleSectionHighlightColor,
-      backgroundColorLeft: this.props.middleSectionDarkBaseColor
-    }
+        <LabelContainer>
+          <TorrentCountLabel count={props.uploadingStore.torrentRowStores.length}
+            {...labelColorProps} />
 
-    return (
-      <div style={styles.root}>
-        <MiddleSection backgroundColor={this.props.middleSectionBaseColor}>
-          <Toolbar>
-            <ToolbarButton title='Start uploading'
-              onClick={this.startUplodingClicked} />
-          </Toolbar>
+          <CurrencyLabel labelText={'REVENUE'}
+            satoshies={props.uploadingStore.totalRevenue}
+            {...labelColorProps} />
 
-          <MaxFlexSpacer />
+          <BandwidthLabel labelText={'UPLOAD SPEED'}
+            bytesPerSecond={props.uploadingStore.totalUploadSpeed}
+            {...labelColorProps} />
 
-          <LabelContainer>
-            <TorrentCountLabel count={this.props.store.torrentsUploading.length}
-              {...labelColorProps} />
+        </LabelContainer>
+      </MiddleSection>
 
-            <CurrencyLabel labelText={'REVENUE'}
-              satoshies={this.props.store.totalRevenue}
-              {...labelColorProps} />
+      <TorrentTable uploadingStore={props.uploadingStore}/>
 
-            <BandwidthLabel labelText={'UPLOAD SPEED'}
-              bytesPerSecond={this.props.store.totalUploadSpeed}
-              {...labelColorProps} />
+      <StartUploadingFlow uploadingStore={props.uploadingStore} />
 
-          </LabelContainer>
-        </MiddleSection>
-
-        <TorrentTable torrents={this.props.store.torrentsUploading} store={this.props.store} />
-
-        <StartUploadingFlow store={this.props.store} uploadingStore={this.props.uiStore.uploadingStore} />
-
-      </div>
-    )
-  }
-}
+    </div>
+  )
+})
 
 Seeding.propTypes = {
-  store: PropTypes.object.isRequired,
+  uploadingStore: PropTypes.object.isRequired, // HMR breaks instanceOf(UploadingStore)
+  
   middleSectionBaseColor: PropTypes.string.isRequired,
   middleSectionDarkBaseColor: PropTypes.string.isRequired,
   middleSectionHighlightColor: PropTypes.string.isRequired

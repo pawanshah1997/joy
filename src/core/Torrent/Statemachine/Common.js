@@ -3,7 +3,6 @@
  */
 
 var Peer = require('../../Peer')
-var DeepInitialState = require('./DeepInitialState')
 
 function processPeerPluginStatuses(client, statuses) {
 
@@ -13,67 +12,133 @@ function processPeerPluginStatuses(client, statuses) {
      */
 
     if(!client.peers)
-        client.peers = {}
+        client.peers = new Map()
 
     // Peer Ids for peers we are getting status snapshot for
-    var peerIdExits = {}
+    var peersInSnapshot = new Set()
 
     // Tell client to either add new peer
     // based on status, or tell about new status
     // if it already exits
     for(var i in statuses) {
+
         var s = statuses[i]
-        var peer = client.peers[s.pid]
+
+        let peer = client.peers.get(s.pid)
 
         if(peer) {
+
             // Update status
             peer.newStatus(s)
 
         } else {
-            // Create client
-            client.peers[s.pid] = new Peer(s.pid, client.torrent, s, client._privateKeyGenerator, client._publicKeyHashGenerator)
+
+            let newPeer = new Peer(s.pid, client.joystreamNodeTorrent, s, client._privateKeyGenerator, client._publicKeyHashGenerator)
+
+            client.peers.set(s.pid, newPeer)
+
+            client.emit('peerPluginPresent', newPeer)
         }
 
         // Mark as present
-        peerIdExits[s.pid] = true
+        
+        peersInSnapshot.add(s.pid)
     }
 
-    // Iterate old peer Ids and drop the ones whichpid
+    // Iterate old peer Ids and drop the ones which pid
     // are not part of this new snapshot
+    for (let [pid, peer] of client.peers) {
 
-    for(var pid in client.peers) {
+        if(!peersInSnapshot.has(pid)) {
 
-        if(!peerIdExits[pid])
-            delete client.peers[pid]
+          client.peers.delete(pid)
+
+          client.emit('peerPluginGone', pid)
+        }
+
     }
 
-    // Update peer list
-    client.store.setPeers(client.peers)
 }
 
-function isUploading(s) {
-    return s == DeepInitialState.UPLOADING.STARTED ||
-        s == DeepInitialState.UPLOADING.STOPPED
+function stopExtension(client) {
+
+  client.joystreamNodeTorrent.stopPlugin( (err, res) => {
+
+    LOG_ERROR("stopExtension", err)
+
+    client._submitInput('stopExtensionResult', err, res)
+
+  })
 
 }
 
-function isPassive(s) {
-    return s == DeepInitialState.PASSIVE
+function startExtension(client) {
+
+  client.joystreamNodeTorrent.startPlugin((err, resp) => {
+
+    LOG_ERROR("startExtension", err)
+
+    client._submitInput('startExtensionResult', err, res)
+
+  })
 }
 
-function isDownloading(s) {
-    return s == DeepInitialState.DOWNLOADING.UNPAID.STARTED ||
-        s == DeepInitialState.DOWNLOADING.UNPAID.STOPPED
+function setLibtorrentInteraction(client, mode) {
+
+  client.joystreamNodeTorrent.setLibtorrentInteraction (mode, (err) => {
+
+    LOG_ERROR("setLibtorrentInteraction", err)
+
+    client._submitInput('setLibtorrentInteractionResult', err, res)
+
+  })
 }
 
-function isStopped(s) {
+function toObserveMode(client) {
 
-    return s == DeepInitialState.UPLOADING.STOPPED ||
-        s == DeepInitialState.DOWNLOADING.UNPAID.STOPPED
+  client.joystreamNodeTorrent.toObserveMode((err, res) => {
+
+    LOG_ERROR("toObserveMode", err)
+
+    client._submitInput('toObserveModeResult', err, res)
+
+  })
 }
 
-module.exports.processPeerPluginStatuses = processPeerPluginStatuses
-module.exports.isUploading = isUploading
-module.exports.isPassive = isPassive
-module.exports.isDownloading = isDownloading
-module.exports.isStopped = isStopped
+function toSellMode(client, sellerTerms) {
+
+  client.joystreamNodeTorrent.toSellMode(sellerTerms, (err, res) => {
+
+    LOG_ERROR("toSellMode", err)
+
+    client._submitInput('toSellModeResult', err, res)
+
+  })
+}
+
+function toBuyMode(client, buyerTerms) {
+
+  client.joystreamNodeTorrent.toBuyMode(buyerTerms, (err, res) => {
+
+    LOG_ERROR("toBuyMode", err)
+
+    client._submitInput('toBuyModeResult', err, res)
+
+  })
+}
+
+function LOG_ERROR(source, err) {
+
+  if(err)
+    console.error(source,": Error found in callback:", err)
+}
+
+export {
+  processPeerPluginStatuses,
+  stopExtension,
+  startExtension,
+  setLibtorrentInteraction,
+  toObserveMode,
+  toSellMode,
+  toBuyMode
+}
