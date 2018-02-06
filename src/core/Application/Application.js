@@ -1,7 +1,7 @@
 import assert from "assert"
 import {EventEmitter} from "events"
 import ApplicationSettings from '../ApplicationSettings/ApplicationSettings'
-import Wallet from './core/Wallet'
+import Wallet from '../Wallet'
 
 import getCoins from './faucet'
 import mkdirp from 'mkdirp'
