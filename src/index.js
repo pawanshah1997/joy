@@ -116,7 +116,7 @@ let loadedRenderer = renderer.bind(null, doHotModuleReload, rootUIStore, documen
 
 // We enable HMR only in development mode
 if (doHotModuleReload) {
-  
+
   if(!module.hot)
     console.log('Could not do HMR, because module.hot is not set')
   else
@@ -142,13 +142,13 @@ application.start(config)
  * @private
  */
 function renderer(doHMR, rootUIStore, parentDOMNode, displayMobxDevTools) {
-  
+
   // NB: We have to re-require Application every time, or else this won't work
   const ApplicationScene = require('./scenes/Application').default
-  
+
   if (doHMR) {
     const AppContainer = require('react-hot-loader').AppContainer
-    
+
     ReactDOM.render(
       <AppContainer>
         <ApplicationScene UIStore={rootUIStore} displayMobxDevTools={displayMobxDevTools}/>
@@ -157,14 +157,14 @@ function renderer(doHMR, rootUIStore, parentDOMNode, displayMobxDevTools) {
       parentDOMNode
     )
   } else {
-    
+
     ReactDOM.render(
       <ApplicationScene UIStore={rootUIStore} displayMobxDevTools={displayMobxDevTools}/>
       ,
       parentDOMNode
     )
   }
-  
+
 }
 
 /**
@@ -172,44 +172,44 @@ function renderer(doHMR, rootUIStore, parentDOMNode, displayMobxDevTools) {
  * @param e
  */
 function beforeWindowUnload(e) {
-  
+
   /**
    * NB: Notice that when this hooks into window.onbeforeunload,
    * it is called _both_ when user tries to close window, and
    * when main process says application.quit. We must handle both case.
    */
-  
+
   if(application.state === App.STATE.STARTING || application.state === App.STATE.STOPPING) {
-    
+
     /**
      * We prevent stopping of any kind while starting up, for now, and obviously when stopping!
      * In the future, we may allow user to cancel startup process, but this will require
      * changes to the application state machine to do safely.
      */
-    
+
     // BLOCK SHUTDOWN
     e.returnValue = false
-    
+
   } else if(application.state === App.STATE.STARTED) {
 
     rootUIStore.stop()
-    
+
     // BLOCK SHUTDOWN
     e.returnValue = false
-    
+
   } else {
-    
+
     /**
      * We are stopped (same as PHASE.NotStarted), so we will thus allow
      * closing of window, which we do by not doing anything.
      */
-    
+
     assert(application.state === App.STATE.STOPPED)
-    
+
     console.log('Allowing closing of window')
-    
+
   }
-  
+
 }
 
 // Debug routine?
