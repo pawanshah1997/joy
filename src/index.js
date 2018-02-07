@@ -26,18 +26,9 @@ ReactDOM.render(
 // babel-polyfill for generator (async/await)
 import 'babel-polyfill'
 
-// Use of pure js bcoin library because electron doesn't compile with openssl
-// which is needed.
-process.env.BCOIN_NO_NATIVE = '1'
-
-// Disable workers which are not available in electron
-const bcoin = require('bcoin')
-
+// Configure and Initialize bcoin network settings
+// NB: this should be the earliest point where bcoin is imported
 import config from './config'
-
-// Set primary network in Bcoin (oyh vey, what a singlton horrible pattern)
-bcoin.set({network: config.network})
-bcoin.set({useWorkers: false})
 
 import {ipcRenderer, webFrame, shell} from 'electron'
 import os from 'os'
@@ -48,7 +39,6 @@ import React from 'react'
 import Application from './core/Application'
 
 import { EXAMPLE_TORRENTS } from './constants'
-
 
 import UIStore from './scenes'
 import assert from 'assert'
