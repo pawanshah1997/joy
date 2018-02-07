@@ -114,10 +114,10 @@ var Loading = new BaseMachine({
             if(client.torrentInfo && client.torrentInfo.isValid()) {
 
               this.transition(client, 'CheckingPartialDownload')
-
-              const torrentInfo = client.joystreamNodeTorrent.handle.torrentFile()
-
-              client._setTorrentInfo(torrentInfo)
+              // We already have valid torrentInfo why getting again?
+              // const torrentInfo = client.joystreamNodeTorrent.handle.torrentFile()
+              //
+              // client._setTorrentInfo(torrentInfo)
 
             } else {
                 this.transition(client, 'WaitingForMetadata')
