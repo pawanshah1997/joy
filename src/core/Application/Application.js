@@ -110,6 +110,7 @@ class Application extends EventEmitter {
    * RENAME: not resource, loading/ter milestone ?
    */
   static RESOURCE = {
+
     SETTINGS : 0,
     WALLET : 1,
     JOYSTREAM_NODE_SESSION: 2,
@@ -118,6 +119,13 @@ class Application extends EventEmitter {
   }
 
   static get NUMBER_OF_RESOURCE_TYPES() { return Object.keys(Application.RESOURCE).length }
+
+  static sessionNetworkFromBcoinNetwork (network) {
+    if (network === 'testnet') return 'testnet'
+    if (network === 'bitcoincashtestnet') return 'testnet_bitcoin_cash'
+
+    throw new Error('unsupported network')
+  }
 
   /**
    * {Set.<RESOURCES>} The resources which are currently started
@@ -225,10 +233,12 @@ class Application extends EventEmitter {
     // Make and hold on to path to wallet
     this._walletPath = path.join(this._appDirectory, FOLDER_NAME.WALLET)
 
-    let spvOptions = {
+    const spvNodeOptions = {
       prefix: this._walletPath,
       db: 'leveldb',
-      network: config.network
+      network: bcoin.network.primary.type,
+      // Disable workers which are not available in electron
+      workers: false
     }
 
     // Add a logger if log level is specified
@@ -315,7 +325,11 @@ class Application extends EventEmitter {
       // network port libtorrent session will open a listening socket on
       port: this.applicationSettings.bittorrentPort(),
       // Assisted Peer Discovery (APD)
-      assistedPeerDiscovery: this.applicationSettings.useAssistedPeerDiscovery()
+
+      assistedPeerDiscovery: this.applicationSettings.useAssistedPeerDiscovery(),
+
+      // bitcoin network configuration for payment channels
+      network: Application.sessionNetworkFromBcoinNetwork(bcoin.network.primary.type)
     }
 
     // Create & start session
