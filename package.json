@@ -59,7 +59,7 @@
   "dependencies": {
     "react-hot-loader": "^3.0.0-beta.6",
     "babel-polyfill": "^6.23.0",
-    "bcoin": "joystream/bcoin#cash-spv",
+    "bcoin": "github:joystream/bcoin#cash-spv",
     "bitcoin-convert": "^1.0.4",
     "bootstrap": "^4.0.0-alpha.6",
     "bytes": "^2.5.0",
@@ -70,7 +70,7 @@
     "electron-is-dev": "^0.1.2",
     "electron-squirrel-startup": "^1.0.0",
     "humanize-duration": "^3.10.0",
-    "joystream-node": "0.2.0",
+    "joystream-node": "0.2.1",
     "jquery": "^3.2.1",
     "level-namespace": "^0.1.0",
     "leveldown": "^1.6.0",
