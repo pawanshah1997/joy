@@ -59,7 +59,7 @@
   "dependencies": {
     "react-hot-loader": "^3.0.0-beta.6",
     "babel-polyfill": "^6.23.0",
-    "bcoin": "1.0.0-beta.12",
+    "bcoin": "joystream/bcoin#cash-spv",
     "bitcoin-convert": "^1.0.4",
     "bootstrap": "^4.0.0-alpha.6",
     "bytes": "^2.5.0",
