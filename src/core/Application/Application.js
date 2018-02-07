@@ -937,11 +937,11 @@ class Application extends EventEmitter {
       // Beg faucet for funds if we are supposed to
       if (this._walletTopUpOptions.doTopUp && this._walletTopUpOptions.walletBalanceLowerBound > balance) {
 
-        let addressString = this._wallet.receiveAddress.toString()
+        let address = this._wallet.receiveAddress
 
-        console.log('Faucet: Requesting some testnet coins to address: ' + addressString)
+        console.log('Faucet: Requesting some testnet coins to address: ' + addressString.toString())
 
-        getCoins(addressString, function (err) {
+        getCoins(address, function (err) {
 
           if (err) {
             console.log('Faucet:', err)
