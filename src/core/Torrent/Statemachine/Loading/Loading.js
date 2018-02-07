@@ -16,9 +16,9 @@ var Loading = new BaseMachine({
     states: {
 
         AddingToSession : {
-  
+
           addedToSession: function (client, torrent) {
-            
+
             // Hold on to torrent
             client.joystreamNodeTorrent = torrent
 
@@ -97,6 +97,10 @@ var Loading = new BaseMachine({
               client._submitInput('paidDownloadInitiationCompleted', alert)
             })
 
+            torrent.on('allSellersGone', function (alert) {
+              client._submitInput('allSellersGone', alert)
+            })
+
             // DO we have new peers
             /* torrent.on('dhtGetPeersReply', function (peers) {
               for (var i in peers) {
@@ -120,7 +124,7 @@ var Loading = new BaseMachine({
             }
           }
         },
-  
+
         WaitingForMetadata : {
 
             metadataReady : function (client, torrentInfo) {
