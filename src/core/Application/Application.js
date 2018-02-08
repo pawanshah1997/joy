@@ -811,7 +811,7 @@ class Application extends EventEmitter {
 
     console.log('priceFeed [error]:')
     console.log('Could not fetch exchange rate, likely due to no internet, or broken endpoint.')
-    console.log(err)
+    console.error(err)
   }
 
 }
