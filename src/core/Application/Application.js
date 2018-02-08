@@ -876,7 +876,7 @@ function encodeTorrentSettings(torrent) {
     encoded.resumeData = torrent.resumeData.toString('base64')
   }
 
-  return torrent
+  return encoded
 
 }
 
