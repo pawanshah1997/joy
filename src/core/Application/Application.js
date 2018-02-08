@@ -531,20 +531,30 @@ class Application extends EventEmitter {
       return
     }
 
+    // Validate magnet link is correctly encoded ?
+    if (settings.url) {
+      // onAdded('Invalid magnet link url')
+    }
+
     // Create parameters for adding to session
     let params = {
       name: settings.name,
       savePath: settings.savePath,
-      ti: settings.metadata
+    }
+
+    // Add torrents paramaters should only have one of ti, url or infoHash
+    if (settings.metadata) {
+      params.ti = settings.metadata
+    } else if (settings.url) {
+      params.url = settings.url
+    } else {
+      params.infoHash = infoHash
     }
 
     // joystream-node decoder doesn't correctly check if resumeData propery is undefined, it only checks
     // if the key on the params object exists so we need to conditionally set it here.
     if (settings.resumeData)
       params.resumeData = Buffer.from(settings.resumeData, 'base64')
-
-    if (settings.url)
-      params.url = settings.url
 
     // set param flags - auto_managed/paused
     params.flags = {
@@ -887,12 +897,16 @@ function encodeTorrentSettings(torrent) {
     infoHash: torrent.infoHash,
     name: torrent.name,
     savePath: torrent.savePath,
-    deepInitialState:  torrent.deepInitialState(),
-    metadata: torrent.torrentInfo.toBencodedEntry().toString('base64'),
+    deepInitialState: torrent.deepInitialState(),
     extensionSettings: {
       buyerTerms: torrent.buyerTerms,
       sellerTerms: torrent.sellerTerms
     }
+  }
+
+  // Only encode metadata if it is available and valid
+  if (torrent.metadata && torrent.metadata.isValid()) {
+    encoded.metadata = torrent.metadata.toBencodedEntry().toString('base64')
   }
 
   // It is possible that resume data generation has failed and resumeData could be null
@@ -920,5 +934,6 @@ function createStartingDownloadSettings(torrentInfo, savePath, buyerTerms) {
     }
   }
 }
+
 
 export default Application
