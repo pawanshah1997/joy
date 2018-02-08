@@ -398,7 +398,7 @@ class Application extends EventEmitter {
           assert(this.state === Application.STATE.STOPPING)
 
           // store this somewhere
-          let encodedTorrentSettings = encodedTorrentSettings(torrent)
+          let encodedTorrentSettings = encodeTorrentSettings(torrent)
 
           this._torrentDatabase.save('torrents', infoHash, encodedTorrentSettings)
             .then(() => {})
@@ -853,7 +853,7 @@ async function exchangeRateFetcher() {
 
 }
 
-function encodedTorrentSettings(torrent) {
+function encodeTorrentSettings(torrent) {
 
   let encoded = {
     infoHash: torrent.infoHash,
