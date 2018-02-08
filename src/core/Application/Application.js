@@ -19,7 +19,7 @@ var debug = require('debug')('application')
 import {shell} from 'electron'
 
 const FOLDER_NAME = {
-  WALLET: 'wallet',
+  WALLETS: 'wallet',
   DEFAULT_SAVE_PATH_BASE: 'download',
   TORRENT_DB: 'data'
 }
@@ -230,8 +230,15 @@ class Application extends EventEmitter {
      * Wallet
      */
 
+     mkdirp(FOLDER_NAME.WALLETS, null, (err) => {
+
+       if(err)
+         console.log('Failed to create wallets folder: ' + FOLDER_NAME.WALLETS + ' due to ' + err)
+
+     })
+
     // Make and hold on to path to wallet
-    this._walletPath = path.join(this._appDirectory, FOLDER_NAME.WALLET)
+    this._walletPath = path.join(this._appDirectory, FOLDER_NAME.WALLETS, bcoin.network.primary.type)
 
     const spvNodeOptions = {
       prefix: this._walletPath,
