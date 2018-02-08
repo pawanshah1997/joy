@@ -6,15 +6,11 @@ import { observable, action } from 'mobx'
 import {TorrentInfo} from "joystream-node"
 import fs from 'fs'
 
-// TEMPORARY
-// a) https://github.com/JoyStream/joystream-desktop/issues/652
-import Common from '../../../core/Application/Statemachine/Common'
-
 /**
  * (MOBX) User interface store for the onboarding
  */
 class OnboardingStore {
-  
+
   static STATE = {
     WelcomeScreen: 0,
     BalanceExplanation: 1,
@@ -47,63 +43,10 @@ class OnboardingStore {
 
   @action.bound
   acceptAddingExampleTorrents () {
-    
+
     if (this.state === OnboardingStore.STATE.WelcomeScreen) {
-  
-      // Get the path to use as savepath from settings
-      let savePath = this._uiStore.appStore.applicationStore.applicationSettings.getDownloadFolder()
-      
-      // Get name of torrent files to add as examples
-      let exampleTorrentFilenames = this._uiStore.appStore.onboardingTorrents
-      
-      for (var i = 0; i < exampleTorrentFilenames.length; i++) {
-  
-        // Get Torrent file name
-        let torrentFileName = exampleTorrentFilenames[i]
-        
-        /// Read torrent file data
-        let torrentFileData
-        
-        try {
-          
-          // NB: Turn into async read, and add UI state for this
-          
-          torrentFileData = fs.readFileSync(torrentFileName)
-        } catch (e) {
-          
-          // NB: Add fail dialog UI state for this
-          
-          console.log('Failed to read torrent file from disk: ' + torrentFileName)
-          console.log(e)
-          return
-        }
-        
-        /// Parse torrent file from data
-        let torrentInfo
-        
-        try {
-          
-          // NB: add UI state to indicate blocking progress
-          
-          torrentInfo = new TorrentInfo(data)
-        } catch(e) {
-          
-          // NB: Add fail dialog state for this
-  
-          console.log('Failed to parse torrent file from data: ' + torrentFileName)
-          console.log(e)
-          return
-        }
-        
-        // Create settings for torrent
-        let settings = Common.getStartingDownloadSettings(torrentInfo, savePath)
-        
-        // Add torrent file
-        this._uiStore.appStore.applicationStore.addTorrentFile(settings)
-        
-        // NB: in the future some how hook into _possible_ errors here, but really there
-        // shouldnt be any.
-      }
+
+      this._uiStore.addExampleTorrents()
 
       this.setState(OnboardingStore.STATE.BalanceExplanation)
     }

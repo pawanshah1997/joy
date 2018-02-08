@@ -719,6 +719,10 @@ class UIStore {
   openSlackSignupPagee() {
 
   }
+
+  addExampleTorrents () {
+    this._application.addExampleTorrents()
+  }
 }
 
 function launchExternalTxViewer(txId, outputIndex) {

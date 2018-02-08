@@ -818,6 +818,33 @@ class Application extends EventEmitter {
     console.error(err)
   }
 
+  addExampleTorrents () {
+    assert(this.state === Application.STATE.STARTED)
+
+    this.onboardingTorrents.forEach((torrentFileName) => {
+
+        fs.readFile(torrentFileName, (err, data) => {
+          if (err) return console.error('Failed to read example torrent:', torrentFileName, err.message)
+
+          let torrentInfo
+
+          try {
+            torrentInfo = new TorrentInfo(data)
+          } catch (e) {
+            console.error('Failed to parse example torrent file from data:', torrentFileName)
+            return
+          }
+
+          let settings = createStartingDownloadSettings(torrentInfo,
+                                                        this.applicationSettings.getDownloadFolder(),
+                                                        DEFAULT_APPLIATION_SETTINGS.buyerTerms)
+
+          this.addTorrent(settings, () => {
+
+          })
+        })
+    })
+  }
 }
 
 function stateToString(state) {
@@ -880,6 +907,20 @@ function encodeTorrentSettings(torrent) {
 
 }
 
+function createStartingDownloadSettings(torrentInfo, savePath, buyerTerms) {
+  const infoHash = torrentInfo.infoHash()
 
+  return {
+    infoHash : infoHash,
+    metadata : torrentInfo,
+    resumeData : null,
+    name: torrentInfo.name() || infoHash,
+    savePath: savePath,
+    deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
+    extensionSettings : {
+      buyerTerms: buyerTerms
+    }
+  }
+}
 
 export default Application
