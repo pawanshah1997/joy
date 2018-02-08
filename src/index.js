@@ -28,6 +28,7 @@ import ReactDOM from "react-dom"
 
 import UIStore from './scenes'
 import assert from 'assert'
+import mkdirp from 'mkdirp'
 
 /**
  * Some Components use react-tap-event-plugin to listen for touch events because onClick is not
@@ -134,7 +135,12 @@ loadedRenderer()
 if(process.env.FORCE_ONBOARDING)
   config.skipLoadingExistingTorrents = true
 
-application.start(config)
+// Root path that will contain the wallets, application database and downloaded torrents
+const appDirectory = path.join(os.homedir(), '.joystream')
+
+mkdirp.sync(appDirectory)
+
+application.start(config, appDirectory)
 
 /**
  * Renderer routine which is invoked repeatedly
