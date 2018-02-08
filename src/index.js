@@ -9,20 +9,18 @@ process.env.BCOIN_NO_NATIVE = '1'
 // Disable workers which are not available in electron
 require('bcoin').set({ useWorkers: false })
 
-// Add a logger if log level is specified
-if(config.logLevel)
-  options.logger = bcoin.logger({ level: config.logLevel })
-
+import config from './config'
 
 // Set primary network in Bcoin (oyh vey, what a singlton horrible pattern)
-bcoin.set({ network :  network})
+bcoin.set({ network :  config.network})
+
 
 import {ipcRenderer, webFrame} from 'electron'
 import isDev from 'electron-compile'
 import React from 'react'
 
 import Application from './core/Application'
-import config from './config'
+
 import { EXAMPLE_TORRENTS } from './constants'
 import ReactDOM from "react-dom"
 

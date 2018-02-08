@@ -208,12 +208,18 @@ class Application extends EventEmitter {
     // Make and hold on to path to wallet
     this._walletPath = path.join(this._appDirectory, FOLDER_NAME.WALLET)
 
-    // Create the SPV Node
-    let spvNode = new bcoin.SPVNode({
+    let spvOptions = {
       prefix: this._walletPath,
       db: 'leveldb',
       network: config.network
-    })
+    }
+
+    // Add a logger if log level is specified
+    if(config.logLevel)
+      spvOptions.logger = bcoin.logger({ level: config.logLevel })
+
+    // Create the SPV Node
+    let spvNode = new bcoin.SPVNode(spvOptions)
 
     // Create and hold to wallet
     this.wallet = new Wallet(spvNode)
