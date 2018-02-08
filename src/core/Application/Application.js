@@ -392,7 +392,7 @@ class Application extends EventEmitter {
       onTorrentsTerminatedStoredAndRemoved()
     else {
       // Add terminated handler for each torrent
-      this.torrents.forEach((infoHash, torrent) => {
+      this.torrents.forEach((torrent, infoHash) => {
 
         torrent.once('Terminated', () => {
 
@@ -419,7 +419,7 @@ class Application extends EventEmitter {
       })
 
       // Terminate all torrents
-      this.torrents.ForEach((infoHash, torrent) => {
+      this.torrents.ForEach((torrent) => {
         torrent.terminate()
       })
     }
