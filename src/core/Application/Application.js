@@ -351,7 +351,7 @@ class Application extends EventEmitter {
               assert(!err)
 
               // Process that torrent was added to session
-              let torrent = this._onTorrentAddedToSession(joystreamNodeTorrent)
+              let torrent = this._onTorrentAddedToSession(savedTorrent, joystreamNodeTorrent)
 
               // When loaded, check if we are done loading all,
               // if so note this
