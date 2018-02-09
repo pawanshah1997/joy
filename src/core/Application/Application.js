@@ -1,7 +1,7 @@
 import assert from "assert"
 import {EventEmitter} from "events"
 import ApplicationSettings from '../ApplicationSettings/ApplicationSettings'
-import Wallet from './core/Wallet'
+import Wallet from '../Wallet'
 
 import getCoins from './faucet'
 import mkdirp from 'mkdirp'
@@ -30,12 +30,12 @@ const PRICE_FEED_POLLING_INTERVAL = 60*1000 //
  * Default settings to use for the application settings
  */
 const DEFAULT_APPLIATION_SETTINGS = {
-  
+
   useAssistedPeerDiscovery : true,
-  
+
   // 0 means libtorrent picks whatever it wants?
   bittorrentPort : 0,
-  
+
   makeDefaultSavePathFromBaseFolder : (baseFolder) => {
     return path.join(baseFolder, FOLDER_NAME.DEFAULT_SAVE_PATH_BASE)
   },
@@ -72,7 +72,7 @@ const DEFAULT_APPLIATION_SETTINGS = {
  * emits torrentRemoved({infoHash})
  */
 class Application extends EventEmitter {
-  
+
   /**
    *
    * NB: An important design decision is that we do not consider
@@ -87,12 +87,12 @@ class Application extends EventEmitter {
     STARTED : 2,
     STOPPING : 3,
   }
-  
+
   /**
    * {STATE} State of app
    */
   state
-  
+
   /**
    * Resource types owned by the app
    * RENAME: not resource, loading/ter milestone ?
@@ -101,29 +101,29 @@ class Application extends EventEmitter {
 
     SETTINGS : 1,
     WALLET : 2,
-    
+
     JOYSTREAM_NODE_SESSION: 9,
     PRICE_FEED : 10,
     STORED_TORRENTS : 11
   }
 
-  static NUMBER_OF_RESOURCE_TYPES = Object.keys(Application.RESOURCE).length
-  
+  static get NUMBER_OF_RESOURCE_TYPES() { Object.keys(Application.RESOURCE).length }
+
   /**
    * {Set.<RESOURCES>} The resources which are currently started
    */
   startedResources
-  
+
   /**
    * {Bool} Whether onboarding is enabled
    */
   onboardingIsEnabled
-  
+
   /**
    * {Array.<String>} List of torrent file paths to use as examples in the onboarding
    */
   onboardingTorrents
-  
+
   /**
    * @property {ElectronConfig} Application settings
    */
@@ -138,7 +138,7 @@ class Application extends EventEmitter {
    * @property {PriceFeed}
    */
   priceFeed
-  
+
   /**
    * {Map<String.Torrent>} Map of torrents currently added
    */
@@ -156,9 +156,9 @@ class Application extends EventEmitter {
    * @param walletTopUpOptions {WalletTopUpOptions}
    */
   constructor (onboardingTorrents, onboardingIsEnabled, enableOnboardingIfFirstRun, walletTopUpOptions) {
-    
+
     super()
-    
+
     this._setState(Application.STATE.STOPPED)
     this.startedResources = new Set()
 
@@ -169,16 +169,16 @@ class Application extends EventEmitter {
     this.wallet = null
     this.priceFeed = null
 
-    
+
     this._enableOnboardingIfFirstRun = enableOnboardingIfFirstRun
     this._walletTopUpOptions = walletTopUpOptions
     this._torrentDatabase = null
-    
+
     // setInterval reference for polling joystream-node session for
     this._torrentUpdateInterval = null
     this._joystreamNodeSession = null
   }
-  
+
   /**
    * Start application
    * Presumes that the application directory ('appDirectory')
@@ -191,42 +191,42 @@ class Application extends EventEmitter {
    */
 
   start(config, appDirectory, onStarted = () => {} ) {
-    
+
     // Make sure we can start
     if(this.state !== Application.STATE.STOPPED)
       onStarted('Can only start when stopped')
-    
+
     this._setState(Application.STATE.STARTING)
-    
+
     // Hold on to app directory
     this._appDirectory = appDirectory
-    
+
     /**
      * Wallet
      */
-  
+
     // Make and hold on to path to wallet
     this._walletPath = path.join(this._appDirectory, FOLDER_NAME.WALLET)
-    
+
     // Create the SPV Node
     let spvNode = new bcoin.SPVNode({
       prefix: this._walletPath,
       db: 'leveldb',
       network: config.network
     })
-    
+
     // Create and hold to wallet
     this.wallet = new Wallet(spvNode)
-    
+
     this.wallet.once('started', () => {
-  
+
       assert(this.state === Application.STATE.STARTING)
-  
+
       this._startedResource(Application.RESOURCE.WALLET, onStarted)
     })
-    
+
     this.wallet.on('totalBalanceChanged', this._totalWalletBalanceChanged)
-    
+
     // Start wallet
     this.wallet.start()
 
@@ -236,21 +236,21 @@ class Application extends EventEmitter {
 
     // Hold on to price feed
     this.priceFeed = new PriceFeed(undefined, exchangeRateFetcher)
-    
+
     this.priceFeed.on('error', this._onPriceFeedError)
-    
+
     // Start feed (synchronous)
     this.priceFeed.start(PRICE_FEED_POLLING_INTERVAL)
-    
+
     this._startedResource(Application.RESOURCE.PRICE_FEED)
-    
+
     /**
      * Application settings
      */
-    
+
     // Create application settings
     this.applicationSettings = new ApplicationSettings()
-    
+
     // Open settings (is synchronous), with given default values,
     // these are set on the first run
     this.applicationSettings.open(0,
@@ -258,7 +258,7 @@ class Application extends EventEmitter {
       DEFAULT_APPLIATION_SETTINGS.useAssistedPeerDiscovery,
       DEFAULT_APPLIATION_SETTINGS.bittorrentPort
       )
-    
+
     // Make sure some download folder actually exists, which
     // may not be the case on the first run
     let downloadFolder = this.applicationSettings.getDownloadFolder()
@@ -277,13 +277,13 @@ class Application extends EventEmitter {
       this._enableOnboardingIfFirstRun &&
       !this.applicationSettings.numberOfPriorSessions())
       this._setOnboardingIsEnabled(true)
-  
+
     this._startedResource(Application.RESOURCE.SETTINGS, onStarted)
-    
+
     /**
      * Create Joystream node session
      */
-    
+
     // Construct default session settings
     var sessionSettings = {
       // network port libtorrent session will open a listening socket on
@@ -291,21 +291,21 @@ class Application extends EventEmitter {
       // Assisted Peer Discovery (APD)
       assistedPeerDiscovery: this.applicationSettings.getUseAssistedPeerDiscovery()
     }
-  
+
     // Create & start session
     // We assume that the session has already started after this call
     this._joystreamNodeSession = new JoystreamNodeSession(sessionSettings)
-  
+
     // Setup polling of torrent plugin statuses
     this._torrentUpdateInterval = setInterval(() => {
-      
+
       // Not possible since we cancel timer before stopping
       assert(this.state !== Application.STATE.STOPPED)
-      
+
       this._joystreamNodeSession.postTorrentUpdates()
-      
+
     }, POST_TORRENT_UPDATES_INTERVAL)
-    
+
     // NB: this is the last synchronous step, so we must pass `onStarted` here,
     // in case all asynchronous loading of resources is already done.
     this._startedResource(Application.RESOURCE.JOYSTREAM_NODE_SESSION, onStarted)
@@ -351,7 +351,7 @@ class Application extends EventEmitter {
               assert(!err)
 
               // Process that torrent was added to session
-              let torrent = this._onTorrentAddedToSession(joystreamNodeTorrent)
+              let torrent = this._onTorrentAddedToSession(savedTorrent, joystreamNodeTorrent)
 
               // When loaded, check if we are done loading all,
               // if so note this
@@ -371,7 +371,7 @@ class Application extends EventEmitter {
     })
 
   }
-  
+
   /**
    * Stops app
    *
@@ -390,15 +390,16 @@ class Application extends EventEmitter {
 
     if(torrents.size === 0)
       onTorrentsTerminatedStoredAndRemoved()
-    else
-      this.torrents.forEach((infoHash, torrent) => {
+    else {
+      // Add terminated handler for each torrent
+      this.torrents.forEach((torrent, infoHash) => {
 
         torrent.once('Terminated', () => {
 
           assert(this.state === Application.STATE.STOPPING)
 
           // store this somewhere
-          let encodedTorrentSettings = encodedTorrentSettings(torrent)
+          let encodedTorrentSettings = encodeTorrentSettings(torrent)
 
           this._torrentDatabase.save('torrents', infoHash, encodedTorrentSettings)
             .then(() => {})
@@ -415,10 +416,13 @@ class Application extends EventEmitter {
             onTorrentsTerminatedStoredAndRemoved()
 
         })
-
-        torrent.terminate()
-
       })
+
+      // Terminate all torrents
+      this.torrents.ForEach((torrent) => {
+        torrent.terminate()
+      })
+    }
 
     function onTorrentsTerminatedStoredAndRemoved() {
 
@@ -468,7 +472,7 @@ class Application extends EventEmitter {
       this.applicationSettings.setNumberOfPriorSessions(numberOfPriorSessions + 1)
 
     this.applicationSettings.close()
-  
+
     this._stoppedResource(Application.RESOURCE.SETTINGS)
 
     /**
@@ -483,20 +487,20 @@ class Application extends EventEmitter {
      * Stop wallet
      */
     this.wallet.once('stopped', () => {
-  
+
       assert(this.state === Application.STATE.STOPPING)
-  
+
       this._stoppedResource(Application.RESOURCE.WALLET, onStopped)
     })
 
     this.wallet.stop()
-  
+
     /**
      * Cancel timers,
      */
 
 
-  
+
   }
 
   /**
@@ -583,7 +587,7 @@ class Application extends EventEmitter {
       }
 
     })
-    
+
   }
 
   _onTorrentAddedToSession(settings, joystreamNodeTorrent) {
@@ -673,13 +677,11 @@ class Application extends EventEmitter {
    * @param onRemoved {Function} - callback
    */
   removeTorrent(infoHash, deleteData, onRemoved) {
-  
+
     if(this.state !== Application.STATE.STARTED) {
       onRemoved('Can only remove torrent when started')
       return
     }
-
-    const infoHash = settings.infoHash
 
     let torrent = this.torrents.get(infoHash)
 
@@ -720,9 +722,9 @@ class Application extends EventEmitter {
 
     // Tell user about success
     onRemoved(undefined, true)
-    
+
   }
-  
+
   _startedResource = (resource, onStarted) => {
 
     assert(this.state === Application.STATE.STARTING)
@@ -733,9 +735,9 @@ class Application extends EventEmitter {
 
     // If all resources have started, then we are done!
     if(this.startedResources.size === Application.NUMBER_OF_RESOURCE_TYPES) {
-      
+
       this._setState(Application.STATE.STARTED)
-      
+
       // Make callback to user
       onStarted(undefined, true)
     }
@@ -759,7 +761,7 @@ class Application extends EventEmitter {
     // If all resources have stopped, then we are done!
     if(this.startedResources.size === 0) {
       this._setState(Application.STATE.STOPPED)
-      
+
       // Make user callback
       onStopped(undefined, true)
     }
@@ -779,22 +781,22 @@ class Application extends EventEmitter {
     this.onboardingIsEnabled = onboardingIsEnabled
     this.emit('onboardingIsEnabled', onboardingIsEnabled)
   }
-  
+
   _totalWalletBalanceChanged = (balance) => {
-  
+
     console.log('totalBalanceChanged: ' + balance)
-    
+
     if(this.state === Application.STATE.STARTED) {
-  
+
       // Beg faucet for funds if we are supposed to
       if (this._walletTopUpOptions.doTopUp && this._walletTopUpOptions.walletBalanceLowerBound > balance) {
-        
+
         let addressString = this._wallet.receiveAddress.toString()
-    
+
         console.log('Faucet: Requesting some testnet coins to address: ' + addressString)
-    
+
         getCoins(addressString, function (err) {
-      
+
           if (err) {
             console.log('Faucet:', err)
           } else {
@@ -802,20 +804,20 @@ class Application extends EventEmitter {
           }
 
         })
-    
+
       }
-      
+
     }
-    
+
   }
-  
+
   _onPriceFeedError = (err) => {
-    
+
     console.log('priceFeed [error]:')
     console.log('Could not fetch exchange rate, likely due to no internet, or broken endpoint.')
-    console.log(err)
+    console.error(err)
   }
-  
+
 }
 
 function stateToString(state) {
@@ -848,14 +850,14 @@ function stateToString(state) {
 }
 
 async function exchangeRateFetcher() {
-  
+
   let v = await coinmarketcap.tickerByAsset('bitcoin')
-  
+
   return v.price_usd
-  
+
 }
 
-function encodedTorrentSettings(torrent) {
+function encodeTorrentSettings(torrent) {
 
   let encoded = {
     infoHash: torrent.infoHash,
@@ -874,7 +876,7 @@ function encodedTorrentSettings(torrent) {
     encoded.resumeData = torrent.resumeData.toString('base64')
   }
 
-  return torrent
+  return encoded
 
 }
 
