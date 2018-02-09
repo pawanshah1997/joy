@@ -884,7 +884,9 @@ async function exchangeRateFetcher() {
   return v.price_usd
 
 }
-
+// TODO: move this to be a method on the Torrent class and introduce a
+// corresponding decoder method. These are routines for converting to and from
+// an object that can be serialized/deserialized into the torrents database
 function encodeTorrentSettings(torrent) {
 
   let encoded = {
@@ -908,6 +910,7 @@ function encodeTorrentSettings(torrent) {
 
 }
 
+// TODO: Move this into Torrent class as a static member method
 function createStartingDownloadSettings(torrentInfo, savePath, buyerTerms) {
   const infoHash = torrentInfo.infoHash()
 
