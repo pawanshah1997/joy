@@ -8,7 +8,7 @@ var util = require('util')
 var TorrentState = require('joystream-node').TorrentState
 var TorrentHandle = require('./TorrentHandle')
 
-util.inherits(EventEmitter, MockTorrent)
+util.inherits(MockTorrent, EventEmitter)
 
 // mocks a joystream-node Torrent
 function MockTorrent(fixture) {
