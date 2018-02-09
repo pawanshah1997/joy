@@ -23,13 +23,13 @@ class TorrentStore {
 
     // Seller minimum price for this torrent
     @observable sellerPrice
-    
+
     // Map of revenue per connection (using pid as a key)
     @observable sellerRevenue
 
     // Buyer max price for this torrent
     @observable buyerPrice
-    
+
     // Map of total spent per connection (using pid as a key)
     @observable buyerSpent
 
@@ -238,15 +238,15 @@ class TorrentStore {
     @computed get isLoading() {
         return this.state.startsWith("Loading")
     }
-  
+
     @computed get isDownloading () {
         return this.state.startsWith("Active.DownloadIncomplete")
     }
-  
+
     @computed get isFullyDownloaded () {
     return this.state.startsWith("Active.FinishedDownloading")
     }
-  
+
     @computed get isUploading () {
     return this.state.startsWith("Active.FinishedDownloading.Uploading")
     }
@@ -288,7 +288,7 @@ class TorrentStore {
         return this.state.startsWith("Active.DownloadIncomplete.Unpaid.Stopped") ||
             this.state.startsWith("Active.FinishedDownloading.Uploading.Stopped")
     }
-    
+
     @computed get totalRevenue() {
         var sum = 0
         this.sellerRevenue.forEach(function (value, key, map) {
@@ -328,28 +328,28 @@ class TorrentStore {
     endUploading() {
         this._uploadStopper()
     }
-  
+
       /** here for now, move later **/
-      
+
       play (fileIndex) {
         this._torrent.play(fileIndex)
       }
-      
+
       @computed get playableIndexfiles () {
         let playableIndexfiles = []
 
-        recover torrentFiles
+        // Recover torrentFiles
         
         for (var i = 0; i < this.torrentFiles.numFiles(); i++) {
           let fileName = this.torrentFiles.fileName(i)
           let fileExtension = fileName.split('.').pop()
-          
+
           // Need a list of all the video extensions that render-media suport.
           if (fileExtension === 'mp4' || fileExtension === 'wbm' || fileExtension === 'mkv' || fileExtension === 'avi' || fileExtension === 'webm') {
             playableIndexfiles.push(i)
           }
         }
-        
+
         return playableIndexfiles
       }
 }
