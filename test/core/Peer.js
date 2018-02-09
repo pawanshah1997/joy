@@ -14,7 +14,7 @@ describe('Peer state machine', function () {
     let endpoint = "my_endpoint"
     let peerBEP10SupportStatus = "peerBEP10SupportStatus"
     let peerBitSwaprBEPSupportStatus = "peerBitSwaprBEPSupportStatus"
-    let torrent = new Mocks.MockTorrent({})
+    let torrent = new Mocks.Torrent({})
     let peer = null
 
     let privateKeyGenerator = sinon.stub()
@@ -34,8 +34,8 @@ describe('Peer state machine', function () {
 
     it('ignores state updates in wrong mode', function () {
 
-        let s = Mocks.MakePeerPluginStatus(pid, null, null, null,
-            Mocks.MakeConnectionStatus(pid, ConnectionInnerState.ReadyForInvitation, null, null, null)
+        let s = Mocks.PeerPluginStatus(pid, null, null, null,
+            Mocks.ConnectionStatus(pid, ConnectionInnerState.ReadyForInvitation, null, null, null)
         )
 
         peer.newStatus(s)
@@ -49,9 +49,9 @@ describe('Peer state machine', function () {
 
     it('updates state: tries to start paid uploading', function () {
 
-        let s = Mocks.MakePeerPluginStatus(pid, null, null, null,
-            Mocks.MakeConnectionStatus(pid, ConnectionInnerState.Invited, null, null,
-                Mocks.MakeAnnouncedModeAndTerms.Buy(buyerTerms))
+        let s = Mocks.PeerPluginStatus(pid, null, null, null,
+            Mocks.ConnectionStatus(pid, ConnectionInnerState.Invited, null, null,
+                Mocks.AnnouncedModeAndTerms.Buy(buyerTerms))
         )
 
         peer.newStatus(s)

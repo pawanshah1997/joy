@@ -35,8 +35,8 @@ describe('Torrent state machine', function () {
             isFullyDownloaded: false
         }
 
-        let torrent = new Mocks.MockTorrent(fixture)
-        let torrentInfo = new Mocks.MockTorrentInfo(fixture)
+        let torrent = new Mocks.Torrent(fixture)
+        let torrentInfo = new Mocks.TorrentInfo(fixture)
 
         it('waits for buyer terms', function () {
 
@@ -84,8 +84,8 @@ describe('Torrent state machine', function () {
             generateResumeData : true
         }
 
-        let torrent = new Mocks.MockTorrent(fixture)
-        let torrentInfo = new Mocks.MockTorrentInfo(fixture)
+        let torrent = new Mocks.Torrent(fixture)
+        let torrentInfo = new Mocks.TorrentInfo(fixture)
 
         it('terminates', function () {
 
@@ -124,8 +124,8 @@ describe('Torrent state machine', function () {
 
         }
 
-        let torrent = new Mocks.MockTorrent(fixture)
-        let torrentInfo = new Mocks.MockTorrentInfo(fixture)
+        let torrent = new Mocks.Torrent(fixture)
+        let torrentInfo = new Mocks.TorrentInfo(fixture)
 
         it('waits to be added to session', function () {
 
@@ -199,9 +199,9 @@ describe('Torrent state machine', function () {
             /// pump in peerpluigins which brings to 'CanStartPaidDownload'
 
             let statuses = []
-            statuses.push(Mocks.MakePeerPluginStatus('id-1'))
-            statuses.push(Mocks.MakePeerPluginStatus('id-2'))
-            statuses.push(Mocks.MakePeerPluginStatus('id-3'))
+            statuses.push(Mocks.PeerPluginStatus('id-1'))
+            statuses.push(Mocks.PeerPluginStatus('id-2'))
+            statuses.push(Mocks.PeerPluginStatus('id-3'))
 
             Torrent.queuedHandle(client, 'processPeerPluginsStatuses', statuses)
 
@@ -210,7 +210,7 @@ describe('Torrent state machine', function () {
             /// pump in peerplugins which brings back to 'ReadyForStartPaidDownloadAttempt' again
 
             statuses = []
-            statuses.push(Mocks.MakePeerPluginStatus('id-1' , 0))
+            statuses.push(Mocks.PeerPluginStatus('id-1' , 0))
 
             Torrent.queuedHandle(client, 'processPeerPluginsStatuses', statuses)
 
@@ -265,8 +265,8 @@ describe('Torrent state machine', function () {
             isFullyDownloaded: true
         }
 
-        let torrent = new Mocks.MockTorrent(fixture)
-        let torrentInfo = new Mocks.MockTorrentInfo(fixture)
+        let torrent = new Mocks.Torrent(fixture)
+        let torrentInfo = new Mocks.TorrentInfo(fixture)
 
         it('gets to passive', function () {
 
@@ -320,8 +320,8 @@ describe('Torrent state machine', function () {
             isFullyDownloaded: true
         }
 
-        let torrent = new Mocks.MockTorrent(fixture)
-        let torrentInfo = new Mocks.MockTorrentInfo(fixture)
+        let torrent = new Mocks.Torrent(fixture)
+        let torrentInfo = new Mocks.TorrentInfo(fixture)
 
         it('gets to (stopped) uploading', function () {
 
@@ -400,7 +400,7 @@ describe('Torrent state machine', function () {
 
 function MockClient() {
 
-    this.store = new Mocks.MockTorrentStore()
+    this.store = new Mocks.TorrentStore()
 
     this.processStateMachineInput = function (...args) {
       Torrent.queuedHandle(this, ...args)
