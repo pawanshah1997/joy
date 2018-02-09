@@ -1,11 +1,12 @@
 import assert from "assert"
 import {EventEmitter} from "events"
 import ApplicationSettings from '../ApplicationSettings/ApplicationSettings'
-import Wallet from '../Wallet'
-
+import Wallet from './core/Wallet'
+import DeepInitialState from '../Torrent/Statemchine/DeepInitialState'
 import getCoins from './faucet'
 import mkdirp from 'mkdirp'
 import WalletTopUpOptions from "./WalletTopUpOptions"
+import fs from 'fs'
 
 const FOLDER_NAME = {
   WALLET: 'wallet',
@@ -812,6 +813,33 @@ class Application extends EventEmitter {
     console.error(err)
   }
 
+  addExampleTorrents () {
+    assert(this.state === Application.STATE.STARTED)
+
+    this.onboardingTorrents.forEach((torrentFileName) => {
+
+        fs.readFile(torrentFileName, (err, data) => {
+          if (err) return console.error('Failed to read example torrent:', torrentFileName, err.message)
+
+          let torrentInfo
+
+          try {
+            torrentInfo = new TorrentInfo(data)
+          } catch (e) {
+            console.error('Failed to parse example torrent file from data:', torrentFileName)
+            return
+          }
+
+          let settings = createStartingDownloadSettings(torrentInfo,
+                                                        this.applicationSettings.getDownloadFolder(),
+                                                        DEFAULT_APPLIATION_SETTINGS.buyerTerms)
+
+          this.addTorrent(settings, () => {
+
+          })
+        })
+    })
+  }
 }
 
 function stateToString(state) {
@@ -850,7 +878,9 @@ async function exchangeRateFetcher() {
   return v.price_usd
 
 }
-
+// TODO: move this to be a method on the Torrent class and introduce a
+// corresponding decoder method. These are routines for converting to and from
+// an object that can be serialized/deserialized into the torrents database
 function encodeTorrentSettings(torrent) {
 
   let encoded = {
@@ -874,6 +904,21 @@ function encodeTorrentSettings(torrent) {
 
 }
 
+// TODO: Move this into Torrent class as a static member method
+function createStartingDownloadSettings(torrentInfo, savePath, buyerTerms) {
+  const infoHash = torrentInfo.infoHash()
 
+  return {
+    infoHash : infoHash,
+    metadata : torrentInfo,
+    resumeData : null,
+    name: torrentInfo.name() || infoHash,
+    savePath: savePath,
+    deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
+    extensionSettings : {
+      buyerTerms: buyerTerms
+    }
+  }
+}
 
 export default Application
