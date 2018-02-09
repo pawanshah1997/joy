@@ -82,15 +82,18 @@ class PriceFeed extends EventEmitter {
   }
 
   _poll() {
-    
-    if(!this._exchangeRateFetcher)
-      debugger
+
+    if(!this._exchangeRateFetcher) {
+      console.error('priceFeed polling with no exchange rate fetcher')
+      return
+    }
+
 
     this._exchangeRateFetcher()
       .then((newExchangeRate) => {
-        
+
         this.cryptoToUsdExchangeRate = newExchangeRate.price_usd
-  
+
         this.emit('tick', this.cryptoToUsdExchangeRate)
       })
       .catch((err) => {

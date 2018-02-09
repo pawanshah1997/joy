@@ -5,9 +5,10 @@
 var BaseMachine = require('../../../BaseMachine')
 var LibtorrentInteraction = require('joystream-node').LibtorrentInteraction
 var TorrentState = require('joystream-node').TorrentState
-var Common = require('./../Common')
-var DeepInitialState = require('../DeepInitialState')
+var Common = require('../Common')
 var assert = require('assert')
+import DeepInitialState from '../DeepInitialState'
+import { isStopped, isDownloading, isUploading, isPassive } from '../DeepInitialState'
 
 var Loading = new BaseMachine({
 
@@ -16,9 +17,9 @@ var Loading = new BaseMachine({
     states: {
 
         AddingToSession : {
-  
+
           addedToSession: function (client, torrent) {
-            
+
             // Hold on to torrent
             client.joystreamNodeTorrent = torrent
 
@@ -97,6 +98,10 @@ var Loading = new BaseMachine({
               client._submitInput('paidDownloadInitiationCompleted', alert)
             })
 
+            torrent.on('allSellersGone', function (alert) {
+              client._submitInput('allSellersGone', alert)
+            })
+
             // DO we have new peers
             /* torrent.on('dhtGetPeersReply', function (peers) {
               for (var i in peers) {
@@ -110,17 +115,17 @@ var Loading = new BaseMachine({
             if(client.torrentInfo && client.torrentInfo.isValid()) {
 
               this.transition(client, 'CheckingPartialDownload')
-
-              const torrentInfo = client.joystreamNodeTorrent.handle.torrentFile()
-
-              client._setTorrentInfo(torrentInfo)
+              // We already have valid torrentInfo why getting again?
+              // const torrentInfo = client.joystreamNodeTorrent.handle.torrentFile()
+              //
+              // client._setTorrentInfo(torrentInfo)
 
             } else {
                 this.transition(client, 'WaitingForMetadata')
             }
           }
         },
-  
+
         WaitingForMetadata : {
 
             metadataReady : function (client, torrentInfo) {
@@ -139,7 +144,7 @@ var Loading = new BaseMachine({
             checkFinished: function (client) {
                 // If the saved initial state was stopped pause the torrent now after
                 // checking files completes
-                if (Common.isStopped(client._deepInitialState)) {
+                if (isStopped(client._deepInitialState)) {
                   client.joystreamNodeTorrent.handle.pause()
                 }
 
@@ -161,7 +166,7 @@ var Loading = new BaseMachine({
 
                 if (s.state === TorrentState.seeding) {
 
-                    if(Common.isPassive(client._deepInitialState) || Common.isDownloading(client._deepInitialState)) {
+                    if(isPassive(client._deepInitialState) || isDownloading(client._deepInitialState)) {
 
                         // When there is a full download, and the user doesn't want to upload, then
                         // we just go to passive, even if the user really wanted to download.
@@ -175,7 +180,7 @@ var Loading = new BaseMachine({
 
                       Common.toSellMode(client, client.sellerTerms)
 
-                      if(!Common.isStopped(client._deepInitialState))
+                      if(!isStopped(client._deepInitialState))
                           Common.startExtension(client)
                     }
 
@@ -186,12 +191,12 @@ var Loading = new BaseMachine({
                     // We go to buy mode, regardless of what the user wanted (DeepInitialState),
                     // user will need to supply terms on their own.
 
-                    if(Common.isDownloading(client._deepInitialState))  {
+                    if(isDownloading(client._deepInitialState))  {
 
                         Common.toBuyMode(client, client.buyerTerms)
 
                         // When not paused, then start extension, otherwise leave extension un-started
-                        if(!Common.isStopped(client._deepInitialState))
+                        if(!isStopped(client._deepInitialState))
                             Common.startExtension(client)
 
                         goToDeepInitialState(this, client)
@@ -219,7 +224,7 @@ var Loading = new BaseMachine({
                 client._setBuyerTerms(terms)
 
                 // When not paused, then start extension, otherwise leave extension un-started
-                if(!Common.isStopped(client._deepInitialState))
+                if(!isStopped(client._deepInitialState))
                     Common.startExtension(client)
 
                 goToDeepInitialState(this, client)
