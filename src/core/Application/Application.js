@@ -433,30 +433,22 @@ class Application extends EventEmitter {
         this._stoppedResource(Application.RESOURCE.STORED_TORRENTS, onStopped)
       })
 
-      // kall funksjon her?
+      /**
+       * Stop Joystream node session
+       */
+
+      this._joystreamNodeSession.pauseLibtorrent((err) => {
+
+        assert(!err)
+
+        clearInterval(this._torrentUpdateInterval)
+        this._joystreamNodeSession = null
+        this._torrentUpdateInterval = null
+
+        this._stoppedResource(Application.RESOURCE.JOYSTREAM_NODE_SESSION, onStopped)
+      })
+
     }
-
-    /**
-     * Stop Joystream node session
-     *
-     *
-     * How to make sure we only start this
-     * until _all_ torrents are terminated!!!
-     *
-     *
-     */
-
-    // TODO: update joystream-node session (to clearInterval)
-    client._libtorrentSession.pauseLibtorrent((err) => {
-      client._libtorrentSession = null
-      client._submitInput('clearedResources')
-    })
-
-
-    clearInterval(this._torrentUpdateInterval)
-    this._torrentUpdateInterval = null
-
-    // Puase???
 
     /**
      * Application settings
@@ -494,13 +486,6 @@ class Application extends EventEmitter {
     })
 
     this.wallet.stop()
-
-    /**
-     * Cancel timers,
-     */
-
-
-
   }
 
   /**
