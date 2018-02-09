@@ -242,7 +242,7 @@ class Application extends EventEmitter {
      */
 
     // Hold on to price feed
-    this.priceFeed = new PriceFeed(undefined, exchangeRateFetcher)
+    this.priceFeed = new PriceFeed(null, exchangeRateFetcher)
 
     this.priceFeed.on('error', this._onPriceFeedError)
 
@@ -576,7 +576,7 @@ class Application extends EventEmitter {
         let torrent = this._onTorrentAddedToSession(settings, newJoystreamNodeTorrent)
 
         // and finally tell user
-        onAdded(undefined, torrent)
+        onAdded(null, torrent)
 
       }
 
@@ -715,7 +715,7 @@ class Application extends EventEmitter {
     }
 
     // Tell user about success
-    onRemoved(undefined, true)
+    onRemoved(null, true)
 
   }
 
@@ -733,7 +733,7 @@ class Application extends EventEmitter {
       this._setState(Application.STATE.STARTED)
 
       // Make callback to user
-      onStarted(undefined, true)
+      onStarted(null, true)
     }
 
     // tell the world
@@ -757,7 +757,7 @@ class Application extends EventEmitter {
       this._setState(Application.STATE.STOPPED)
 
       // Make user callback
-      onStopped(undefined, true)
+      onStopped(null, true)
     }
 
     // tell the world
