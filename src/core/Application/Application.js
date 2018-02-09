@@ -444,7 +444,6 @@ class Application extends EventEmitter {
        */
 
       this._joystreamNodeSession.pauseLibtorrent((err) => {
-
         assert(!err)
 
         clearInterval(this._torrentUpdateInterval)
@@ -563,7 +562,7 @@ class Application extends EventEmitter {
     }
 
     // Try to add torrent to session
-    this._libtorrentSession.addTorrent(params, function (err, newJoystreamNodeTorrent) {
+    this._joystreamNodeSession.addTorrent(params, function (err, newJoystreamNodeTorrent) {
 
       if(err)
         onAdded(err)
@@ -691,7 +690,7 @@ class Application extends EventEmitter {
      * we don't need to wait for some resource to come back, like in the
      * addTorrent scenario
      */
-    this._libtorrentSession.removeTorrent(infoHash, (err) => {
+    this._joystreamNodeSession.removeTorrent(infoHash, (err) => {
 
       assert(!err)
 
