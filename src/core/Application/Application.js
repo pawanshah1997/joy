@@ -1,11 +1,12 @@
 import assert from "assert"
 import {EventEmitter} from "events"
 import ApplicationSettings from '../ApplicationSettings/ApplicationSettings'
-import Wallet from '../Wallet'
-
+import Wallet from './core/Wallet'
+import DeepInitialState from '../Torrent/Statemchine/DeepInitialState'
 import getCoins from './faucet'
 import mkdirp from 'mkdirp'
 import WalletTopUpOptions from "./WalletTopUpOptions"
+import fs from 'fs'
 
 const FOLDER_NAME = {
   WALLET : 'wallet',
