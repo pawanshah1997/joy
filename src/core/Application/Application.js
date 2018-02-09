@@ -8,8 +8,9 @@ import mkdirp from 'mkdirp'
 import WalletTopUpOptions from "./WalletTopUpOptions"
 
 const FOLDER_NAME = {
-  WALLET : 'wallet',
-  DEFAULT_SAVE_PATH_BASE : 'torrents',
+  WALLET: 'wallet',
+  DEFAULT_SAVE_PATH_BASE: 'download',
+  TORRENT_DB: 'data'
 }
 
 /**
@@ -320,7 +321,10 @@ class Application extends EventEmitter {
      * Load settings, add and start torrents
      */
 
-    db.open(this._appDirectory)
+    // Torrent database folder
+    const torrentDatabaseFolder = path.join(this._appDirectory, FOLDER_NAME.TORRENT_DB)
+
+    db.open(torrentDatabaseFolder)
       .then((torrentDatabase) => {
 
         // Hold on to torrent database
