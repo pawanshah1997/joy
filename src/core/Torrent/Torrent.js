@@ -27,8 +27,8 @@ import {deepInitialStateFromActiveState} from './Statemachine/DeepInitialState'
  * snapshots of plugin state at regular intervals.
  * The arrival & disappearance of peer plugins may be missed
  * in theory:
- * emits peerPluginPresent({Peer}) - when peer plugin is first seens as present
- * emits peerPluginGone({PID}) - when peer plugin is first seens as gone
+ * emits peerAdded({Peer}) - when peer plugin is first seens as present
+ * emits peerRemoved({PID}) - when peer plugin is first seens as gone
  */
 class Torrent extends EventEmitter {
 
