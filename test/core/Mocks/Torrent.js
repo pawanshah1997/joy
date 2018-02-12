@@ -21,9 +21,12 @@ function MockTorrent(fixture) {
     this._fixture = fixture
 
     this.handle = new TorrentHandle(fixture)
-    this.startUploading = sinon.spy()
 
-    // Setup spies?/ stubs?
+    // Spies and stubs
+    this.startPlugin = sinon.spy()
+    this.startUploading = sinon.spy()
+    this.toBuyMode = sinon.spy()
+    this.setLibtorrentInteraction = sinon.spy()
 }
 
 module.exports = MockTorrent
