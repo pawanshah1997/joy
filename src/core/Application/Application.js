@@ -543,10 +543,10 @@ class Application extends EventEmitter {
     }
 
     // Add torrents paramaters should only have one of ti, url or infoHash
-    if (settings.metadata) {
-      params.ti = settings.metadata
-    } else if (settings.url) {
+    if (settings.url) {
       params.url = settings.url
+    else if (settings.metadata) {
+      params.ti = settings.metadata
     } else {
       params.infoHash = infoHash
     }
