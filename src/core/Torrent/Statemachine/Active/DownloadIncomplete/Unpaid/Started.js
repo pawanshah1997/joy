@@ -178,7 +178,7 @@ var Started = new BaseMachine({
                 } else {
 
                     client.joystreamNodeTorrent.startDownloading(tx, client.downloadInfoMap, (err, res) => {
-                      client._submitInput('startDownloadingResult', err, res)
+                      client._submitInput('paidDownloadInitiationCompleted', err, res)
                     })
 
                     this.transition(client, 'InitiatingPaidDownload')
