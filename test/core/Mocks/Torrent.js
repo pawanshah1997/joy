@@ -25,7 +25,10 @@ function MockTorrent(fixture) {
     // Spies and stubs
     this.startPlugin = sinon.spy()
     this.startUploading = sinon.spy()
+    this.startDownloading = sinon.spy()
     this.toBuyMode = sinon.spy()
+    this.toObserveMode = sinon.spy()
+    this.toSellMode = sinon.spy()
     this.setLibtorrentInteraction = sinon.spy()
 }
 

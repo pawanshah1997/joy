@@ -12,6 +12,10 @@ MockTorrentInfo.prototype.isValid = function() {
     return this._fixture.metadata != null
 }
 
+MockTorrentInfo.prototype.numPieces = function () {
+  return this._fixture.metadata._numPieces
+}
+
 MockTorrentInfo.prototype.files = function () {
   return new FileStorage(this._fixture)
 }
