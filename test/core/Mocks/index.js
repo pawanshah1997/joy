@@ -6,7 +6,6 @@ import TorrentInfo from './TorrentInfo'
 import TorrentStatus from './TorrentStatus'
 import TorrentHandle from './TorrentHandle'
 import Torrent from './Torrent'
-import TorrentStore from './TorrentStore'
 
 
 // export all mocks
@@ -18,6 +17,5 @@ export {
   TorrentHandle,
   TorrentInfo,
   TorrentStatus,
-  TorrentStore,
   FileStorage
 }
