@@ -2,6 +2,7 @@
  * Created by bedeho on 21/07/17.
  */
 
+var sinon = require('sinon')
 var TorrentInfo = require('./TorrentInfo')
 var TorrentStatus = require('./TorrentStatus')
 
@@ -10,6 +11,9 @@ var TorrentStatus = require('./TorrentStatus')
 function MockTorrentHandle(fixture) {
     this._fixture = fixture
     this._status = new TorrentStatus(fixture)
+
+    this.resume = sinon.spy()
+    this.pause = sinon.spy()
 }
 
 MockTorrentHandle.prototype.status = function () {
@@ -18,10 +22,6 @@ MockTorrentHandle.prototype.status = function () {
 
 MockTorrentHandle.prototype.torrentFile = function () {
   return new TorrentInfo(this._fixture)
-}
-
-MockTorrentHandle.prototype.pause = function () {
-
 }
 
 module.exports = MockTorrentHandle
