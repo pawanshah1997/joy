@@ -94,7 +94,9 @@ var Loading = new BaseMachine({
             })
 
             torrent.on('downloadStarted', function (alert) {
-              client._submitInput('paidDownloadInitiationCompleted', alert)
+              // this only happens on success, we can't use this without a corresponding
+              // error alert to indicate download starting failed
+              //client._submitInput('paidDownloadInitiationCompleted', alert)
             })
 
             torrent.on('allSellersGone', function (alert) {
