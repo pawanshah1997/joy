@@ -5,6 +5,7 @@
 var BaseMachine = require('../../../BaseMachine')
 var DownloadIncomplete = require('./DownloadIncomplete')
 var FinishedDownloading = require('./FinishedDownloading')
+var Common = require('../Common')
 
 var Active = new BaseMachine({
 

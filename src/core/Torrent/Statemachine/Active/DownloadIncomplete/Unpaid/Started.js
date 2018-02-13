@@ -105,7 +105,7 @@ var Started = new BaseMachine({
                   var sellerTerms = status.connection.announcedModeAndTermsFromPeer.seller.terms
 
                   // Pick how much to distribute among the sellers
-                  var minimumRevenue = sellerTerms.minPrice * client.metadata.numPieces()
+                  var minimumRevenue = sellerTerms.minPrice * client.torrentInfo.numPieces()
 
                   // Set value to at least surpass dust
                   var value = Math.max(minimumRevenue, 0)
@@ -168,7 +168,7 @@ var Started = new BaseMachine({
                 if(err) {
 
                     // Tell user about failure
-                    client._startPaidDownloadFn({err , tx}, null)
+                    client._startPaidDownloadFn(err)
 
                     // Drop callback
                     delete client._startPaidDownloadFn
@@ -193,20 +193,20 @@ var Started = new BaseMachine({
 
             // NB: We don't handleSequence peer plugin statuses
 
-            paidDownloadInitiationCompleted : function (client, alert) {
+            paidDownloadInitiationCompleted : function (client, err, result) {
 
               // NB: Joystream alert never throw error. Need to be added in extension-cpp
-                if (alert.error) {
+                if (err) {
 
                     // Tell user about failure
-                    client._startPaidDownloadFn({err}, null)
+                    client._startPaidDownloadFn(err)
 
                     this.transition(client, 'ReadyForStartPaidDownloadAttempt')
 
                 } else {
 
                     // Tell user about success
-                    client._startPaidDownloadFn(undefined)
+                    client._startPaidDownloadFn(null)
 
                     this.go(client, '../../Paid/Started')
                 }
