@@ -73,8 +73,9 @@ var Started = new BaseMachine({
             startPaidDownload : function (client, fn) {
 
               // Check that we can actually start
-              if(!(client.viabilityOfPaidDownloadInSwarm instanceof ViabilityOfPaidDownloadInSwarm.Viable))
-                  fn(client.viabilityOfPaidDownloadInSwarm , null)
+              if(!(client.viabilityOfPaidDownloadInSwarm instanceof ViabilityOfPaidDownloadInSwarm.Viable)) {
+                  return fn(client.viabilityOfPaidDownloadInSwarm , null)
+              }
 
               let peerComparer = function (sellerA, sellerB) {
                   const termsA = sellerA.connection.announcedModeAndTermsFromPeer.seller.terms
@@ -170,7 +171,7 @@ var Started = new BaseMachine({
                     client._startPaidDownloadFn({err , tx}, null)
 
                     // Drop callback
-                    client._startPaidDownloadFn
+                    delete client._startPaidDownloadFn
 
                     this.transition(client, 'ReadyForStartPaidDownloadAttempt')
 
@@ -211,7 +212,7 @@ var Started = new BaseMachine({
                 }
 
                 // Drop callback
-                client._startPaidDownloadFn
+                delete client._startPaidDownloadFn
 
             }
         }
