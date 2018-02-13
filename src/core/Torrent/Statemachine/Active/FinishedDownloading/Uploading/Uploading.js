@@ -3,6 +3,7 @@
  */
 
 var BaseMachine = require('../../../../../BaseMachine')
+var Common = require('../../../Common')
 
 var Uploading = new BaseMachine({
 
