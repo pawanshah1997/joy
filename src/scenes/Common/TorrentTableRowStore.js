@@ -35,6 +35,16 @@ class TorrentTableRowStore {
   setShowToolbar(showToolbar) {
     this.showToolbar = showToolbar
   }
+
+  @action.bound
+  mouseEnter() {
+    this.setShowToolbar(true)
+  }
+
+  @action.bound
+  mouseLeave() {
+    this.setShowToolbar(false)
+  }
   
   remove() {
     this._applicationStore.remove(this.torrentStore.infoHash, false)
