@@ -46,7 +46,7 @@ describe('Torrent state machine', function () {
                             fixtureToAddedToSessionInput(fixture),
                             fixtureToCheckFinishedInput(fixture))
 
-            assert(client.joystreamNodeTorrent != null)
+            assert(client._joystreamNodeTorrent != null)
             assert.equal(Torrent.compositeState(client), 'Loading.WaitingForMissingBuyerTerms')
 
         })
@@ -158,22 +158,22 @@ describe('Torrent state machine', function () {
 
             Torrent.queuedHandle(client, 'checkFinished')
 
-            assert.equal(client.joystreamNodeTorrent.setLibtorrentInteraction.callCount, 1)
-            assert.equal(client.joystreamNodeTorrent.toBuyMode.callCount, 1)
-            assert.deepEqual(client.joystreamNodeTorrent.toBuyMode.getCall(0).args[0], fixture.extensionSettings.buyerTerms)
+            assert.equal(client._joystreamNodeTorrent.setLibtorrentInteraction.callCount, 1)
+            assert.equal(client._joystreamNodeTorrent.toBuyMode.callCount, 1)
+            assert.deepEqual(client._joystreamNodeTorrent.toBuyMode.getCall(0).args[0], fixture.extensionSettings.buyerTerms)
             assert.equal(Torrent.compositeState(client), 'Active.DownloadIncomplete.Unpaid.Stopped')
 
         })
 
         it('starts', function () {
 
-            client.joystreamNodeTorrent.handle.resume.reset()
-            client.joystreamNodeTorrent.startPlugin.reset()
+            client._joystreamNodeTorrent.handle.resume.reset()
+            client._joystreamNodeTorrent.startPlugin.reset()
 
             Torrent.queuedHandle(client, 'start')
 
-            assert.equal(client.joystreamNodeTorrent.handle.resume.callCount, 1)
-            assert.equal(client.joystreamNodeTorrent.startPlugin.callCount, 1)
+            assert.equal(client._joystreamNodeTorrent.handle.resume.callCount, 1)
+            assert.equal(client._joystreamNodeTorrent.startPlugin.callCount, 1)
             assert.equal(Torrent.compositeState(client), 'Active.DownloadIncomplete.Unpaid.Started.ReadyForStartPaidDownloadAttempt')
         })
 
@@ -264,7 +264,7 @@ describe('Torrent state machine', function () {
 
           // trigger paidDownloadInitiationCompleted, moves to '../../Paid/Started'
           // third argument is the callback
-          const callback = client.joystreamNodeTorrent.startDownloading.getCall(0).args[2]
+          const callback = client._joystreamNodeTorrent.startDownloading.getCall(0).args[2]
 
           // success
           callback(null)
@@ -281,11 +281,11 @@ describe('Torrent state machine', function () {
 
         it('finish download' , function() {
 
-            client.joystreamNodeTorrent.toObserveMode.reset()
+            client._joystreamNodeTorrent.toObserveMode.reset()
 
             Torrent.queuedHandle(client, 'downloadFinished')
 
-            assert.equal(client.joystreamNodeTorrent.toObserveMode.callCount, 1)
+            assert.equal(client._joystreamNodeTorrent.toObserveMode.callCount, 1)
             assert.equal(Torrent.compositeState(client), 'Active.FinishedDownloading.Passive')
         })
 
@@ -321,7 +321,7 @@ describe('Torrent state machine', function () {
             Torrent.queuedHandle(client, 'goToStartedUploading')
 
             assert.equal(Torrent.compositeState(client), 'Active.FinishedDownloading.Uploading.Started')
-            assert.equal(client.joystreamNodeTorrent.toSellMode.callCount, 1)
+            assert.equal(client._joystreamNodeTorrent.toSellMode.callCount, 1)
         })
 
         it('then back to passive', function() {
@@ -367,13 +367,13 @@ describe('Torrent state machine', function () {
 
         it('starts', function () {
 
-          client.joystreamNodeTorrent.handle.resume.reset()
-          client.joystreamNodeTorrent.startPlugin.reset()
+          client._joystreamNodeTorrent.handle.resume.reset()
+          client._joystreamNodeTorrent.startPlugin.reset()
 
           Torrent.queuedHandle(client, 'start')
 
-          assert.equal(client.joystreamNodeTorrent.handle.resume.callCount, 1)
-          assert.equal(client.joystreamNodeTorrent.startPlugin.callCount, 1)
+          assert.equal(client._joystreamNodeTorrent.handle.resume.callCount, 1)
+          assert.equal(client._joystreamNodeTorrent.startPlugin.callCount, 1)
           assert.equal(Torrent.compositeState(client), 'Active.FinishedDownloading.Uploading.Started')
         })
 
