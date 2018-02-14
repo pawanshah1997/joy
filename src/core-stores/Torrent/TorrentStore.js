@@ -224,15 +224,15 @@ class TorrentStore {
     @computed get isLoading() {
         return this.state.startsWith("Loading")
     }
-  
+
     @computed get isDownloading () {
         return this.state.startsWith("Active.DownloadIncomplete")
     }
-  
+
     @computed get isFullyDownloaded () {
     return this.state.startsWith("Active.FinishedDownloading")
     }
-  
+
     @computed get isUploading () {
     return this.state.startsWith("Active.FinishedDownloading.Uploading")
     }
@@ -274,15 +274,16 @@ class TorrentStore {
         return this.state.startsWith("Active.DownloadIncomplete.Unpaid.Stopped") ||
             this.state.startsWith("Active.FinishedDownloading.Uploading.Stopped")
     }
-    
+
     @computed get numberOfBuyers() {
 
       let n = 0
 
       this.peerStores.forEach((store, pid) => {
 
-        if(store.peerIsBuyer)
+        if(store.peerIsBuyer) {
           n++
+        }
 
       })
 
@@ -295,8 +296,10 @@ class TorrentStore {
 
       this.peerStores.forEach((store, pid) => {
 
-        if(store.peerIsSeller)
+        if(store.peerIsSeller) {
           n++
+        }
+        
       })
 
       return n
@@ -308,8 +311,10 @@ class TorrentStore {
 
       this.peerStores.forEach((store, pid) => {
 
-        if(store.peerIsObserver)
+        if(store.peerIsObserver) {
           n++
+        }
+        
       })
 
       return n
@@ -321,8 +326,10 @@ class TorrentStore {
 
       this.peerStores.forEach((store, pid) => {
 
-        if(store.peerSupportsProtocol)
+        if(store.peerSupportsProtocol) {
           n++
+        }
+        
       })
 
       return n
@@ -347,7 +354,7 @@ class TorrentStore {
     endUploading() {
         this._uploadStopper()
     }
-    
+
 }
 
 export default TorrentStore

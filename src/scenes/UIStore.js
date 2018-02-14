@@ -49,7 +49,7 @@ import PaymentStore from "../core-stores/Wallet/PaymentStore";
  *
  */
 class UIStore {
-  
+
   /**
    * Phases for the UI
    *
@@ -60,24 +60,24 @@ class UIStore {
    * is no difference betweene Application.STATE and UIStore.PHASE.
    */
   static PHASE = {
-    
+
     Idle: 0,
-    
+
     // UI is loading, user cannot do anything
     Loading: 1,
-    
+
     // UI is alive and running
     Alive: 2,
-    
+
     // UI is terminating, user cannot do anything
     Terminating: 3
   }
-  
+
   /**
    * {PHASE} Current phase of the UI
    */
   @observable currentPhase
-  
+
   /**
    * {Number} Total number of pieces sold by us as a seller this
    * session
@@ -101,46 +101,46 @@ class UIStore {
    * Is set when `currentPhase` is `PHASE.Alive`.
    */
   applicationNavigationStore
-  
+
   /**
    * @property {DownloadingStore} Model for downloading scene.
    * Is set when `currentPhase` is `PHASE.Alive`.
    */
   downloadingStore
-  
+
   /**
    * @property {UploadingStore} Model for uploading scene.
    *
    */
   uploadingStore
-  
+
   /**
    * @property {CompletedStore} Model for completed scene.
    */
   completedStore
-  
+
   /**
    * @property {DownloadingStore} Model for downloading scene.
    */
   walletSceneStore
-  
+
   /**
    * @property {OnboardingStore} Model for onboarding flow. Is observable
    * so that triggering onboarding start|stop in the UI is reactive.
    */
   @observable onboardingStore
-  
+
   /**
    * @property {MediaPlayerStore} Model for media player scene. Is observable
    * so that opening and closing of player in UI is reactive.
    */
   @observable mediaPlayerStore
-  
+
   /**
    * {ApplicatonStore} Mobx store for the application.
    */
   applicationStore
-  
+
   /**
    * Constructor
    *
@@ -154,20 +154,20 @@ class UIStore {
     
     // Hold on to application instance
     this._application = application
-  
+
     // Create application store
     this.applicationStore = new ApplicationStore(
       application.state,
       application.startedResources,
       application.onboardingTorrents,
       application.applicationSettings,
-      
+
       // We create WalletStore, PriceFeedStore instances when application starts
       null,
       null,
-      
+
       new Map(),
-      
+
       // Map store user actions onto underlying application
 
       application.start.bind(application),
@@ -175,53 +175,53 @@ class UIStore {
       application.addTorrent.bind(application),
       application.removeTorrent.bind(application)
     )
-  
+
     // Hook into key application events, and set our observables based
     // on current values
-  
+
     application.on('state', this._onNewApplicationStateAction)
     this._onNewApplicationStateAction(application.state)
-  
+
     application.on('startedResources', this._updateStartedAppResourcesAction)
     this._updateStartedAppResourcesAction(application.startedResources)
-  
+
     application.on('onboardingIsEnabled', this._updateOnboardingStatusAction)
     this._updateOnboardingStatusAction(application.onboardingIsEnabled)
-  
+
     application.on('torrentAdded', this._onTorrentAddedAction)
-    
+
     // process any currently added torrents
     for(let [infoHash, torrent] in application.torrents)
       this._onTorrentAddedAction(torrent)
-  
+
     application.on('torrentRemoved', this._onTorrentRemovedAction)
   }
-  
+
   _onNewApplicationStateAction = action((newState) => {
-    
+
     if(newState === Application.STATE.STARTED) {
-  
+
       /**
        * Now that all application resources have been started, we
        * can create new corresponding domain stores, and set on application store.
        */
-  
+
       /**
        * ApplicationSettings
        * Nothing much to do here beyond exposing it, since there is no actual store
        */
-      
+
       let applicationSettings = this._application.applicationSettings
       assert(applicationSettings)
       this.applicationStore.applicationSettings = applicationSettings
-  
+
       /**
        * Create and setup wallet store
        */
-      
+
       let wallet = this._application.wallet
       assert(wallet)
-      
+
       // Create
       this.walletStore = new WalletStore(
         wallet.state,
@@ -233,7 +233,7 @@ class UIStore {
         wallet.paymentStores,
         wallet.pay.bind(wallet)
       )
-  
+
       // Hook into events
       wallet.on('stateChanged', this._onWalletStateChanged)
       wallet.on('totalBalanceChanged', this._onWalletTotalBalanceChanged)
@@ -242,36 +242,35 @@ class UIStore {
       wallet.on('blockTipHeightChanged', this._onWalletBlockTipHeightChanged)
       wallet.on('synchronizedBlockHeightChanged', this._onWalletSynchronizedBlockHeightChanged)
       wallet.on('paymentAdded', this._onWalletPaymentAdded)
-      
+
       // add any payments which are already present
       wallet.paymentsInTransactionWithTXID.forEach((payments, txHash) => {
-        
+
         payments.forEach(this._onWalletPaymentAdded.bind(this))
-        
+
       })
-  
+
       /**
        * Create and setup price feed store
        */
-      
+
       let priceFeed = this._application.priceFeed
       assert(priceFeed)
-      
+
       // Create
       this.priceFeedStore = new PriceFeedStore(priceFeed.cryptoToUsdExchangeRate)
-      
+
       // Hook into events
       this.priceFeed.on('tick', action((cryptoToUsdExchangeRate) => {
-    
-        priceFeedStore.setCryptoToUsdExchangeRate(cryptoToUsdExchangeRate)
+
+        this.priceFeedStore.setCryptoToUsdExchangeRate(cryptoToUsdExchangeRate)
       }))
-  
+
       /**
        * Create major UI stores
        */
-  
+
       // Application header
-  
       this.applicationNavigationStore = new ApplicationNavigationStore(ApplicationNavigationStore.TAB.Downloading, 0, 'USD', walletStore, priceFeedStore, bcoin.protocol.consensus.COIN)
       
       // Scene specific stores
@@ -288,7 +287,7 @@ class UIStore {
         this.completedStore.addTorrentStore(torrentStore)
         
       })
-  
+      
       /**
        * Set wallet scene model
        * For now just set a constant fee rate, in the
@@ -297,7 +296,7 @@ class UIStore {
        * Estimate picked from: https://live.blockcypher.com/btc-testnet/
        */
       let satsPrkBFee = 0.00239 * bcoin.protocol.consensus.COIN
-  
+
       this.walletSceneStore = new WalletSceneStore(
         walletStore,
         priceFeedStore,
@@ -306,46 +305,45 @@ class UIStore {
         '',
         launchExternalTxViewer
       )
-  
+
       // Imperatively display doorbell widget
       Doorbell.load()
+      
     }
     else if(newState === Application.STATE.STOPPING) {
       // hide doorbell again
       Doorbell.hide()
     }
-    
+
     this.applicationStore.setState(newState)
     this.setCurrentPhase(appStateToUIStorePhase(newState))
-    
+
   })
-  
+
   _updateStartedAppResourcesAction = action((resources) => {
-    
+
     this.applicationStore.setStartedResources(resource)
-    
+
   })
-  
+
   _updateOnboardingStatusAction = action((isEnabled) => {
-    
+
     let onboardingStore = null
-    
+
     // Create onboarding store if enabled
     if (isEnabled)
       onboardingStore = new OnboardingStore(this, OnboardingStore.STATE.WelcomeScreen)
-  
+
     // Update application store signal about onboarding being enabled
     // and set store
     this.applicationStore.setOnboardingIsEnabled(isEnabled)
     this.applicationStore.setOnboardingStore(onboardingStore)
-    
-  })
-  
-  _onTorrentAddedAction = action((torrent) => {
-    
-    let applicationStore = this.applicationStore
 
-    assert(applicationStore)
+  })
+
+  _onTorrentAddedAction = action((torrent) => {
+
+    assert(this.applicationStore)
 
     // Create TorrentStore
     let torrentStore = new TorrentStore(
@@ -530,7 +528,7 @@ class UIStore {
     // which they only do when UI is active, not during loading
 
     if(this.currentPhase === UIStore.PHASE.Alive) {
-
+      
       assert(this.uploadingStore)
       assert(this.downloadingStore)
       assert(this.completedStore)
@@ -541,14 +539,14 @@ class UIStore {
        * the torrent may be in an irrelevant state. This avoids
        * having to add/remove through reactions as state changes
        */
-
+      
       this.uploadingStore.addTorrentStore(torrentStore)
       this.downloadingStore.addTorrentStore(torrentStore)
       this.completedStore.addTorrentStore(torrentStore)
     }
     
   })
-  
+
   _onTorrentRemovedAction = action((infoHash) => {
 
     let applicationStore = this.applicationStore
@@ -562,51 +560,60 @@ class UIStore {
     this.uploadingStore.removeTorrentStore(infoHash)
     this.downloadingStore.removeTorrentStore(infoHash)
     this.completedStore.removeTorrentStore(infoHash)
-  
   })
-  
+
   /**
    * Below we have all the hooks introduced to handle core domain
    * events which require action wrappers to be handled safely in
    * updating our store tree.
    */
-  
+
   /**
    * Hooks for {@link Wallet}
    */
-  
+
   /// Hook up with events
-  
-  let walletStore = applicationStore.walletStore
-  assert(walletStore)
 
   _onWalletStateChanged = action((newState) => {
-    
+    let walletStore = this.applicationStore.walletStore
+    assert(walletStore)
     walletStore.setState(newState)
   })
-  
+
   _onWalletTotalBalanceChanged = action((totalBalance) => {
+    let walletStore = this.applicationStore.walletStore
+    assert(walletStore)
     walletStore.setTotalBalance(totalBalance)
   })
-  
+
   _onWalletConfirmedBalanceChanged = action((confirmedBalance) => {
+    let walletStore = this.applicationStore.walletStore
+    assert(walletStore)
     walletStore.setConfirmedBalance(confirmedBalance)
   })
-  
+
   _onWalletReceiveAddressChanged = action((receiveAddress) => {
+    let walletStore = this.applicationStore.walletStore
+    assert(walletStore)
     walletStore.setReceiveAddress(receiveAddress)
   })
-  
+
   _onWalletBlockTipHeightChanged = action((height) => {
+    let walletStore = this.applicationStore.walletStore
+    assert(walletStore)
     walletStore.setBlockTipHeight(height)
   })
-  
+
   _onWalletSynchronizedBlockHeightChanged = action((height) => {
+    let walletStore = this.applicationStore.walletStore
+    assert(walletStore)
     walletStore.setSynchronizedBlockHeight(height)
   })
-  
+
   _onWalletPaymentAdded = action((payment) => {
-    
+
+    assert(this.applicationStore)
+
     // Create payment store
     let paymentStore = new PaymentStore(
       payment.type,
@@ -622,61 +629,65 @@ class UIStore {
       payment.blockHeightOfBlockHoldingTransaction,
       payment.note
     )
-    
+
     /**
      * NB: REVISIT when we work on WalletStore.pay
      * // add to wallet store
      *
      */
+
+    let walletStore = this.applicationStore.walletStore
+    assert(walletStore)
+
     walletStore.paymentStores.push(paymentStore)
-  
+
     /// Hook up events
-  
+
     payment.on('confirmedChanged', action((confirmed) => {
       paymentStore.setConfirmed(confirmed)
     }))
-  
+
     payment.on('blockIdOfBlockHoldingTransactionChanged', action((blockIdOfBlockHoldingTransaction) => {
       paymentStore.setBlockIdOfBlockHoldingTransaction(blockIdOfBlockHoldingTransaction)
     }))
-  
+
     payment.on('blockHeightOfBlockHoldingTransactionChanged', action((blockHeightOfBlockHoldingTransaction) => {
       paymentStore.setBlockHeightOfBlockHoldingTransaction(blockHeightOfBlockHoldingTransaction)
     }))
-  
+
     payment.on('noteChanged', action((note) => {
       paymentStore.setNote(note)
     }))
-    
+
   })
 
   @action.bound
   setCurrentPhase(currentPhase) {
     this.currentPhase = currentPhase
   }
-  
+
   stop() {
-    
+
     /**
      * If onboarding is enabled, then display shutdown message - if its not already
      * showing, and block the shutdown for now
      */
     if (this._applicationStore.onboardingIsEnabled) {
-      
+
       /**
        *  Only call for shutdown message if its not already showing, it is after all
        *  posible for the user to click the window close button on the shutdown message one or more times,
        * which we block, we _require_ that the button is pressed
        */
-      
+
       assert(this.onboardingStore !== null)
-      
+
       if (this.onboardingStore.state !== OnboardingStore.STATE.DepartureScreen) {
         this.onboardingStore.displayShutdownMessage()
       } else {
         console.log('Ignoring user attempt to close window while on departure screen of onboarding, UI scene button must be used.')
       }
-      
+
     }
     /**
      * Otherwise we are initiating stop, so block window closing for the moment,
@@ -687,117 +698,121 @@ class UIStore {
     else {
       this._applicationStore.stop()
     }
-    
+
   }
-  
+
   openFolder(path) {
     shell.openItem(path)
   }
-  
+
   @action.bound
   setRevenue(revenue) {
     this.revenue = revenue
   }
-  
+
   @action.bound
   setOnboardingStore(onboardingStore) {
     this.onboardingStore = onboardingStore
   }
-  
+
   @action.bound
   setMediaPlayerStore(mediaPlayerStore) {
     this.mediaPlayerStore = mediaPlayerStore
   }
-  
+
   @computed get torrentsBeingLoaded() {
-    return this._applicationStore.applicationStore.torrents.filter(function (torrent) {
+    return this.applicationStore.torrents.filter(function (torrent) {
       return torrent.isLoading
     })
   }
-  
+
   @computed get torrentsFullyLoadedPercentage() {
-    return 100 * (1 - (this.torrentsBeingLoaded.length / this._applicationStore.applicationStore.torrents.length))
+    return 100 * (1 - (this.torrentsBeingLoaded.length / this.applicationStore.torrents.length))
   }
-  
+
   @computed get startingTorrentCheckingProgressPercentage() {
     // Compute total size
-    let totalSize = this._applicationStore.applicationStore.torrents.reduce(function (accumulator, torrent) {
+    let totalSize = this.applicationStore.torrents.reduce(function (accumulator, torrent) {
       return accumulator + torrent.totalSize
     }, 0)
-    
+
     // Computed total checked size
-    let totalCheckedSize = this._applicationStore.applicationStore.torrents.reduce(function (accumulator, torrent) {
+    let totalCheckedSize = this.applicationStore.torrents.reduce(function (accumulator, torrent) {
       let checkedSize = torrent.totalSize * (torrent.isLoading ? torrent.progress / 100 : 1)
       return accumulator + checkedSize
     }, 0)
-    
+
     return totalCheckedSize / totalSize * 100
   }
-  
+
   @computed get torrentsBeingTerminated() {
-    return this._applicationStore.applicationStore.torrents.filter(function (torrent) {
+    return this.applicationStore.torrents.filter(function (torrent) {
       return torrent.isTerminating
     })
   }
-  
+
   @computed get terminatingTorrentsProgressPercentage() {
-    return this.torrentsBeingTerminated * 100 / this._applicationStore.applicationStore.torrents.length
+    return this.torrentsBeingTerminated * 100 / this.applicationStore.torrents.length
   }
-  
+
   @action.bound
   setTorrentTerminatingProgress(progress) {
     this.torrentTerminatingProgress = progress
   }
-  
+
   openTelegramChannel() {
-  
+
   }
-  
+
   openRedditCommunity() {
-  
+
   }
-  
+
   openSlackSignupPagee() {
-  
+
+  }
+
+  addExampleTorrents () {
+    this._application.addExampleTorrents()
   }
 }
 
 function launchExternalTxViewer(txId, outputIndex) {
-  
+
   console.log('Opening payment carried by output ' + outputIndex + ' in tx ' + txId)
-  
+
   shell.openExternal(constants.BLOCKEXPLORER_QUERY_STRING_BASE + txId)
 }
 
 function appStateToUIStorePhase(state) {
-  
+
   let phase
-  
+
   switch (state) {
-    
+
     case Application.STATE.STOPPED:
       phase = UIStore.PHASE.Idle
       break
-    
+
     case Application.STATE.STARTING:
       phase = UIStore.PHASE.Loading
       break
-    
+
     case Application.STATE.STARTED:
       phase = UIStore.PHASE.Alive
       break
-    
+
     case Application.STATE.STOPPING:
       phase = UIStore.PHASE.Terminating
       break
-    
+
     default:
-      
+
       assert(false)
     //throw Error('Invalid state passed, and recall that STOPPED is not accepted')
-    
+
   }
-  
+
   return phase
 }
 
@@ -864,7 +879,7 @@ function peerCountsFromPluginStatuses(peerPluginStatuses) {
 
   Common.addTorrent(client, settings)
 }
- 
+
  function getSettingsFromMagnetUri (magnetUri, defaultSavePath) {
 
     let terms = getStandardBuyerTerms()
@@ -885,7 +900,7 @@ function peerCountsFromPluginStatuses(peerPluginStatuses) {
  */
 
 /**
- 
+
  function startMediaPlayer(client, fileIndex, completed) {
 
     // Hide feedback in player
@@ -908,25 +923,25 @@ function peerCountsFromPluginStatuses(peerPluginStatuses) {
                                     powerSavingBlocker,
                                     showDoorbellWidget)
 }
- 
+
  var electron = require('electron')
- 
+
  function mediaPlayerWindowSizeFetcher() {
     return { width : window.innerWidth, height : window.innerHeight}
 }
- 
+
  function mediaPlayerWindowSizeUpdater(bounds) {
     electron.ipcRenderer.send('set-bounds', bounds)
 }
- 
+
  function powerSavingBlocker(enable) {
     electron.ipcRenderer.send('power-save-blocker', {enable: enable})
 }
- 
+
  function showDoorbellWidget() {
     Doorbell.show()
 }
- 
+
  */
 
 export default UIStore

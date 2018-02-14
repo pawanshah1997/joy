@@ -5,7 +5,7 @@ var BaseMachine = require('../../BaseMachine')
 var Loading = require('./Loading/Loading')
 var Active = require('./Active')
 var Common = require('./Common')
-var DeepInitialState = require('./DeepInitialState')
+var DeepInitialState = require('./DeepInitialState').default
 
 const assert = require('assert')
 
@@ -14,7 +14,7 @@ var Torrent = new BaseMachine({
     initialState: "Loading",
 
     states: {
-        
+
         Loading : {
 
             _child : Loading,
