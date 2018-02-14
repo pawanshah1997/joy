@@ -412,18 +412,30 @@ class UIStore {
     torrent.on('state', action((state) => {
       torrentStore.setState(state)
     }))
-
-    torrent.on('torrent-status', (status) => {
-
-      // Update torrent store
-      torrentStore.setProgress(100*status.progress)
-      torrentStore.setDownloadSpeed(status.downloadRate)
-      torrentStore.setUploadSpeed(status.uploadRate)
-      torrentStore.setDownloadedSize(status.totalDone)
-      torrentStore.setUploadedTotal(status.totalUpload)
-      torrentStore.setNumberOfSeeders(status.numSeeds)
-
-    })
+    torrent.on('progress', action((progress) => {
+      torrentStore.setProgress(progress)
+    }))
+    
+    torrent.on('downloadedSize', action((downloadedSize) => {
+      torrentStore.setDownloadedSize(downloadedSize)
+    }))
+    
+    torrent.on('downloadSpeed', action((downloadSpeed) => {
+      torrentStore.setDownloadSpeed(downloadSpeed)
+    }))
+    
+    torrent.on('uploadedTotal', action((uploadedTotal) => {
+      torrentStore.setUploadedTotal(uploadedTotal)
+    }))
+    
+    torrent.on('uploadSpeed', action((uploadSpeed) => {
+      torrentStore.setUploadSpeed(uploadSpeed)
+    }))
+    
+    torrent.on('numberOfSeeders', action((numberOfSeeders) => {
+      torrentStore.setNumberOfSeeders(numberOfSeeders)
+    }))
+    
 
     /**
      * When a peer is added,
