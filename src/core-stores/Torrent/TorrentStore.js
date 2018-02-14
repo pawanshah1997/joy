@@ -5,7 +5,6 @@ class TorrentStore {
     @observable infoHash
     @observable name
     @observable state
-    @observable progress
     
     @observable totalSize
 
@@ -58,6 +57,11 @@ class TorrentStore {
     @observable downloadedSize
     @observable downloadSpeed
     @observable uploadSpeed
+  
+    /**
+     * {Number} Number of peers classified as seeders (by libtorrent)
+     */
+    @observable numberOfSeeders
 
     // store the files (see libtorrent::file_storage)
     @observable torrentFiles
@@ -79,12 +83,7 @@ class TorrentStore {
      * {Map.<String,PeerStore>} Maps peer id to peer store for corresponding peer
      */
     @observable peerStores
-
-    /**
-     * {Number} Number of peers classified as seeders (by libtorrent)
-     */
-    @observable numberOfSeeders
-
+  
     constructor (infoHash,
                  name,
                  savePath,
@@ -141,6 +140,7 @@ class TorrentStore {
         this._uploadStopper = uploadStopper
       this.setName(name)
       this.setProgress(progress)
+      this.setNumberOfSeeders(numberOfSeeders)
       this.setSellerTerms(sellerTerms)
       this.setNumberOfPiecesSoldAsSeller(numberOfPiecesSoldAsSeller)
       this.setTotalRevenueFromPiecesAsSeller(totalRevenueFromPiecesAsSeller)
