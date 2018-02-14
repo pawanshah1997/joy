@@ -44,9 +44,8 @@ var Loading = new BaseMachine({
                 if (status.state === TorrentState.finished || status.state === TorrentState.seeding) {
                   client._submitInput('downloadFinished')
                 }
-
-                //client._set
-
+                
+                client._setJoystreamNodeTorrentStatus(status)
             })
 
             // This alert is generated when a torrent switches from being a downloader to a seed.
