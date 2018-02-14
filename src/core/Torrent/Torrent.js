@@ -242,7 +242,7 @@ class Torrent extends EventEmitter {
       throw Error('A stream factory is already active')
 
     // Check that index of file is valid
-    let numFiles = this.joystreamNodeTorrent.handle.torrentFile().files().numFiles()
+    let numFiles = this._joystreamNodeTorrent.handle.torrentFile().files().numFiles()
 
     if(fileIndex >= numFiles)
       throw Error('Invalid file index, max index: ' + (numFiles - 1))
@@ -251,7 +251,7 @@ class Torrent extends EventEmitter {
     let completed = this.state.startsWith('Active.FinishedDownloading')
 
     // Create factory and set
-    this.fileSegmentStreamFactory = new FileSegmentStreamFactory(client.joystreamNodeTorrent, fileIndex, completed)
+    this.fileSegmentStreamFactory = new FileSegmentStreamFactory(client._joystreamNodeTorrent, fileIndex, completed)
 
     return this.fileSegmentStreamFactory
   }
