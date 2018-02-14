@@ -192,7 +192,7 @@ class UploadingStore {
     this.setState(UploadingStore.STATE.AddingTorrent)
     
     // Add torrent with given settings
-    this._torrentAdder(settings, (err, torrentStore) => {
+    this._uiStore.applicationStore.addTorrent(settings, (err, torrentStore) => {
       
       assert(this.state === UploadingStore.STATE.AddingTorrent)
     
@@ -285,7 +285,7 @@ class UploadingStore {
     
     assert(this._torrentInfoSelected)
   
-    this._torrentRemover(this._torrentInfoSelected.infoHash, false)
+    this._uiStore.applicationStore.removeTorrent(this._torrentInfoSelected.infoHash, false)
     
     this.setState(UploadingStore.STATE.InitState)
   }
