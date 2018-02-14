@@ -709,15 +709,6 @@ class UIStore {
     return this.torrentsBeingTerminated * 100 / this._applicationStore.applicationStore.torrents.length
   }
   
-  @computed get activeMediaPlayerStore() {
-    for (var i = 0; i < this._applicationStore.applicationStore.torrents.length; i++) {
-      if (this._applicationStore.applicationStore.torrents[i].activeMediaPlayerStore) {
-        return this._applicationStore.applicationStore.torrents[i].activeMediaPlayerStore
-      }
-    }
-    return null
-  }
-  
   @action.bound
   setTorrentTerminatingProgress(progress) {
     this.torrentTerminatingProgress = progress
