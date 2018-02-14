@@ -17,10 +17,17 @@ import {deepInitialStateFromActiveState} from './Statemachine/DeepInitialState'
  * emits loaded({DeepInitialState}) -  torrent has been loaded with given state
  * emits viabilityOfPaidDownloadInSwarm({ViabilityOfPaidDownloadInSwarm})
  * emits buyerTerms({BuyerTerns}) - updated terms of client side
- * emits sellerTerms({SellerTerms}
+ * emits sellerTerms({SellerTerms})
+ * emits resumeData({Buffer})
  * emits torrentInfo({TorrentInfo}) - updated metadata
- * emits validPaymentReceived({ValidPAymentReceivedAlert})
- * emits paymentSent({PaymentSentAlert})
+ * emits progress({Number})
+ * emits downloadedSize({Number})
+ * emits uploadedTotal({Number})
+ * emits uploadSpeed({Number})
+ * emits numberOfSeeders({Number})
+ * emits validPaymentReceived(paymentIncrement, totalNumberOfPayments, totalAmountPaid)
+ * emits paymentSent(paymentIncrement, totalNumberOfPayments, totalAmountPaid, pieceIndex)
+ * emits lastPaymentReceived(settlementTx {tx}) -
  * emits failedToMakeSignedContract({err , tx}) - when
  *
  * These two are not reliable, as they are based on
@@ -61,17 +68,34 @@ class Torrent extends EventEmitter {
    * {TorrentInfo}
    */
   torrentInfo
-
+  
   /**
-   * {joystream-node.TorrentStatus} The most recent status for this status
+   * {Number} Progress on torrent, referring to either progress
+   * during checking resume data while starting, or download progress
+   * otherwise.
    */
-  torrentStatusUpdate
-
+  progress
+  
   /**
-   * {joystream-node.Torrent} joystream-node torrent
+   * {Number} Number of bytes downloaded so far
    */
-  joystreamNodeTorrent
-
+  downloadedSize
+  
+  /**
+   * {Number} Bytes per second download rate
+   */
+  downloadSpeed
+  
+  /**
+   * {Number} Bytes per second upload rate
+   */
+  uploadSpeed
+  
+  /**
+   * {Number} Bytes uploaded so far
+   */
+  uploadedTotal
+  
   /**
    * {SellerTerms}
    */
@@ -130,7 +154,7 @@ class Torrent extends EventEmitter {
     
     }
     
-    this.joystreamNodeTorrent = null
+    this._joystreamNodeTorrent = null
     this.fileSegmentStreamFactory = null
 
     // Hooks for state machine
@@ -289,24 +313,57 @@ class Torrent extends EventEmitter {
     this.torrentInfo = torrentInfo
     this.emit('torrentInfo', torrentInfo)
   }
+  
+  _setProgress(progress) {
+    this.progress = progress
+    this.emit('progress')
+  }
+  
+  _setDownloadedSize(downloadedSize) {
+    this.downloadedSize = downloadedSize
+    this.emit('downloadedSize', downloadedSize)
+  }
+  
+  _setDownloadSpeed(downloadSpeed) {
+    this.downloadSpeed = downloadSpeed
+    this.emit('downloadSpeed', downloadSpeed)
+  }
+  
+  _setUploadedTotal(uploadedTotal) {
+    this.uploadedTotal = uploadedTotal
+    this.emit('uploadedTotal', uploadedTotal)
+  }
+  
+  _setUploadSpeed(uploadSpeed) {
+    this.uploadSpeed = uploadSpeed
+    this.emit('uploadSpeed', uploadSpeed)
+  }
+  
+  _setNumberOfSeeders(numberOfSeeders) {
+    this.numberOfSeeders = numberOfSeeders
+    this.emit('numberOfSeeders', numberOfSeeders)
+  }
 
-  _setTorrentStatusUpdate(torrentStatusUpdate) {
-    this.torrentStatusUpdate = torrentStatusUpdate
-    this.emit('torrentStatusUpdate', torrentStatusUpdate)
+  _setJoystreamNodeTorrentStatus(status) {
+  
+    this._setProgress(status.progress)
+    this._setDownloadedSize(status.totalDone)
+    this._setDownloadSpeed(status.downloadRate)
+    this._setUploadedTotal(status.totalUpload)
+    this._setUploadSpeed(status.uploadRate)
+    this._setNumberOfSeeders(status.numSeeds)
   }
 
   _handleValidPaymentReceivedAlert(alert) {
-    this.emit('validPaymentReceived', alert) // (alert.pid, alert.totalAmountPaid)
+    this.emit('validPaymentReceived', alert.paymentIncrement, alert.totalNumberOfPayments, alert.totalAmountPaid)
   }
 
   _handlePaymentSentAlert(alert) {
-    this.emit('paymentSent', alert) // (alert.pid, alert.totalAmountPaid)
+    this.emit('paymentSent', alert.paymentIncrement, alert.totalNumberOfPayments, alert.totalAmountPaid, alert.pieceIndex)
   }
 
   _lastPaymentReceived(alert) {
-    // store ?? alert.settlementTx
-
-    this.emit('lastPaymentReceived', alert)
+    this.emit('lastPaymentReceived', alert.settlementTx)
   }
 
 }

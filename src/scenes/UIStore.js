@@ -1,4 +1,4 @@
-import {observable, action, computed, reaction, when, autorun} from 'mobx'
+import {observable, action, computed} from 'mobx'
 import assert from 'assert'
 import {shell} from 'electron'
 
@@ -32,7 +32,7 @@ import PaymentStore from "../core-stores/Wallet/PaymentStore";
  * must be handled by a single action which also scopes this object. This single
  * action ensures that _all_ resulting mutations of the MOBX state tree are transactional,
  * avoiding any possible race conditions in how reactions are dispatched, which is
- * very hard to reason about precisely, in particular over time as things change.
+ * very hard to reason about precisely, in particular over time as the source changes.
  * In practice, there are many - in fact most, events which just need to update a single
  * observable, and thus doing a local context specific event trapping and handling would be enough,
  * but for now we will try to just follow this general rule, to avoid the problem on principle.
@@ -79,10 +79,23 @@ class UIStore {
   @observable currentPhase
 
   /**
-   * {Number} Number of satoshis earned during *this session*.
+   * {Number} Total number of pieces sold by us as a seller this
+   * session
    */
-  @observable revenue
-
+  @observable numberOfPiecesSoldAsSeller
+  
+  /**
+   * {Number} Total revenue so far from spending, does not include
+   * tx fees for closing channel (they are deducted).
+   */
+  @observable totalRevenueFromPieces
+  
+  /**
+   * {Number} The total amount (sats) sent as payments so far,
+   * does not include tx fees used to open and close channel.
+   */
+  @observable totalSpendingOnPieces
+  
   /**
    * {ApplicationNavigationStore} Model for application navigator.
    * Is set when `currentPhase` is `PHASE.Alive`.
@@ -134,7 +147,11 @@ class UIStore {
    * @param application {Application}
    */
   constructor(application) {
-
+    
+    this.totalRevenueFromPieces = 0
+    this.numberOfPiecesSoldAsSeller = 0
+    this.totalSpendingOnPieces = 0
+    
     // Hold on to application instance
     this._application = application
 
@@ -254,16 +271,23 @@ class UIStore {
        */
 
       // Application header
-
-      this.applicationNavigationStore = new ApplicationNavigationStore(ApplicationNavigationStore.TAB.Downloading, 0, 'USD', this.walletStore, this.priceFeedStore, bcoin.protocol.consensus.COIN)
-
-
-      // (4) refactor ==> Needs slight refactoring to rely directly on new application store
-
-      this.uploadingStore = new UploadingStore(new Map(), torrentAdder, torrentRemover)
-      this.downloadingStore = new DownloadingStore(new Map(), this.applicationStore.applicationSettings, torrentAdder)
-      this.completedStore = new CompletedStore(new Map())
-
+      this.applicationNavigationStore = new ApplicationNavigationStore(ApplicationNavigationStore.TAB.Downloading, 0, 'USD', walletStore, priceFeedStore, bcoin.protocol.consensus.COIN)
+      
+      // Scene specific stores
+      this.uploadingStore = new UploadingStore(this)
+      this.downloadingStore = new DownloadingStore(this)
+      this.completedStore = new CompletedStore(this)
+      
+      // add existing torrents to scene stores
+      
+      this.applicationStore.torrents.forEach((torrentStore, infoHash) => {
+        
+        this.uploadingStore.addTorrentStore(torrentStore)
+        this.downloadingStore.addTorrentStore(torrentStore)
+        this.completedStore.addTorrentStore(torrentStore)
+        
+      })
+      
       /**
        * Set wallet scene model
        * For now just set a constant fee rate, in the
@@ -284,68 +308,7 @@ class UIStore {
 
       // Imperatively display doorbell widget
       Doorbell.load()
-
-      /// Keep set of rows synchronized with set of torrents present on the application and their state
-
-      reaction(
-        () => {
-          return this.applicationStore.torrents.filter((torrentStore) => {
-            torrentStore.state.startsWith('Active.DownloadIncomplete')
-          })
-        },
-
-        (downloadingTorrents) => {
-
-          let newDownloadingRowStorefromTorrentInfoHash = new Map(downloadingTorrents.map((torrentStore) => [torrentStore.infoHash, new TorrentTableRowStore(torrentStore, this.applicationStore, this, false)]))
-
-          this.downloadingStore.rowStorefromTorrentInfoHash.forEach((rowStore, infoHash) => {
-            if (newDownloadingRowStorefromTorrentInfoHash.has(infoHash))
-              newDownloadingRowStorefromTorrentInfoHash.set(infoHash, rowStore)
-          })
-
-          this.downloadingStore.setRowStorefromTorrentInfoHash(newDownloadingRowStorefromTorrentInfoHash)
-        }
-      )
-
-      reaction(
-        () => {
-          return this.applicationStore.torrents.filter((torrentStore) => {
-            torrentStore.state.startsWith('Active.FinishedDownloading.Uploading')
-          })
-        },
-
-        (uploadingTorrents) => {
-
-          let newUploadingRowStorefromTorrentInfoHash = new Map(uploadingTorrents.map((torrentStore) => [torrentStore.infoHash, new TorrentTableRowStore(torrentStore, this.applicationStore, this, false)]))
-
-          this.uploadingStore.rowStorefromTorrentInfoHash.forEach((rowStore, infoHash) => {
-            if (newUploadingRowStorefromTorrentInfoHash.has(infoHash))
-              newUploadingRowStorefromTorrentInfoHash.set(infoHash, rowStore)
-          })
-
-          this.uploadingStore.setRowStorefromTorrentInfoHash(newUploadingRowStorefromTorrentInfoHash)
-        }
-      )
-
-      reaction(
-        () => {
-          return this.applicationStore.torrents.filter((torrentStore) => {
-            torrentStore.state.startsWith('Active.FinishedDownloading')
-          })
-        },
-
-        (completedTorrents) => {
-
-          let newCompletedRowStoreFromTorrentInfoHash = new Map(completedTorrents.map((torrentStore) => [torrentStore.infoHash, new TorrentTableRowStore(torrentStore, this.applicationStore, this, false)]))
-
-          this.completedStore.rowStorefromTorrentInfoHash.forEach((rowStore, infoHash) => {
-            if (newCompletedRowStoreFromTorrentInfoHash.hash(infoHash))
-              newCompletedRowStoreFromTorrentInfoHash.set(infoHash, rowStore)
-          })
-
-          this.completedStore.setRowStorefromTorrentInfoHash(newCompletedRowStoreFromTorrentInfoHash)
-        }
-      )
+      
     }
     else if(newState === Application.STATE.STOPPING) {
       // hide doorbell again
@@ -385,24 +348,23 @@ class UIStore {
     // Create TorrentStore
     let torrentStore = new TorrentStore(
       torrent.infoHash,
+      torrent.name,
       torrent.savePath,
       torrent.state,
-      0,
-      metadata ? metadata.totalSize : undefined,
-      downloadedSize,
-      downloadSpeed,
-      uploadSpeed,
-      uploadedTotal,
-      metadata ? metadata.name : '',
-      numberOfBuyers,
-      numberOfSellers,
-      numberOfObservers,
-      numberOfNormalPeers,
-      numberOfSeeders,
-      sellerPrice,
-      sellerRevenue,
-      buyerPrice,
-      buyerSpent
+      torrent.torrentInfo ? torrent.torrentInfo.totalSize : 0, // Total size of torrent
+      torrent.progress,
+      torrent.downloadedSize,
+      torrent.downloadSpeed,
+      torrent.uploadSpeed,
+      torrent.uploadedTotal,
+      torrent.numberOfSeeders,
+      torrent.sellerTerms,
+      torrent.buyerTerms,
+      torrent.start.bind(torrent),
+      torrent.stop.bind(torrent),
+      torrent.startPaidDownload.bind(torrent),
+      torrent.beginUpload.bind(torrent),
+      torrent.endUpload.bind(torrent)
     )
 
     /// Hook into events
@@ -410,19 +372,117 @@ class UIStore {
     torrent.on('state', action((state) => {
       torrentStore.setState(state)
     }))
+    
+    torrent.on('viabilityOfPaidDownloadInSwarm', action((viabilityOfPaidDownloadInSwarm) => {
+      torrentStore.setViabilityOfPaidDownloadInSwarm(viabilityOfPaidDownloadInSwarm)
+    }))
+    
+    torrent.on('buyerTerms', action((buyerTerms) => {
+      torrentStore.setBuyerTerms(buyerTerms)
+    }))
+    
+    torrent.on('sellerTerms', action((sellerTerms) => {
+      torrentStore.setSellerTerms(sellerTerms)
+    }))
+    
+    torrent.on('resumeData', action((resumeData) => {
+      // Nothing to do
+    }))
+  
+    /**
+     * When metadata comes in, we need to set some values on
+     * the store
+     */
+    torrent.on('torrentInfo', action((torrentInfo) => {
+      
+      torrentStore.setName(torrentInfo.name())
+      torrentStore.setTotalSize(torrentInfo.totalSize())
+    }))
+    
+    // When torrent is finished, we have to count towards the navigator
+    torrent.once('Active.FinishedDownloading', action(() => {
+    
+      assert(this.applicationNavigationStore)
+      this.applicationNavigationStore.handleTorrentCompleted()
+    
+      /**
+       * Add desktop notifications
+       */
+    
+      // Tell uploading store, which may need to know
+      if(this.uploadingStore)
+        this.uploadingStore.torrentFinishedDownloading(torrent.infoHash)
+      
+    }))
+    
+    // When torrent is found to not be a complete download
+    torrent.once('Active.DownloadIncomplete', action(() => {
+    
+      // Tell uploading store, which may need to know
+      if(this.uploadingStore)
+        this.uploadingStore.torrentDownloadIncomplete(torrent.infoHash)
+    }))
+    
+    torrent.on('progress', action((progress) => {
+      torrentStore.setProgress(progress)
+    }))
+    
+    torrent.on('downloadedSize', action((downloadedSize) => {
+      torrentStore.setDownloadedSize(downloadedSize)
+    }))
+    
+    torrent.on('downloadSpeed', action((downloadSpeed) => {
+      torrentStore.setDownloadSpeed(downloadSpeed)
+    }))
+    
+    torrent.on('uploadedTotal', action((uploadedTotal) => {
+      torrentStore.setUploadedTotal(uploadedTotal)
+    }))
+    
+    torrent.on('uploadSpeed', action((uploadSpeed) => {
+      torrentStore.setUploadSpeed(uploadSpeed)
+    }))
+    
+    torrent.on('numberOfSeeders', action((numberOfSeeders) => {
+      torrentStore.setNumberOfSeeders(numberOfSeeders)
+    }))
+    
+    torrent.on('paymentSent', action((paymentIncrement, totalNumberOfPayments, totalAmountPaid, pieceIndex) => {
+  
+      /**
+       * A naive mistake here is to miss the fact that a single torrent may involve
+       * multiple failed attempts at paying different peers at different times, hence
+       * we cannot simply write to the `torrentStore` using `totalAmountPaid`.
+       */
 
-    torrent.on('torrent-status', (status) => {
-
-      // Update torrent store
-      torrentStore.setProgress(100*status.progress)
-      torrentStore.setDownloadSpeed(status.downloadRate)
-      torrentStore.setUploadSpeed(status.uploadRate)
-      torrentStore.setDownloadedSize(status.totalDone)
-      torrentStore.setUploadedTotal(status.totalUpload)
-      torrentStore.setNumberOfSeeders(status.numSeeds)
-
-    })
-
+      torrentStore.totalSpendingOnPiecesAsBuyer += paymentIncrement
+      
+      // Global counters
+      this.totalSpendingOnPieces += paymentIncrement
+    }))
+    
+    torrent.on('validPaymentReceived', action((paymentIncrement, totalNumberOfPayments, totalAmountPaid) => {
+      
+      torrentStore.numberOfPiecesSoldAsSeller++
+      torrentStore.totalRevenueFromPiecesAsSeller += paymentIncrement
+      
+      // Global counters
+      this.numberOfPiecesSoldAsSeller++
+      this.totalRevenueFromPieces += paymentIncrement
+    }))
+    
+    torrent.on('lastPaymentReceived', action((settlementTx) => {
+      
+      // Raw transaction
+      console.log('settlementTx')
+      console.log(settlementTx)
+      
+    }))
+  
+    torrent.on('failedToMakeSignedContract', action((failedToMakeSignedContract) => {
+      console.log('failedToMakeSignedContract: ' + failedToMakeSignedContract)
+    }))
+    
     /**
      * When a peer is added,
      * we create a peer store which watches the peer and
@@ -460,58 +520,31 @@ class UIStore {
       torrentStore.peerStores.delete(peerId)
 
     }))
+    
+    // Add to application store
+    applicationStore.onNewTorrentStore(torrentStore)
 
-    torrent.on('viabilityOfPaidDownloadInSwarm', action((viabilityOfPaidDownloadInSwarm) => {
+    // Add to relevant scenes if they currently exist,
+    // which they only do when UI is active, not during loading
 
-    }))
-
-    torrent.on('buyerTerms', action((buyerTerms) => {
-
-    }))
-
-    torrent.on('sellerTerms', action((sellerTerms) => {
-
-    }))
-
-    torrent.on('validPaymentReceived', action((validPaymentReceived) => {
-
-
-
-    }))
-
-    torrent.on('paymentSent', action((paymentSent) => {
-
-
-
-    }))
-
-    torrent.on('failedToMakeSignedContract', action((failedToMakeSignedContract) => {
-      console.log('failedToMakeSignedContract: ' + failedToMakeSignedContract)
-    }))
-
-    torrent.once('torrentInfo', action((torrentInfo) => {
-      this.setName(torrentInfo.name())
-      this.setTotalSize(torrentInfo.totalSize())
-    }))
-
-    // When torrent is finished, we have to count towards the navigator
-    torrent.once('Active.FinishedDownloading', action(() => {
-
-      assert(this.applicationNavigationStore)
-      this.applicationNavigationStore.handleTorrentCompleted()
+    if(this.currentPhase === UIStore.PHASE.Alive) {
+      
+      assert(this.uploadingStore)
+      assert(this.downloadingStore)
+      assert(this.completedStore)
 
       /**
-       * Add desktop notifications
+       * Keep in mind that _all_ torrent table scenes
+       * know about all stores at all times, even though
+       * the torrent may be in an irrelevant state. This avoids
+       * having to add/remove through reactions as state changes
        */
-
-    }))
-
-    // Add to application store
-    this.applicationStore.onNewTorrentStore(torrentStore)
-
-    // Add to relevant scenes
-    // ?
-
+      
+      this.uploadingStore.addTorrentStore(torrentStore)
+      this.downloadingStore.addTorrentStore(torrentStore)
+      this.completedStore.addTorrentStore(torrentStore)
+    }
+    
   })
 
   _onTorrentRemovedAction = action((infoHash) => {
@@ -524,8 +557,9 @@ class UIStore {
     applicationStore.onTorrentRemoved(infoHash)
 
     // Remove from relevant scenes
-    // ?
-
+    this.uploadingStore.removeTorrentStore(infoHash)
+    this.downloadingStore.removeTorrentStore(infoHash)
+    this.completedStore.removeTorrentStore(infoHash)
   })
 
   /**
@@ -719,15 +753,6 @@ class UIStore {
 
   @computed get terminatingTorrentsProgressPercentage() {
     return this.torrentsBeingTerminated * 100 / this.applicationStore.torrents.length
-  }
-
-  @computed get activeMediaPlayerStore() {
-    for (var i = 0; i < this.applicationStore.torrents.length; i++) {
-      if (this.applicationStore.torrents[i].activeMediaPlayerStore) {
-        return this.applicationStore.torrents[i].activeMediaPlayerStore
-      }
-    }
-    return null
   }
 
   @action.bound

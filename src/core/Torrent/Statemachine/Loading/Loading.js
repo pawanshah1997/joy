@@ -21,7 +21,7 @@ var Loading = new BaseMachine({
           addedToSession: function (client, torrent) {
 
             // Hold on to torrent
-            client.joystreamNodeTorrent = torrent
+            client._joystreamNodeTorrent = torrent
 
             // Hook into torrent events
 
@@ -45,9 +45,8 @@ var Loading = new BaseMachine({
                 if (status.state === TorrentState.finished || status.state === TorrentState.seeding) {
                   client._submitInput('downloadFinished')
                 }
-
-                //client._set
-
+                
+                client._setJoystreamNodeTorrentStatus(status)
             })
 
             // This alert is generated when a torrent switches from being a downloader to a seed.

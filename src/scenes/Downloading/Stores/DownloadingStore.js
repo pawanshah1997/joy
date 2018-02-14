@@ -1,5 +1,6 @@
 import { observable, action, computed } from 'mobx'
 import { TorrentInfo } from 'joystream-node'
+import TorrentTableRowStore from '../../Common/TorrentTableRowStore'
 import { remote } from 'electron'
 
 // TEMPORARY
@@ -37,43 +38,34 @@ class DownloadingStore {
    * @observable startDownloadingFlowStore
    */
   
-  constructor (rowStorefromTorrentInfoHash, applicationSettings, torrentAdder, uiStore) {
-    this.setRowStorefromTorrentInfoHash(rowStorefromTorrentInfoHash)
-    this._applicationSettings = applicationSettings
-    this._torrentAdder = torrentAdder
+  constructor (uiStore) {
+
     this._uiStore = uiStore
-    
+
+    this.setRowStorefromTorrentInfoHash(new Map())
     this.setState(DownloadingStore.STATE.InitState)
   }
 
-  /**
-   * WIP
-   */
+  @action.bound
+  addTorrentStore(torrentStore) {
 
-  @computed get
-  viabilityOfPaidDownloadingTorrent() {
+    if(this.rowStorefromTorrentInfoHash.has(torrentStore.infoHash))
+      throw Error('Torrent store for same torrent already exists.')
 
-    if(this.state.startsWith("Active.DownloadIncomplete.Unpaid.Stopped"))
-      return new ViabilityOfPaidDownloadingTorrent.Stopped()
-    else if(this.state.startsWith("Active.DownloadIncomplete.Paid"))
-      return new ViabilityOfPaidDownloadingTorrent.AlreadyStarted()
-    else if(!(this.viabilityOfPaidDownloadInSwarm instanceof ViabilityOfPaidDownloadInSwarm.Viable))
-      return new ViabilityOfPaidDownloadingTorrent.InViable(this.viabilityOfPaidDownloadInSwarm)
-    else {
-
-      // Here it must be that swarm is viable, by
-      // test in prior step
-
-      throw Error('please remove this._applicationStore ')
-
-      if(this._applicationStore.unconfirmedBalance == 0) // <== fix later to be a more complex constraint
-        return new ViabilityOfPaidDownloadingTorrent.InsufficientFunds(this.viabilityOfPaidDownloadInSwarm.estimate, this._applicationStore.unconfirmedBalance)
-      else
-        return new ViabilityOfPaidDownloadingTorrent.CanStart(this.viabilityOfPaidDownloadInSwarm.suitableAndJoined, this.viabilityOfPaidDownloadInSwarm.estimate)
-    }
-
+    let row = new TorrentTableRowStore(torrentStore, this._uiStore.applicationStore, false)
+    
+    this.rowStorefromTorrentInfoHash.set(torrentStore.infoHash, row)
   }
-  
+
+  @action.bound
+  removeTorrentStore(infoHash) {
+
+    if(!this.rowStorefromTorrentInfoHash.has(infoHash))
+      throw Error('No corresponding torrent store exists.')
+
+    this.rowStorefromTorrentInfoHash.delete(infoHash)
+  }
+
   @action.bound
   setRowStorefromTorrentInfoHash(rowStorefromTorrentInfoHash) {
     this.rowStorefromTorrentInfoHash = rowStorefromTorrentInfoHash
@@ -112,14 +104,6 @@ class DownloadingStore {
      */
   
     return this.rowStorefromTorrentInfoHash.values()
-  }
-  
-  @computed get
-  totalSpent () {
-    
-    return this.torrentRowStores.reduce((accumulator, torrentRowStore) => {
-      return accumulator + torrentRowStore.torrentStore.totalSpent
-    }, 0)
   }
   
   @computed get
@@ -211,14 +195,14 @@ class DownloadingStore {
     }
   
     // Get the path to use as savepath from settings
-    let savePath = this._applicationSettings.getDownloadFolder()
+    let savePath = this._uiStore.applicationStore.applicationSettings.getDownloadFolder()
   
     let settings = getStartingDownloadSettings(torrentInfo, savePath)
     
     /// Try to add torrent
     this.setState(DownloadingStore.STATE.TorrentBeingAdded)
   
-    this._torrentAdder(settings, (err, torrentStore) => {
+    this._uiStore.applicationStore.addTorrent(settings, (err, torrentStore) => {
       
       if(err) {
         

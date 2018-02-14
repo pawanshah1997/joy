@@ -1,48 +1,66 @@
 import { observable, action, computed } from 'mobx'
 
-import ViabilityOfPaidDownloadInSwarm from '../../core/Torrent/ViabilityOfPaidDownloadingSwarm'
-import ViabilityOfPaidDownloadingTorrent from '../../core/Torrent/ViabilityOfPaidDownloadingTorrent'
-
 class TorrentStore {
 
     @observable infoHash
+    @observable name
     @observable state
-    @observable progress
+    
     @observable totalSize
 
     /**
      * {String} Path where torrent data is saved and or read from
      */
     @observable savePath
-
+  
     /**
-     * **Temporary, needs be moved onto a pure view store later**
-     * {MediaPlayer} Store for currently active streamer on this torrent
+     * {SellerTerms} Terms when selling
      */
-    @observable activeMediaPlayerStore
-
-    // Seller minimum price for this torrent
-    @observable sellerPrice
-
-    // Map of revenue per connection (using pid as a key)
-    @observable sellerRevenue
-
-    // Buyer max price for this torrent
-    @observable buyerPrice
-
-    // Map of total spent per connection (using pid as a key)
-    @observable buyerSpent
+    @observable sellerTerms
+  
+  /**
+   * {Number} Total number of pieces sold by us as a seller this
+   * session
+   */
+  @observable numberOfPiecesSoldAsSeller
+  
+  /**
+   * {Number} Total revenue so far from spending, does not include
+   * tx fees for closing channel (they are deducted).
+   */
+  @observable totalRevenueFromPiecesAsSeller
+  
+    /**
+     * {BuyerTerms} Terms when buying
+     */
+    @observable buyerTerms
+  
+    /**
+     * {Number} The total amount (sats) sent as payments so far,
+     * does not include tx fees used to open and close channel.
+     */
+    @observable totalSpendingOnPiecesAsBuyer
+    
+    /**
+     * {Number} Current progress of torrent processing. While downloading,
+     * this refers to completion rate, while checking resume
+     * data it refers to the progress check.
+     */
+    @observable progress
 
     /**
-     * libtorrent::torrent_status::total_done
-     *
-     * The total number of bytes of the file(s) that we have.
+     * {Number} The total number of bytes of the file(s) that we have.
      * All this does not necessarily has to be downloaded during
      * this session (that's total_payload_download).
      */
     @observable downloadedSize
     @observable downloadSpeed
     @observable uploadSpeed
+  
+    /**
+     * {Number} Number of peers classified as seeders (by libtorrent)
+     */
+    @observable numberOfSeeders
 
     // store the files (see libtorrent::file_storage)
     @observable torrentFiles
@@ -57,7 +75,6 @@ class TorrentStore {
      *
      */
     @observable uploadedTotal
-    @observable name
 
     @observable viabilityOfPaidDownloadInSwarm
 
@@ -65,66 +82,53 @@ class TorrentStore {
      * {Map.<String,PeerStore>} Maps peer id to peer store for corresponding peer
      */
     @observable peerStores
-
-    /**
-     * {Number} Number of peers classified as seeders (by libtorrent)
-     */
-    @observable numberOfSeeders
-
+  
     constructor (infoHash,
+                 name,
                  savePath,
                  state,
-                 progress,
                  totalSize,
+                 progress,
                  downloadedSize,
                  downloadSpeed,
                  uploadSpeed,
                  uploadedTotal,
-                 name,
-                 sellerPrice,
-                 sellerRevenue,
-                 buyerPrice,
-                 buyerSpent,
                  numberOfSeeders,
+                 sellerTerms,
+                 numberOfPiecesSoldAsSeller,
+                 totalRevenueFromPiecesAsSeller,
+                 buyerTerms,
+                 totalSpendingOnPiecesAsBuyer,
                  starter,
                  stopper,
-                 folderOpener,
                  paidDownloadStarter,
                  uploadBeginner,
-                 uploadStopper,
-    ) {
+                 uploadStopper) {
+      
+      this.setInfoHash(infoHash)
+      this.setName(name)
+      this.setSavePath(savePath)
+      this.setState(state)
+      this.setTotalSize(totalSize)
+      this.setProgress(progress)
+      this.setDownloadedSize(downloadedSize)
+      this.setDownloadSpeed(downloadSpeed)
+      this.setUploadSpeed(uploadSpeed)
+      this.setUploadedTotal(uploadedTotal)
+      this.setNumberOfSeeders(numberOfSeeders)
+      this.setSellerTerms(sellerTerms)
+      this.setNumberOfPiecesSoldAsSeller(numberOfPiecesSoldAsSeller)
+      this.setTotalRevenueFromPiecesAsSeller(totalRevenueFromPiecesAsSeller)
+      this.setBuyerTerms(buyerTerms)
+      this.setTotalSpendingOnPiecesAsBuyer(totalSpendingOnPiecesAsBuyer)
+      
+      this.peerStores = new Map()
 
-      /**
-        this.infoHash = infoHash
-        this.savePath = savePath
-        this.state = state
-        this.progress = progress ? progress : 0
-        this.totalSize = totalSize ? totalSize : 0
-        this.downloadedSize = downloadedSize ? downloadedSize : 0
-        this.downloadSpeed = downloadSpeed ? downloadSpeed : 0
-        this.uploadSpeed = uploadSpeed ? uploadSpeed : 0
-        this.uploadedTotal = uploadedTotal ? uploadedTotal : 0
-        this.name = name ? name : ''
-        this.numberOfBuyers = numberOfBuyers ? numberOfBuyers : 0
-        this.numberOfSellers = numberOfSellers ? numberOfSellers : 0
-        this.numberOfObservers = numberOfObservers ? numberOfObservers : 0
-        this.numberOfNormalPeers = numberOfNormalPeers ? numberOfNormalPeers : 0
-        this.numberOfSeeders = numberOfSeeders ? numberOfSeeders : 0
-        this.viabilityOfPaidDownloadInSwarm = viabilityOfPaidDownloadInSwarm ? viabilityOfPaidDownloadInSwarm : new ViabilityOfPaidDownloadInSwarm.NoJoyStreamPeerConnections()
-        this.sellerPrice = sellerPrice ? sellerPrice : 0
-        this.sellerRevenue = sellerRevenue ? sellerRevenue : new Map()
-        this.buyerPrice = buyerPrice ? buyerPrice : 0
-        this.buyerSpent = buyerSpent ? buyerSpent : new Map()
-     */
-
-        this.peerStores = new Map()
-
-        this._starter = starter
-        this._stopper = stopper
-        this._folderOpener = folderOpener
-        this._paidDownloadStarter = paidDownloadStarter
-        this._uploadBeginner = uploadBeginner
-        this._uploadStopper = uploadStopper
+      this._starter = starter
+      this._stopper = stopper
+      this._paidDownloadStarter = paidDownloadStarter
+      this._uploadBeginner = uploadBeginner
+      this._uploadStopper = uploadStopper
     }
 
     @action.bound
@@ -188,33 +192,33 @@ class TorrentStore {
     }
 
     @action.bound
-    setActiveMediaPlayerStore (activeMediaPlayerStore) {
-      this.activeMediaPlayerStore = activeMediaPlayerStore
-    }
-
-    @action.bound
     setTorrentFiles (torrentFiles) {
       this.torrentFiles = torrentFiles
     }
 
     @action.bound
-    setSellerPrice (sellerTerms) {
-      this.sellerPrice = sellerTerms.minPrice
+    setSellerTerms (sellerTerms) {
+      this.sellerTerms = sellerTerms
     }
 
     @action.bound
-    setSellerRevenue (pid, amountPaid) {
-        this.sellerRevenue.set(pid, amountPaid)
+    setNumberOfPiecesSoldAsSeller (numberOfPiecesSoldAsSeller) {
+        this.numberOfPiecesSoldAsSeller = numberOfPiecesSoldAsSeller
+    }
+    
+    @action.bound
+    setTotalRevenueFromPiecesAsSeller(totalRevenueFromPiecesAsSeller) {
+      this.totalRevenueFromPiecesAsSeller = totalRevenueFromPiecesAsSeller
     }
 
     @action.bound
-    setBuyerPrice (buyerTerms) {
-      this.buyerPrice = buyerTerms.maxPrice
+    setBuyerTerms (buyerTerms) {
+      this.buyerTerms = buyerTerms
     }
 
     @action.bound
-    setBuyerSpent (pid, amountPaid) {
-        this.buyerSpent.set(pid, amountPaid)
+    setTotalSpendingOnPiecesAsBuyer (totalSpendingOnPiecesAsBuyer) {
+      this.totalSpendingOnPiecesAsBuyer = totalSpendingOnPiecesAsBuyer
     }
 
     @computed get isLoading() {
@@ -269,22 +273,6 @@ class TorrentStore {
     @computed get canStart() {
         return this.state.startsWith("Active.DownloadIncomplete.Unpaid.Stopped") ||
             this.state.startsWith("Active.FinishedDownloading.Uploading.Stopped")
-    }
-
-    @computed get totalRevenue() {
-        var sum = 0
-        this.sellerRevenue.forEach(function (value, key, map) {
-            sum += value
-        })
-        return sum
-    }
-
-    @computed get totalSpent() {
-        var sum = 0
-        this.buyerSpent.forEach(function (value, key, map) {
-            sum += value
-        })
-        return sum
     }
 
     @computed get numberOfBuyers() {
@@ -355,10 +343,6 @@ class TorrentStore {
         this._stopper()
     }
 
-    openFolder() {
-        this._folderOpener
-    }
-
     startPaidDownload() {
         this._paidDownloadStarter
     }
@@ -371,29 +355,6 @@ class TorrentStore {
         this._uploadStopper()
     }
 
-      /** here for now, move later **/
-
-      play (fileIndex) {
-        this._torrent.play(fileIndex)
-      }
-
-      @computed get playableIndexfiles () {
-        let playableIndexfiles = []
-
-        // Recover torrentFiles
-        
-        for (var i = 0; i < this.torrentFiles.numFiles(); i++) {
-          let fileName = this.torrentFiles.fileName(i)
-          let fileExtension = fileName.split('.').pop()
-
-          // Need a list of all the video extensions that render-media suport.
-          if (fileExtension === 'mp4' || fileExtension === 'wbm' || fileExtension === 'mkv' || fileExtension === 'avi' || fileExtension === 'webm') {
-            playableIndexfiles.push(i)
-          }
-        }
-
-        return playableIndexfiles
-      }
 }
 
 export default TorrentStore

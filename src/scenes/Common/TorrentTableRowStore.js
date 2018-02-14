@@ -1,11 +1,7 @@
 
 import { observable, action } from 'mobx'
 import {computed} from "mobx/lib/mobx";
-
-
-/**
- * Factor out a base which can be reused across all three scenes?
- */
+import {indexesOfPlayableFiles} from './utils'
 
 /**
  * Model for row in downloading table
@@ -22,17 +18,26 @@ class TorrentTableRowStore {
    */
   torrentStore
   
-  constructor(torrentStore, applicationStore, uiStore, showToolbar) {
+  constructor(torrentStore, applicationStore, showToolbar) {
     
     this.torrentStore = torrentStore
     this._applicationStore = applicationStore
-    this._uiStore = uiStore
     this.setShowToolbar(showToolbar)
   }
   
   @action.bound
   setShowToolbar(showToolbar) {
     this.showToolbar = showToolbar
+  }
+
+  @action.bound
+  mouseEnter() {
+    this.setShowToolbar(true)
+  }
+
+  @action.bound
+  mouseLeave() {
+    this.setShowToolbar(false)
   }
   
   remove() {
@@ -44,16 +49,20 @@ class TorrentTableRowStore {
   }
   
   openFolder() {
-    this._uiStore.openFolder(this.torrentStore.savePath)
+    shell.openItem(this.torrentStore.savePath)
   }
   
   @computed get
-  canPlayMedia() {
-    return this.torrentStore.playableIndexfiles.length > 0
+  playableMediaList() {
+
+    if(this.torrentStore.torrentInfo) {
+      return indexesOfPlayableFiles(this.torrentStore.torrentInfo.torrentFiles)
+    } else
+      return false
   }
   
   playMedia(fileIndex = 0) {
-    this.torrentStore.play(this.torrentStore.playableIndexfiles[fileIndex])
+    this.torrentStore.play(this.playableMediaList[fileIndex])
   }
   
 }
