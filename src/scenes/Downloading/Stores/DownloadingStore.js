@@ -1,5 +1,6 @@
 import { observable, action, computed } from 'mobx'
 import { TorrentInfo } from 'joystream-node'
+import TorrentTableRowStore from '../../Common/TorrentTableRowStore'
 import { remote } from 'electron'
 
 // TEMPORARY
@@ -45,13 +46,26 @@ class DownloadingStore {
     this.setState(DownloadingStore.STATE.InitState)
   }
 
+  @action.bound
+  addTorrentStore(torrentStore) {
 
+    if(this.rowStorefromTorrentInfoHash.has(torrentStore.infoHash))
+      throw Error('Torrent store for same torrent already exists.')
 
-
-
-
+    let row = new TorrentTableRowStore(torrentStore, this._uiStore.applicationStore, false)
+    
+    this.rowStorefromTorrentInfoHash.set(torrentStore.infoHash, row)
   }
-  
+
+  @action.bound
+  removeTorrentStore(infoHash) {
+
+    if(!this.rowStorefromTorrentInfoHash.has(infoHash))
+      throw Error('No corresponding torrent store exists.')
+
+    this.rowStorefromTorrentInfoHash.delete(infoHash)
+  }
+
   @action.bound
   setRowStorefromTorrentInfoHash(rowStorefromTorrentInfoHash) {
     this.rowStorefromTorrentInfoHash = rowStorefromTorrentInfoHash
