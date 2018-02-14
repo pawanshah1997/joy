@@ -404,24 +404,23 @@ class UIStore {
     // Create TorrentStore
     let torrentStore = new TorrentStore(
       torrent.infoHash,
+      torrent.name,
       torrent.savePath,
       torrent.state,
-      0,
-      metadata ? metadata.totalSize : undefined,
-      downloadedSize,
-      downloadSpeed,
-      uploadSpeed,
-      uploadedTotal,
-      metadata ? metadata.name : '',
-      numberOfBuyers,
-      numberOfSellers,
-      numberOfObservers,
-      numberOfNormalPeers,
-      numberOfSeeders,
-      sellerPrice,
-      sellerRevenue,
-      buyerPrice,
-      buyerSpent
+      torrent.torrentInfo ? torrent.torrentInfo.totalSize : 0, // Total size of torrent
+      torrent.progress,
+      torrent.downloadedSize,
+      torrent.downloadSpeed,
+      torrent.uploadSpeed,
+      torrent.uploadedTotal,
+      torrent.numberOfSeeders,
+      torrent.sellerTerms,
+      torrent.buyerTerms,
+      torrent.start.bind(torrent),
+      torrent.stop.bind(torrent),
+      torrent.startPaidDownload.bind(torrent),
+      torrent.beginUpload.bind(torrent),
+      torrent.endUpload.bind(torrent)
     )
 
     /// Hook into events
@@ -429,6 +428,57 @@ class UIStore {
     torrent.on('state', action((state) => {
       torrentStore.setState(state)
     }))
+    
+    torrent.on('viabilityOfPaidDownloadInSwarm', action((viabilityOfPaidDownloadInSwarm) => {
+      torrentStore.setViabilityOfPaidDownloadInSwarm(viabilityOfPaidDownloadInSwarm)
+    }))
+    
+    torrent.on('buyerTerms', action((buyerTerms) => {
+      torrentStore.setBuyerTerms(buyerTerms)
+    }))
+    
+    torrent.on('sellerTerms', action((sellerTerms) => {
+      torrentStore.setSellerTerms(sellerTerms)
+    }))
+    
+    torrent.on('resumeData', action((resumeData) => {
+      // Nothing to do
+    }))
+  
+    /**
+     * When metadata comes in, we need to set some values on
+     * the store
+     */
+    torrent.on('torrentInfo', action((torrentInfo) => {
+      
+      torrentStore.setName(torrentInfo.name())
+      torrentStore.setTotalSize(torrentInfo.totalSize())
+    }))
+    
+    // When torrent is finished, we have to count towards the navigator
+    torrent.once('Active.FinishedDownloading', action(() => {
+    
+      assert(this.applicationNavigationStore)
+      this.applicationNavigationStore.handleTorrentCompleted()
+    
+      /**
+       * Add desktop notifications
+       */
+    
+      // Tell uploading store, which may need to know
+      if(this.uploadingStore)
+        this.uploadingStore.torrentFinishedDownloading(torrent.infoHash)
+      
+    }))
+    
+    // When torrent is found to not be a complete download
+    torrent.once('Active.DownloadIncomplete', action(() => {
+    
+      // Tell uploading store, which may need to know
+      if(this.uploadingStore)
+        this.uploadingStore.torrentDownloadIncomplete(torrent.infoHash)
+    }))
+    
     torrent.on('progress', action((progress) => {
       torrentStore.setProgress(progress)
     }))
@@ -484,6 +534,11 @@ class UIStore {
       console.log(settlementTx)
       
     }))
+  
+    torrent.on('failedToMakeSignedContract', action((failedToMakeSignedContract) => {
+      console.log('failedToMakeSignedContract: ' + failedToMakeSignedContract)
+    }))
+    
     /**
      * When a peer is added,
      * we create a peer store which watches the peer and
@@ -521,57 +576,30 @@ class UIStore {
       torrentStore.peerStores.delete(peerId)
 
     }))
-
-    torrent.on('viabilityOfPaidDownloadInSwarm', action((viabilityOfPaidDownloadInSwarm) => {
-
-    }))
-
-    torrent.on('buyerTerms', action((buyerTerms) => {
-
-    }))
-
-    torrent.on('sellerTerms', action((sellerTerms) => {
-
-    }))
-
-    torrent.on('validPaymentReceived', action((validPaymentReceived) => {
-
-
-
-    }))
-
-    torrent.on('paymentSent', action((paymentSent) => {
-
-
-
-    }))
-
-    torrent.on('failedToMakeSignedContract', action((failedToMakeSignedContract) => {
-      console.log('failedToMakeSignedContract: ' + failedToMakeSignedContract)
-    }))
-
-    torrent.once('torrentInfo', action((torrentInfo) => {
-      this.setName(torrentInfo.name())
-      this.setTotalSize(torrentInfo.totalSize())
-    }))
     
-    // When torrent is finished, we have to count towards the navigator
-    torrent.once('Active.FinishedDownloading', action(() => {
-      
-      assert(this.applicationNavigationStore)
-      this.applicationNavigationStore.handleTorrentCompleted()
-
-      /**
-       * Add desktop notifications
-       */
-
-    }))
-
     // Add to application store
     applicationStore.onNewTorrentStore(torrentStore)
 
-    // Add to relevant scenes
-    // ?
+    // Add to relevant scenes if they currently exist,
+    // which they only do when UI is active, not during loading
+
+    if(this.currentPhase === UIStore.PHASE.Alive) {
+
+      assert(this.uploadingStore)
+      assert(this.downloadingStore)
+      assert(this.completedStore)
+
+      /**
+       * Keep in mind that _all_ torrent table scenes
+       * know about all stores at all times, even though
+       * the torrent may be in an irrelevant state. This avoids
+       * having to add/remove through reactions as state changes
+       */
+
+      this.uploadingStore.addTorrentStore(torrentStore)
+      this.downloadingStore.addTorrentStore(torrentStore)
+      this.completedStore.addTorrentStore(torrentStore)
+    }
     
   })
   
