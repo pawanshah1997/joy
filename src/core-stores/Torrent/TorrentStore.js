@@ -103,48 +103,32 @@ class TorrentStore {
                  stopper,
                  paidDownloadStarter,
                  uploadBeginner,
-                 uploadStopper,
-    ) {
-
-      /**
-        this.infoHash = infoHash
-        this.savePath = savePath
-        this.state = state
-        this.progress = progress ? progress : 0
-        this.totalSize = totalSize ? totalSize : 0
-        this.downloadedSize = downloadedSize ? downloadedSize : 0
-        this.downloadSpeed = downloadSpeed ? downloadSpeed : 0
-        this.uploadSpeed = uploadSpeed ? uploadSpeed : 0
-        this.uploadedTotal = uploadedTotal ? uploadedTotal : 0
-        this.name = name ? name : ''
-        this.numberOfBuyers = numberOfBuyers ? numberOfBuyers : 0
-        this.numberOfSellers = numberOfSellers ? numberOfSellers : 0
-        this.numberOfObservers = numberOfObservers ? numberOfObservers : 0
-        this.numberOfNormalPeers = numberOfNormalPeers ? numberOfNormalPeers : 0
-        this.numberOfSeeders = numberOfSeeders ? numberOfSeeders : 0
-        this.viabilityOfPaidDownloadInSwarm = viabilityOfPaidDownloadInSwarm ? viabilityOfPaidDownloadInSwarm : new ViabilityOfPaidDownloadInSwarm.NoJoyStreamPeerConnections()
-        this.sellerPrice = sellerPrice ? sellerPrice : 0
-        this.sellerRevenue = sellerRevenue ? sellerRevenue : new Map()
-        this.buyerPrice = buyerPrice ? buyerPrice : 0
-        this.buyerSpent = buyerSpent ? buyerSpent : new Map()
-     */
-
-        this.peerStores = new Map()
-
-        this._starter = starter
-        this._stopper = stopper
-        this._folderOpener = folderOpener
-        this._paidDownloadStarter = paidDownloadStarter
-        this._uploadBeginner = uploadBeginner
-        this._uploadStopper = uploadStopper
+                 uploadStopper) {
+      
+      this.setInfoHash(infoHash)
       this.setName(name)
+      this.setSavePath(savePath)
+      this.setState(state)
+      this.setTotalSize(totalSize)
       this.setProgress(progress)
+      this.setDownloadedSize(downloadedSize)
+      this.setDownloadSpeed(downloadSpeed)
+      this.setUploadSpeed(uploadSpeed)
+      this.setUploadedTotal(uploadedTotal)
       this.setNumberOfSeeders(numberOfSeeders)
       this.setSellerTerms(sellerTerms)
       this.setNumberOfPiecesSoldAsSeller(numberOfPiecesSoldAsSeller)
       this.setTotalRevenueFromPiecesAsSeller(totalRevenueFromPiecesAsSeller)
       this.setBuyerTerms(buyerTerms)
       this.setTotalSpendingOnPiecesAsBuyer(totalSpendingOnPiecesAsBuyer)
+      
+      this.peerStores = new Map()
+
+      this._starter = starter
+      this._stopper = stopper
+      this._paidDownloadStarter = paidDownloadStarter
+      this._uploadBeginner = uploadBeginner
+      this._uploadStopper = uploadStopper
     }
 
     @action.bound
