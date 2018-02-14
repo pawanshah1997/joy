@@ -3,6 +3,7 @@
  */
 
 var BaseMachine = require('../../../../../BaseMachine')
+var Common = require('../../../Common')
 
 var Uploading = new BaseMachine({
 
@@ -25,7 +26,7 @@ var Uploading = new BaseMachine({
               Common.stopExtension(client)
 
               // Stop libtorrent torrent
-              client.joystreamNodeTorrent.handle.pause()
+              client._joystreamNodeTorrent.handle.pause()
 
               this.transition(client, 'Stopped')
             },
@@ -60,7 +61,7 @@ var Uploading = new BaseMachine({
 
             start: function (client) {
 
-              client.joystreamNodeTorrent.handle.resume()
+              client._joystreamNodeTorrent.handle.resume()
 
               Common.startExtension(client)
 
@@ -69,7 +70,7 @@ var Uploading = new BaseMachine({
 
             goToPassive: function (client) {
 
-                client.joystreamNodeTorrent.handle.resume()
+                client._joystreamNodeTorrent.handle.resume()
 
                 Common.startExtension(client)
 

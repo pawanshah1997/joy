@@ -35,7 +35,7 @@ var Started = new BaseMachine({
               Common.stopExtension(client)
 
               // Stop libtorrent torrent
-              client.joystreamNodeTorrent.handle.pause()
+              client._joystreamNodeTorrent.handle.pause()
 
               this.go(client, '../Stopped')
             },
@@ -73,8 +73,9 @@ var Started = new BaseMachine({
             startPaidDownload : function (client, fn) {
 
               // Check that we can actually start
-              if(!(client.viabilityOfPaidDownloadInSwarm instanceof ViabilityOfPaidDownloadInSwarm.Viable))
-                  fn(client.viabilityOfPaidDownloadInSwarm , null)
+              if(!(client.viabilityOfPaidDownloadInSwarm instanceof ViabilityOfPaidDownloadInSwarm.Viable)) {
+                  return fn(client.viabilityOfPaidDownloadInSwarm , null)
+              }
 
               let peerComparer = function (sellerA, sellerB) {
                   const termsA = sellerA.connection.announcedModeAndTermsFromPeer.seller.terms
@@ -104,7 +105,7 @@ var Started = new BaseMachine({
                   var sellerTerms = status.connection.announcedModeAndTermsFromPeer.seller.terms
 
                   // Pick how much to distribute among the sellers
-                  var minimumRevenue = sellerTerms.minPrice * client.metadata.numPieces()
+                  var minimumRevenue = sellerTerms.minPrice * client.torrentInfo.numPieces()
 
                   // Set value to at least surpass dust
                   var value = Math.max(minimumRevenue, 0)
@@ -167,17 +168,17 @@ var Started = new BaseMachine({
                 if(err) {
 
                     // Tell user about failure
-                    client._startPaidDownloadFn({err , tx}, null)
+                    client._startPaidDownloadFn(err)
 
                     // Drop callback
-                    client._startPaidDownloadFn
+                    delete client._startPaidDownloadFn
 
                     this.transition(client, 'ReadyForStartPaidDownloadAttempt')
 
                 } else {
 
-                    client.joystreamNodeTorrent.startDownloading(tx, client.downloadInfoMap, (err, res) => {
-                      client._submitInput('startDownloadingResult', err, res)
+                    client._joystreamNodeTorrent.startDownloading(tx, client.downloadInfoMap, (err, res) => {
+                      client._submitInput('paidDownloadInitiationCompleted', err, res)
                     })
 
                     this.transition(client, 'InitiatingPaidDownload')
@@ -192,26 +193,26 @@ var Started = new BaseMachine({
 
             // NB: We don't handleSequence peer plugin statuses
 
-            paidDownloadInitiationCompleted : function (client, alert) {
+            paidDownloadInitiationCompleted : function (client, err, result) {
 
               // NB: Joystream alert never throw error. Need to be added in extension-cpp
-                if (alert.error) {
+                if (err) {
 
                     // Tell user about failure
-                    client._startPaidDownloadFn({err}, null)
+                    client._startPaidDownloadFn(err)
 
                     this.transition(client, 'ReadyForStartPaidDownloadAttempt')
 
                 } else {
 
                     // Tell user about success
-                    client._startPaidDownloadFn(undefined)
+                    client._startPaidDownloadFn(null)
 
                     this.go(client, '../../Paid/Started')
                 }
 
                 // Drop callback
-                client._startPaidDownloadFn
+                delete client._startPaidDownloadFn
 
             }
         }

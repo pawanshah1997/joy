@@ -4,6 +4,7 @@
 
 var BaseMachine = require('../../../../BaseMachine')
 var Uploading = require('./Uploading')
+var Common = require('../../Common')
 
 var FinishedDownloading = new BaseMachine({
 
