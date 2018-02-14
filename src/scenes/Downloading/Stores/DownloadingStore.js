@@ -37,12 +37,11 @@ class DownloadingStore {
    * @observable startDownloadingFlowStore
    */
   
-  constructor (rowStorefromTorrentInfoHash, applicationSettings, torrentAdder, uiStore) {
-    this.setRowStorefromTorrentInfoHash(rowStorefromTorrentInfoHash)
-    this._applicationSettings = applicationSettings
-    this._torrentAdder = torrentAdder
+  constructor (uiStore) {
+
     this._uiStore = uiStore
-    
+
+    this.setRowStorefromTorrentInfoHash(new Map())
     this.setState(DownloadingStore.STATE.InitState)
   }
 
@@ -211,14 +210,14 @@ class DownloadingStore {
     }
   
     // Get the path to use as savepath from settings
-    let savePath = this._applicationSettings.getDownloadFolder()
+    let savePath = this._uiStore.applicationStore.applicationSettings.getDownloadFolder()
   
     let settings = getStartingDownloadSettings(torrentInfo, savePath)
     
     /// Try to add torrent
     this.setState(DownloadingStore.STATE.TorrentBeingAdded)
   
-    this._torrentAdder(settings, (err, torrentStore) => {
+    this._uiStore.applicationStore.addTorrent(settings, (err, torrentStore) => {
       
       if(err) {
         
