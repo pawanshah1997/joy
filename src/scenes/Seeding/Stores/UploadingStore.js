@@ -91,15 +91,6 @@ class UploadingStore {
   }
   
   @computed get
-  totalRevenue () {
-    var total = 0
-    for (var i = 0; i < this.torrentRowStores.length; i++) {
-      total += this.torrentRowStores[i].totalRevenue
-    }
-    return total
-  }
-  
-  @computed get
   totalUploadSpeed () {
     return this.torrentRowStores.reduce(function (accumulator, torrent) {
       return accumulator + torrent.uploadSpeed
