@@ -79,9 +79,22 @@ class UIStore {
   @observable currentPhase
   
   /**
-   * {Number} Number of satoshis earned during *this session*.
+   * {Number} Total number of pieces sold by us as a seller this
+   * session
    */
-  @observable revenue
+  @observable numberOfPiecesSoldAsSeller
+  
+  /**
+   * {Number} Total revenue so far from spending, does not include
+   * tx fees for closing channel (they are deducted).
+   */
+  @observable totalRevenueFromPieces
+  
+  /**
+   * {Number} The total amount (sats) sent as payments so far,
+   * does not include tx fees used to open and close channel.
+   */
+  @observable totalSpendingOnPieces
   
   /**
    * {ApplicationNavigationStore} Model for application navigator.
@@ -134,6 +147,10 @@ class UIStore {
    * @param application {Application}
    */
   constructor(application) {
+    
+    this.totalRevenueFromPieces = 0
+    this.numberOfPiecesSoldAsSeller = 0
+    this.totalSpendingOnPieces = 0
     
     // Hold on to application instance
     this._application = application
@@ -436,7 +453,37 @@ class UIStore {
       torrentStore.setNumberOfSeeders(numberOfSeeders)
     }))
     
+    torrent.on('paymentSent', action((paymentIncrement, totalNumberOfPayments, totalAmountPaid, pieceIndex) => {
+  
+      /**
+       * A naive mistake here is to miss the fact that a single torrent may involve
+       * multiple failed attempts at paying different peers at different times, hence
+       * we cannot simply write to the `torrentStore` using `totalAmountPaid`.
+       */
 
+      torrentStore.totalSpendingOnPiecesAsBuyer += paymentIncrement
+      
+      // Global counters
+      this.totalSpendingOnPieces += paymentIncrement
+    }))
+    
+    torrent.on('validPaymentReceived', action((paymentIncrement, totalNumberOfPayments, totalAmountPaid) => {
+      
+      torrentStore.numberOfPiecesSoldAsSeller++
+      torrentStore.totalRevenueFromPiecesAsSeller += paymentIncrement
+      
+      // Global counters
+      this.numberOfPiecesSoldAsSeller++
+      this.totalRevenueFromPieces += paymentIncrement
+    }))
+    
+    torrent.on('lastPaymentReceived', action((settlementTx) => {
+      
+      // Raw transaction
+      console.log('settlementTx')
+      console.log(settlementTx)
+      
+    }))
     /**
      * When a peer is added,
      * we create a peer store which watches the peer and
