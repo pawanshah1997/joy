@@ -6,6 +6,7 @@ import {computed} from "mobx/lib/mobx";
 /**
  * Factor out a base which can be reused across all three scenes?
  */
+import {indexesOfPlayableFiles} from './utils'
 
 /**
  * Model for row in downloading table
@@ -48,12 +49,16 @@ class TorrentTableRowStore {
   }
   
   @computed get
-  canPlayMedia() {
-    return this.torrentStore.playableIndexfiles.length > 0
+  playableMediaList() {
+
+    if(this.torrentStore.torrentInfo) {
+      return indexesOfPlayableFiles(this.torrentStore.torrentInfo.torrentFiles)
+    } else
+      return false
   }
   
   playMedia(fileIndex = 0) {
-    this.torrentStore.play(this.torrentStore.playableIndexfiles[fileIndex])
+    this.torrentStore.play(this.playableMediaList[fileIndex])
   }
   
 }
