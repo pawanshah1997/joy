@@ -363,30 +363,7 @@ class TorrentStore {
     endUploading() {
         this._uploadStopper()
     }
-  
-      /** here for now, move later **/
-      
-      play (fileIndex) {
-        this._torrent.play(fileIndex)
-      }
-      
-      @computed get playableIndexfiles () {
-        let playableIndexfiles = []
-
-        recover torrentFiles
-        
-        for (var i = 0; i < this.torrentFiles.numFiles(); i++) {
-          let fileName = this.torrentFiles.fileName(i)
-          let fileExtension = fileName.split('.').pop()
-          
-          // Need a list of all the video extensions that render-media suport.
-          if (fileExtension === 'mp4' || fileExtension === 'wbm' || fileExtension === 'mkv' || fileExtension === 'avi' || fileExtension === 'webm') {
-            playableIndexfiles.push(i)
-          }
-        }
-        
-        return playableIndexfiles
-      }
+    
 }
 
 export default TorrentStore
