@@ -41,6 +41,12 @@ class TorrentStore {
      */
     @observable totalSpendingOnPiecesAsBuyer
     
+    /**
+     * {Number} Current progress of torrent processing. While downloading,
+     * this refers to completion rate, while checking resume
+     * data it refers to the progress check.
+     */
+    @observable progress
 
     /**
      * libtorrent::torrent_status::total_done
@@ -83,8 +89,8 @@ class TorrentStore {
                  name,
                  savePath,
                  state,
-                 progress,
                  totalSize,
+                 progress,
                  downloadedSize,
                  downloadSpeed,
                  uploadSpeed,
@@ -134,6 +140,7 @@ class TorrentStore {
         this._uploadBeginner = uploadBeginner
         this._uploadStopper = uploadStopper
       this.setName(name)
+      this.setProgress(progress)
       this.setSellerTerms(sellerTerms)
       this.setNumberOfPiecesSoldAsSeller(numberOfPiecesSoldAsSeller)
       this.setTotalRevenueFromPiecesAsSeller(totalRevenueFromPiecesAsSeller)
