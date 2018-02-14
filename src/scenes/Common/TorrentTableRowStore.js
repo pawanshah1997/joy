@@ -1,11 +1,6 @@
 
 import { observable, action } from 'mobx'
 import {computed} from "mobx/lib/mobx";
-
-
-/**
- * Factor out a base which can be reused across all three scenes?
- */
 import {indexesOfPlayableFiles} from './utils'
 
 /**
