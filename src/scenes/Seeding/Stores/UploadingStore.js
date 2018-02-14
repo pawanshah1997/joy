@@ -47,10 +47,11 @@ class UploadingStore {
    */
   @observable torrentFilePathSelected
 
-  constructor (rowStorefromTorrentInfoHash, torrentAdder, torrentRemover) {
-    this.setRowStorefromTorrentInfoHash(rowStorefromTorrentInfoHash)
-    this._torrentAdder = torrentAdder
-    this._torrentRemover = torrentRemover
+  constructor (uiStore) {
+
+    this._uiStore = uiStore
+
+    this.setRowStorefromTorrentInfoHash(new Map())
     this.setState(UploadingStore.STATE.InitState)
     
     // Torrent file selected in the current start uploading flow,
