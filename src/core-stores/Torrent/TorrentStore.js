@@ -3,15 +3,17 @@ import { observable, action, computed } from 'mobx'
 class TorrentStore {
 
     @observable infoHash
+    @observable name
     @observable state
     @observable progress
+    
     @observable totalSize
 
     /**
      * {String} Path where torrent data is saved and or read from
      */
     @observable savePath
-
+  
     /**
      */
     @observable sellerTerms
@@ -64,7 +66,6 @@ class TorrentStore {
      *
      */
     @observable uploadedTotal
-    @observable name
 
     @observable viabilityOfPaidDownloadInSwarm
 
@@ -79,6 +80,7 @@ class TorrentStore {
     @observable numberOfSeeders
 
     constructor (infoHash,
+                 name,
                  savePath,
                  state,
                  progress,
@@ -87,7 +89,6 @@ class TorrentStore {
                  downloadSpeed,
                  uploadSpeed,
                  uploadedTotal,
-                 name,
                  numberOfSeeders,
                  sellerTerms,
                  numberOfPiecesSoldAsSeller,
@@ -132,6 +133,7 @@ class TorrentStore {
         this._paidDownloadStarter = paidDownloadStarter
         this._uploadBeginner = uploadBeginner
         this._uploadStopper = uploadStopper
+      this.setName(name)
       this.setSellerTerms(sellerTerms)
       this.setNumberOfPiecesSoldAsSeller(numberOfPiecesSoldAsSeller)
       this.setTotalRevenueFromPiecesAsSeller(totalRevenueFromPiecesAsSeller)
