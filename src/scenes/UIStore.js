@@ -1,4 +1,4 @@
-import {observable, action, computed, reaction, when, autorun} from 'mobx'
+import {observable, action, computed} from 'mobx'
 import assert from 'assert'
 import {shell} from 'electron'
 
@@ -32,7 +32,7 @@ import PaymentStore from "../core-stores/Wallet/PaymentStore";
  * must be handled by a single action which also scopes this object. This single
  * action ensures that _all_ resulting mutations of the MOBX state tree are transactional,
  * avoiding any possible race conditions in how reactions are dispatched, which is
- * very hard to reason about precisely, in particular over time as things change.
+ * very hard to reason about precisely, in particular over time as the source changes.
  * In practice, there are many - in fact most, events which just need to update a single
  * observable, and thus doing a local context specific event trapping and handling would be enough,
  * but for now we will try to just follow this general rule, to avoid the problem on principle.
