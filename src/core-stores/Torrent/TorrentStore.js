@@ -348,10 +348,6 @@ class TorrentStore {
         this._stopper()
     }
 
-    openFolder() {
-        this._folderOpener
-    }
-
     startPaidDownload() {
         this._paidDownloadStarter
     }
