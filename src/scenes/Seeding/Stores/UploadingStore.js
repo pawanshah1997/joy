@@ -225,43 +225,43 @@ class UploadingStore {
       
       } else {
         
-        // React to state changes in this torrent
-        let stateReactionDisposer =
-          
-          reaction(
-          
-          // Track state of torrent
-          () => {return torrentStore.state},
-          
-          // Handle the new torrent state
-          (newState) => {
-            
-            // if torrent is finished, then
-            if(newState.startsWith('Active.FinishedDownloading')) {
-              
-              // dispose reaction, never again!
-              stateReactionDisposer()
-              
-              this.setState(UploadingStore.STATE.InitState)
-            }
-            // if torrent is incomplete,  then
-            else if(newState.startsWith('Active.DownloadIncomplete')) {
-              
-              // dispose reaction, never again!
-              stateReactionDisposer()
-              
-              this.setState(UploadingStore.STATE.TellUserAboutIncompleteDownload)
-            }
-            
-            // otherwise, there was some sort of irrelevant state change, so we keep waiting
-            
-          }
-        )
+        // <-- is this really right? -->
         
-        // NB: Do something with `torrentStore`, e.g. add to alert notification queue!
+        // We were able to add, now we must wait for calls to
+        // `torrentFinishedDownloading` or `torrentDownloadIncomplete`
+        // to learn about result. We cannot create local reactions on
+        // `torrentStore`, as that violates design principle (a), and
+        // also MOBX best practices about updating model in reactions.
+        
       }
     
     })
+  }
+  
+  torrentFinishedDownloading(infoHash) {
+  
+    // If we are currently trying to add this torrent
+  
+    if(this.state === UploadingStore.STATE.AddingTorrent &&
+    infoHash === this._torrentInfoSelected.infoHash()) {
+  
+      // then we are now done
+      this.setState(UploadingStore.STATE.InitState)
+      
+    }
+    
+  }
+  
+  torrentDownloadIncomplete(infoHash) {
+    
+    // If we are currently trying to add this torrent
+    if(this.state === UploadingStore.STATE.AddingTorrent &&
+      infoHash === this._torrentInfoSelected.infoHash()) {
+    
+      // then we have to inform the user about the incomplete download
+      this.setState(UploadingStore.STATE.TellUserAboutIncompleteDownload)
+    
+    }
   }
 
   acceptTorrentFileWasInvalid () {
