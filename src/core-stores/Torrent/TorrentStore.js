@@ -14,6 +14,7 @@ class TorrentStore {
     @observable savePath
   
     /**
+     * {SellerTerms} Terms when selling
      */
     @observable sellerTerms
   
@@ -48,9 +49,7 @@ class TorrentStore {
     @observable progress
 
     /**
-     * libtorrent::torrent_status::total_done
-     *
-     * The total number of bytes of the file(s) that we have.
+     * {Number} The total number of bytes of the file(s) that we have.
      * All this does not necessarily has to be downloaded during
      * this session (that's total_payload_download).
      */
