@@ -9,7 +9,9 @@ class CompletedStore {
    */
   @observable rowStorefromTorrentInfoHash
   
-  constructor(rowStorefromTorrentInfoHash) {
+  constructor(uiStore) {
+    
+    this._uiStore = uiStore
     this.setRowStorefromTorrentInfoHash(rowStorefromTorrentInfoHash)
   }
   
