@@ -274,12 +274,20 @@ class UIStore {
   
       this.applicationNavigationStore = new ApplicationNavigationStore(ApplicationNavigationStore.TAB.Downloading, 0, 'USD', walletStore, priceFeedStore, bcoin.protocol.consensus.COIN)
       
+      // Scene specific stores
+      this.uploadingStore = new UploadingStore(this)
+      this.downloadingStore = new DownloadingStore(this)
+      this.completedStore = new CompletedStore(this)
       
-      // (4) refactor ==> Needs slight refactoring to rely directly on new application store
+      // add existing torrents to scene stores
       
-      this.uploadingStore = new UploadingStore(new Map(), torrentAdder, torrentRemover)
-      this.downloadingStore = new DownloadingStore(new Map(), this._applicationStore.applicationStore.applicationSettings, torrentAdder)
-      this.completedStore = new CompletedStore(new Map())
+      this.applicationStore.torrents.forEach((torrentStore, infoHash) => {
+        
+        this.uploadingStore.addTorrentStore(torrentStore)
+        this.downloadingStore.addTorrentStore(torrentStore)
+        this.completedStore.addTorrentStore(torrentStore)
+        
+      })
   
       /**
        * Set wallet scene model
@@ -301,68 +309,6 @@ class UIStore {
   
       // Imperatively display doorbell widget
       Doorbell.load()
-  
-      /// Keep set of rows synchronized with set of torrents present on the application and their state
-      
-      reaction(
-        () => {
-          return applicationStore.torrents.filter((torrentStore) => {
-            torrentStore.state.startsWith('Active.DownloadIncomplete')
-          })
-        },
-    
-        (downloadingTorrents) => {
-      
-          let newDownloadingRowStorefromTorrentInfoHash = new Map(downloadingTorrents.map((torrentStore) => [torrentStore.infoHash, new TorrentTableRowStore(torrentStore, applicationStore, this, false)]))
-      
-          this.downloadingStore.rowStorefromTorrentInfoHash.forEach((rowStore, infoHash) => {
-            if (newDownloadingRowStorefromTorrentInfoHash.has(infoHash))
-              newDownloadingRowStorefromTorrentInfoHash.set(infoHash, rowStore)
-          })
-      
-          this.downloadingStore.setRowStorefromTorrentInfoHash(newDownloadingRowStorefromTorrentInfoHash)
-        }
-      )
-  
-      reaction(
-        () => {
-          return applicationStore.torrents.filter((torrentStore) => {
-            torrentStore.state.startsWith('Active.FinishedDownloading.Uploading')
-          })
-        },
-    
-        (uploadingTorrents) => {
-      
-          let newUploadingRowStorefromTorrentInfoHash = new Map(uploadingTorrents.map((torrentStore) => [torrentStore.infoHash, new TorrentTableRowStore(torrentStore, applicationStore, this, false)]))
-      
-          this.uploadingStore.rowStorefromTorrentInfoHash.forEach((rowStore, infoHash) => {
-            if (newUploadingRowStorefromTorrentInfoHash.has(infoHash))
-              newUploadingRowStorefromTorrentInfoHash.set(infoHash, rowStore)
-          })
-      
-          this.uploadingStore.setRowStorefromTorrentInfoHash(newUploadingRowStorefromTorrentInfoHash)
-        }
-      )
-  
-      reaction(
-        () => {
-          return applicationStore.torrents.filter((torrentStore) => {
-            torrentStore.state.startsWith('Active.FinishedDownloading')
-          })
-        },
-    
-        (completedTorrents) => {
-      
-          let newCompletedRowStoreFromTorrentInfoHash = new Map(completedTorrents.map((torrentStore) => [torrentStore.infoHash, new TorrentTableRowStore(torrentStore, applicationStore, this, false)]))
-      
-          this.completedStore.rowStorefromTorrentInfoHash.forEach((rowStore, infoHash) => {
-            if (newCompletedRowStoreFromTorrentInfoHash.hash(infoHash))
-              newCompletedRowStoreFromTorrentInfoHash.set(infoHash, rowStore)
-          })
-      
-          this.completedStore.setRowStorefromTorrentInfoHash(newCompletedRowStoreFromTorrentInfoHash)
-        }
-      )
     }
     else if(newState === Application.STATE.STOPPING) {
       // hide doorbell again
@@ -613,7 +559,9 @@ class UIStore {
     applicationStore.onTorrentRemoved(infoHash)
 
     // Remove from relevant scenes
-    // ?
+    this.uploadingStore.removeTorrentStore(infoHash)
+    this.downloadingStore.removeTorrentStore(infoHash)
+    this.completedStore.removeTorrentStore(infoHash)
   
   })
   
