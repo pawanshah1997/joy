@@ -44,7 +44,7 @@ class TorrentTableRowStore {
   }
   
   openFolder() {
-    this._uiStore.openFolder(this.torrentStore.savePath)
+    shell.openItem(this.torrentStore.savePath)
   }
   
   @computed get
