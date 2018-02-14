@@ -76,11 +76,11 @@ var Torrent = new BaseMachine({
             stopExtensionResult: function (client) {
 
               // Stop libtorrent torrent
-              client.joystreamNodeTorrent.handle.pause()
+              client._joystreamNodeTorrent.handle.pause()
 
                 if (client._generateResumeDataOnTermination && client.hasOutstandingResumeData()) {
 
-                    client.joystreamNodeTorrent.handle.saveResume_data()
+                    client._joystreamNodeTorrent.handle.saveResume_data()
 
                     this.transition(client, 'GeneratingResumeData')
 

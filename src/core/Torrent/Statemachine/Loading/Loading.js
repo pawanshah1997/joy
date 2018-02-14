@@ -45,7 +45,7 @@ var Loading = new BaseMachine({
                 if (status.state === TorrentState.finished || status.state === TorrentState.seeding) {
                   client._submitInput('downloadFinished')
                 }
-                
+
                 client._setJoystreamNodeTorrentStatus(status)
             })
 
@@ -117,7 +117,7 @@ var Loading = new BaseMachine({
 
               this.transition(client, 'CheckingPartialDownload')
               // We already have valid torrentInfo why getting again?
-              // const torrentInfo = client.joystreamNodeTorrent.handle.torrentFile()
+              // const torrentInfo = client._joystreamNodeTorrent.handle.torrentFile()
               //
               // client._setTorrentInfo(torrentInfo)
 
@@ -131,7 +131,7 @@ var Loading = new BaseMachine({
 
             metadataReady : function (client, torrentInfo) {
 
-              //const torrentInfo = client.joystreamNodeTorrent.handle.torrentFile()
+              //const torrentInfo = client._joystreamNodeTorrent.handle.torrentFile()
 
               // Hold on to metadata, is required when shutting down
               client._setTorrentInfo(torrentInfo)
@@ -146,7 +146,7 @@ var Loading = new BaseMachine({
                 // If the saved initial state was stopped pause the torrent now after
                 // checking files completes
                 if (isStopped(client._deepInitialState)) {
-                  client.joystreamNodeTorrent.handle.pause()
+                  client._joystreamNodeTorrent.handle.pause()
                 }
 
                 // By default, extension torrent plugins are constructed with
@@ -163,7 +163,7 @@ var Loading = new BaseMachine({
 
                 // Determine whether we have a full download
 
-                var s = client.joystreamNodeTorrent.handle.status()
+                var s = client._joystreamNodeTorrent.handle.status()
 
                 if (s.state === TorrentState.seeding) {
 

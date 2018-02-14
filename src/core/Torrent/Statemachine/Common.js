@@ -33,7 +33,7 @@ function processPeerPluginStatuses(client, statuses) {
 
         } else {
 
-            let newPeer = new Peer(s.pid, client.joystreamNodeTorrent, s, client._privateKeyGenerator, client._publicKeyHashGenerator)
+            let newPeer = new Peer(s.pid, client._joystreamNodeTorrent, s, client._privateKeyGenerator, client._publicKeyHashGenerator)
 
             client.peers.set(s.pid, newPeer)
 
@@ -41,7 +41,7 @@ function processPeerPluginStatuses(client, statuses) {
         }
 
         // Mark as present
-        
+
         peersInSnapshot.add(s.pid)
     }
 
@@ -62,7 +62,7 @@ function processPeerPluginStatuses(client, statuses) {
 
 function stopExtension(client) {
 
-  client.joystreamNodeTorrent.stopPlugin( (err, res) => {
+  client._joystreamNodeTorrent.stopPlugin( (err, res) => {
 
     LOG_ERROR("stopExtension", err)
 
@@ -74,7 +74,7 @@ function stopExtension(client) {
 
 function startExtension(client) {
 
-  client.joystreamNodeTorrent.startPlugin((err, resp) => {
+  client._joystreamNodeTorrent.startPlugin((err, resp) => {
 
     LOG_ERROR("startExtension", err)
 
@@ -85,7 +85,7 @@ function startExtension(client) {
 
 function setLibtorrentInteraction(client, mode) {
 
-  client.joystreamNodeTorrent.setLibtorrentInteraction (mode, (err) => {
+  client._joystreamNodeTorrent.setLibtorrentInteraction (mode, (err) => {
 
     LOG_ERROR("setLibtorrentInteraction", err)
 
@@ -96,7 +96,7 @@ function setLibtorrentInteraction(client, mode) {
 
 function toObserveMode(client) {
 
-  client.joystreamNodeTorrent.toObserveMode((err, res) => {
+  client._joystreamNodeTorrent.toObserveMode((err, res) => {
 
     LOG_ERROR("toObserveMode", err)
 
@@ -107,7 +107,7 @@ function toObserveMode(client) {
 
 function toSellMode(client, sellerTerms) {
 
-  client.joystreamNodeTorrent.toSellMode(sellerTerms, (err, res) => {
+  client._joystreamNodeTorrent.toSellMode(sellerTerms, (err, res) => {
 
     LOG_ERROR("toSellMode", err)
 
@@ -118,7 +118,7 @@ function toSellMode(client, sellerTerms) {
 
 function toBuyMode(client, buyerTerms) {
 
-  client.joystreamNodeTorrent.toBuyMode(buyerTerms, (err, res) => {
+  client._joystreamNodeTorrent.toBuyMode(buyerTerms, (err, res) => {
 
     LOG_ERROR("toBuyMode", err)
 
