@@ -29,9 +29,23 @@ class TorrentStore {
 
     // Buyer max price for this torrent
     @observable buyerPrice
+  /**
+   * {Number} Total number of pieces sold by us as a seller this
+   * session
+   */
+  @observable numberOfPiecesSoldAsSeller
+  
+  /**
+   * {Number} Total revenue so far from spending, does not include
+   * tx fees for closing channel (they are deducted).
+   */
+  @observable totalRevenueFromPiecesAsSeller
+    /**
+     * {Number} The total amount (sats) sent as payments so far,
+     * does not include tx fees used to open and close channel.
+     */
+    @observable totalSpendingOnPiecesAsBuyer
     
-    // Map of total spent per connection (using pid as a key)
-    @observable buyerSpent
 
     /**
      * libtorrent::torrent_status::total_done
@@ -82,10 +96,11 @@ class TorrentStore {
                  uploadedTotal,
                  name,
                  sellerPrice,
-                 sellerRevenue,
                  buyerPrice,
-                 buyerSpent,
                  numberOfSeeders,
+                 numberOfPiecesSoldAsSeller,
+                 totalRevenueFromPiecesAsSeller,
+                 totalSpendingOnPiecesAsBuyer,
                  starter,
                  stopper,
                  folderOpener,
@@ -125,6 +140,9 @@ class TorrentStore {
         this._paidDownloadStarter = paidDownloadStarter
         this._uploadBeginner = uploadBeginner
         this._uploadStopper = uploadStopper
+      this.setNumberOfPiecesSoldAsSeller(numberOfPiecesSoldAsSeller)
+      this.setTotalRevenueFromPiecesAsSeller(totalRevenueFromPiecesAsSeller)
+      this.setTotalSpendingOnPiecesAsBuyer(totalSpendingOnPiecesAsBuyer)
     }
 
     @action.bound
@@ -203,8 +221,13 @@ class TorrentStore {
     }
 
     @action.bound
-    setSellerRevenue (pid, amountPaid) {
-        this.sellerRevenue.set(pid, amountPaid)
+    setNumberOfPiecesSoldAsSeller (numberOfPiecesSoldAsSeller) {
+        this.numberOfPiecesSoldAsSeller = numberOfPiecesSoldAsSeller
+    }
+    
+    @action.bound
+    setTotalRevenueFromPiecesAsSeller(totalRevenueFromPiecesAsSeller) {
+      this.totalRevenueFromPiecesAsSeller = totalRevenueFromPiecesAsSeller
     }
 
     @action.bound
@@ -213,8 +236,8 @@ class TorrentStore {
     }
 
     @action.bound
-    setBuyerSpent (pid, amountPaid) {
-        this.buyerSpent.set(pid, amountPaid)
+    setTotalSpendingOnPiecesAsBuyer (totalSpendingOnPiecesAsBuyer) {
+      this.totalSpendingOnPiecesAsBuyer = totalSpendingOnPiecesAsBuyer
     }
 
     @computed get isLoading() {
@@ -271,22 +294,6 @@ class TorrentStore {
             this.state.startsWith("Active.FinishedDownloading.Uploading.Stopped")
     }
     
-    @computed get totalRevenue() {
-        var sum = 0
-        this.sellerRevenue.forEach(function (value, key, map) {
-            sum += value
-        })
-        return sum
-    }
-
-    @computed get totalSpent() {
-        var sum = 0
-        this.buyerSpent.forEach(function (value, key, map) {
-            sum += value
-        })
-        return sum
-    }
-
     @computed get numberOfBuyers() {
 
       let n = 0
