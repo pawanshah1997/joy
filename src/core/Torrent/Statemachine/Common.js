@@ -37,7 +37,7 @@ function processPeerPluginStatuses(client, statuses) {
 
             client.peers.set(s.pid, newPeer)
 
-            client.emit('peerPluginPresent', newPeer)
+            client.emit('peerAdded', newPeer)
         }
 
         // Mark as present
@@ -53,7 +53,7 @@ function processPeerPluginStatuses(client, statuses) {
 
           client.peers.delete(pid)
 
-          client.emit('peerPluginGone', pid)
+          client.emit('peerRemoved', pid)
         }
 
     }

@@ -1,5 +1,5 @@
 import { observable, action, computed } from 'mobx'
-import { BEPSupportStatus } from 'joystream-node'
+
 import ViabilityOfPaidDownloadInSwarm from '../../core/Torrent/ViabilityOfPaidDownloadingSwarm'
 import ViabilityOfPaidDownloadingTorrent from '../../core/Torrent/ViabilityOfPaidDownloadingTorrent'
 
@@ -59,13 +59,17 @@ class TorrentStore {
     @observable uploadedTotal
     @observable name
 
-    @observable numberOfBuyers
-    @observable numberOfSellers
-    @observable numberOfObservers
-    @observable numberOfNormalPeers
-    @observable numberOfSeeders
-
     @observable viabilityOfPaidDownloadInSwarm
+
+    /**
+     * {Map.<String,PeerStore>} Maps peer id to peer store for corresponding peer
+     */
+    @observable peerStores
+
+    /**
+     * {Number} Number of peers classified as seeders (by libtorrent)
+     */
+    @observable numberOfSeeders
 
     constructor (infoHash,
                  savePath,
@@ -77,15 +81,11 @@ class TorrentStore {
                  uploadSpeed,
                  uploadedTotal,
                  name,
-                 numberOfBuyers,
-                 numberOfSellers,
-                 numberOfObservers,
-                 numberOfNormalPeers,
-                 numberOfSeeders,
                  sellerPrice,
                  sellerRevenue,
                  buyerPrice,
                  buyerSpent,
+                 numberOfSeeders,
                  starter,
                  stopper,
                  folderOpener,
@@ -116,6 +116,8 @@ class TorrentStore {
         this.buyerPrice = buyerPrice ? buyerPrice : 0
         this.buyerSpent = buyerSpent ? buyerSpent : new Map()
      */
+
+        this.peerStores = new Map()
 
         this._starter = starter
         this._stopper = stopper
@@ -171,33 +173,13 @@ class TorrentStore {
     }
 
     @action.bound
+    setNumberOfSeeders(numberOfSeeders) {
+      this.numberOfSeeders = numberOfSeeders
+    }
+
+    @action.bound
     setProgress (progress) {
         this.progress = progress
-    }
-
-    @action.bound
-    setNumberOfBuyers (numberOfBuyers) {
-        this.numberOfBuyers = numberOfBuyers
-    }
-
-    @action.bound
-    setNumberOfSellers (numberOfSellers) {
-        this.numberOfSellers = numberOfSellers
-    }
-
-    @action.bound
-    setNumberOfObservers (numberOfObservers) {
-        this.numberOfObservers = numberOfObservers
-    }
-
-    @action.bound
-    setNumberOfNormalPeers (numberOfNormalPeers) {
-        this.numberOfNormalPeers = numberOfNormalPeers
-    }
-
-    @action.bound
-    setNumberOfSeeders(numberOfSeeders) {
-        this.numberOfSeeders = numberOfSeeders
     }
 
     @action.bound
@@ -303,6 +285,66 @@ class TorrentStore {
             sum += value
         })
         return sum
+    }
+
+    @computed get numberOfBuyers() {
+
+      let n = 0
+
+      this.peerStores.forEach((store, pid) => {
+
+        if(store.peerIsBuyer) {
+          n++
+        }
+
+      })
+
+      return n
+    }
+
+    @computed get numberOfSellers() {
+
+      let n = 0
+
+      this.peerStores.forEach((store, pid) => {
+
+        if(store.peerIsSeller) {
+          n++
+        }
+        
+      })
+
+      return n
+    }
+
+    @computed get numberOfObservers() {
+
+      let n = 0
+
+      this.peerStores.forEach((store, pid) => {
+
+        if(store.peerIsObserver) {
+          n++
+        }
+        
+      })
+
+      return n
+    }
+
+    @computed get numberOfNormalPeers() {
+
+      let n = 0
+
+      this.peerStores.forEach((store, pid) => {
+
+        if(store.peerSupportsProtocol) {
+          n++
+        }
+        
+      })
+
+      return n
     }
 
     start() {

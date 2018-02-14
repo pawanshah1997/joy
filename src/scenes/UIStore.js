@@ -6,6 +6,7 @@ import {shell} from 'electron'
 import {
   ApplicationStore,
   TorrentStore,
+  PeerStore,
   WalletStore,
   PriceFeedStore} from '../core-stores'
 
@@ -422,17 +423,43 @@ class UIStore {
 
     })
 
-    torrent.on('peer-plugin-status', (peerPluginStatuses) => {
+    /**
+     * When a peer is added,
+     * we create a peer store which watches the peer and
+     * synches its own observables. Also we add
+     * store to torrent store
+     */
+    torrent.on('peerAdded', action((peer) => {
 
-      let peerCounts = peerCountsFromPluginStatuses(peerPluginStatuses)
+      let pid = peer.pid()
 
-      // Update torrent store
-      torrentStore.setNumberOfBuyers(peerCounts.buyers)
-      torrentStore.setNumberOfSellers(peerCounts.sellers)
-      torrentStore.setNumberOfObservers(peerCounts.observers)
-      torrentStore.setNumberOfNormalPeers(peerCounts.normals)
+      let peerStore = new PeerStore(
+        pid,
+        peer.state(),
+        peer.peerPluginStatus()
+      )
 
-    })
+      peer.on('peerPluginStatus', action((peerPluginStatus) => {
+        peerStore.setPeerPluginStatus(peerPluginStatus)
+      }))
+
+      assert(!torrentStore.peerStores.has(pid))
+
+      torrentStore.peerStores.set(pid, peerStore)
+
+    }))
+
+    /**
+     * When peer is removed, drop peer store from the
+     * torrent store
+     */
+    torrent.on('peerRemoved', action((peerId) => {
+
+      assert(torrentStore.has(peerId))
+
+      torrentStore.peerStores.delete(peerId)
+
+    }))
 
     torrent.on('viabilityOfPaidDownloadInSwarm', action((viabilityOfPaidDownloadInSwarm) => {
 
@@ -764,6 +791,7 @@ function appStateToUIStorePhase(state) {
   return phase
 }
 
+/**
 function peerCountsFromPluginStatuses(peerPluginStatuses) {
 
   // Counters
@@ -802,6 +830,7 @@ function peerCountsFromPluginStatuses(peerPluginStatuses) {
   }
 
 }
+*/
 
 /**
  startDownloadWithTorrentFileFromMagnetUri: function (client, magnetUri) {
