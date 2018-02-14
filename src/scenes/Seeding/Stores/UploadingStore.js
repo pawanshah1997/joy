@@ -1,6 +1,7 @@
 import { observable, action, computed } from 'mobx'
 import { TorrentInfo } from 'joystream-node'
 import { remote } from 'electron'
+import TorrentTableRowStore from "../../Common/TorrentTableRowStore";
 
 /**
  * User interface store for uploading scene
@@ -57,6 +58,25 @@ class UploadingStore {
     // Torrent file selected in the current start uploading flow,
     // is reset when flow ends
     this._torrentInfoSelected = null
+  }
+  @action.bound
+  addTorrentStore(torrentStore) {
+    
+    if(this.rowStorefromTorrentInfoHash.has(torrentStore.infoHash))
+      throw Error('Torrent store for same torrent already exists.')
+    
+    let row = new TorrentTableRowStore(torrentStore, this._uiStore.applicationStore, false)
+    
+    this.rowStorefromTorrentInfoHash.set(torrentStore.infoHash, row)
+  }
+  
+  @action.bound
+  removeTorrentStore(infoHash) {
+    
+    if(!this.rowStorefromTorrentInfoHash.has(infoHash))
+      throw Error('No corresponding torrent store exists.')
+    
+    this.rowStorefromTorrentInfoHash.delete(infoHash)
   }
 
   @action.bound
