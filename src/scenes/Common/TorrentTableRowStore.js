@@ -18,11 +18,10 @@ class TorrentTableRowStore {
    */
   torrentStore
   
-  constructor(torrentStore, applicationStore, uiStore, showToolbar) {
+  constructor(torrentStore, applicationStore, showToolbar) {
     
     this.torrentStore = torrentStore
     this._applicationStore = applicationStore
-    this._uiStore = uiStore
     this.setShowToolbar(showToolbar)
   }
   
