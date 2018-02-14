@@ -33,22 +33,6 @@ class CompletedStore {
     
     return this.rowStorefromTorrentInfoHash.values()
   }
-  
-  @computed get
-  totalSpent () {
-    
-    return this.torrentRowStores.reduce((accumulator, torrentRowStore) => {
-      return accumulator + torrentRowStore.torrentStore.totalSpent
-    }, 0)
-  }
-  
-  @computed get
-  totalRevenue() {
-    
-    return this.torrentRowStores.reduce((accumulator, torrentRowStore) => {
-      return accumulator + torrentRowStore.torrentStore.totalRevenue
-    }, 0)
-  }
 }
 
 export default CompletedStore
