@@ -1,8 +1,5 @@
 import { observable, action, computed } from 'mobx'
 
-import ViabilityOfPaidDownloadInSwarm from '../../core/Torrent/ViabilityOfPaidDownloadingSwarm'
-import ViabilityOfPaidDownloadingTorrent from '../../core/Torrent/ViabilityOfPaidDownloadingTorrent'
-
 class TorrentStore {
 
     @observable infoHash
@@ -16,14 +13,7 @@ class TorrentStore {
     @observable savePath
 
     /**
-     * **Temporary, needs be moved onto a pure view store later**
-     * {MediaPlayer} Store for currently active streamer on this torrent
      */
-    @observable activeMediaPlayerStore
-    
-    // Map of revenue per connection (using pid as a key)
-    @observable sellerRevenue
-
     @observable sellerTerms
   
   /**
@@ -106,7 +96,6 @@ class TorrentStore {
                  totalSpendingOnPiecesAsBuyer,
                  starter,
                  stopper,
-                 folderOpener,
                  paidDownloadStarter,
                  uploadBeginner,
                  uploadStopper,
@@ -208,11 +197,6 @@ class TorrentStore {
     @action.bound
     setViabilityOfPaidDownloadInSwarm (viabilityOfPaidDownloadInSwarm) {
         this.viabilityOfPaidDownloadInSwarm = viabilityOfPaidDownloadInSwarm
-    }
-
-    @action.bound
-    setActiveMediaPlayerStore (activeMediaPlayerStore) {
-      this.activeMediaPlayerStore = activeMediaPlayerStore
     }
 
     @action.bound
