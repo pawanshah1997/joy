@@ -20,15 +20,12 @@ class TorrentStore {
      * {MediaPlayer} Store for currently active streamer on this torrent
      */
     @observable activeMediaPlayerStore
-
-    // Seller minimum price for this torrent
-    @observable sellerPrice
     
     // Map of revenue per connection (using pid as a key)
     @observable sellerRevenue
 
-    // Buyer max price for this torrent
-    @observable buyerPrice
+    @observable sellerTerms
+  
   /**
    * {Number} Total number of pieces sold by us as a seller this
    * session
@@ -40,6 +37,12 @@ class TorrentStore {
    * tx fees for closing channel (they are deducted).
    */
   @observable totalRevenueFromPiecesAsSeller
+  
+    /**
+     * {BuyerTerms} Terms when buying
+     */
+    @observable buyerTerms
+  
     /**
      * {Number} The total amount (sats) sent as payments so far,
      * does not include tx fees used to open and close channel.
@@ -95,11 +98,11 @@ class TorrentStore {
                  uploadSpeed,
                  uploadedTotal,
                  name,
-                 sellerPrice,
-                 buyerPrice,
                  numberOfSeeders,
+                 sellerTerms,
                  numberOfPiecesSoldAsSeller,
                  totalRevenueFromPiecesAsSeller,
+                 buyerTerms,
                  totalSpendingOnPiecesAsBuyer,
                  starter,
                  stopper,
@@ -140,8 +143,10 @@ class TorrentStore {
         this._paidDownloadStarter = paidDownloadStarter
         this._uploadBeginner = uploadBeginner
         this._uploadStopper = uploadStopper
+      this.setSellerTerms(sellerTerms)
       this.setNumberOfPiecesSoldAsSeller(numberOfPiecesSoldAsSeller)
       this.setTotalRevenueFromPiecesAsSeller(totalRevenueFromPiecesAsSeller)
+      this.setBuyerTerms(buyerTerms)
       this.setTotalSpendingOnPiecesAsBuyer(totalSpendingOnPiecesAsBuyer)
     }
 
@@ -216,8 +221,8 @@ class TorrentStore {
     }
 
     @action.bound
-    setSellerPrice (sellerTerms) {
-      this.sellerPrice = sellerTerms.minPrice
+    setSellerTerms (sellerTerms) {
+      this.sellerTerms = sellerTerms
     }
 
     @action.bound
@@ -231,8 +236,8 @@ class TorrentStore {
     }
 
     @action.bound
-    setBuyerPrice (buyerTerms) {
-      this.buyerPrice = buyerTerms.maxPrice
+    setBuyerTerms (buyerTerms) {
+      this.buyerTerms = buyerTerms
     }
 
     @action.bound
