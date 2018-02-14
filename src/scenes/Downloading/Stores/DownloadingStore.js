@@ -45,31 +45,10 @@ class DownloadingStore {
     this.setState(DownloadingStore.STATE.InitState)
   }
 
-  /**
-   * WIP
-   */
 
-  @computed get
-  viabilityOfPaidDownloadingTorrent() {
 
-    if(this.state.startsWith("Active.DownloadIncomplete.Unpaid.Stopped"))
-      return new ViabilityOfPaidDownloadingTorrent.Stopped()
-    else if(this.state.startsWith("Active.DownloadIncomplete.Paid"))
-      return new ViabilityOfPaidDownloadingTorrent.AlreadyStarted()
-    else if(!(this.viabilityOfPaidDownloadInSwarm instanceof ViabilityOfPaidDownloadInSwarm.Viable))
-      return new ViabilityOfPaidDownloadingTorrent.InViable(this.viabilityOfPaidDownloadInSwarm)
-    else {
 
-      // Here it must be that swarm is viable, by
-      // test in prior step
 
-      throw Error('please remove this._applicationStore ')
-
-      if(this._applicationStore.unconfirmedBalance == 0) // <== fix later to be a more complex constraint
-        return new ViabilityOfPaidDownloadingTorrent.InsufficientFunds(this.viabilityOfPaidDownloadInSwarm.estimate, this._applicationStore.unconfirmedBalance)
-      else
-        return new ViabilityOfPaidDownloadingTorrent.CanStart(this.viabilityOfPaidDownloadInSwarm.suitableAndJoined, this.viabilityOfPaidDownloadInSwarm.estimate)
-    }
 
   }
   
