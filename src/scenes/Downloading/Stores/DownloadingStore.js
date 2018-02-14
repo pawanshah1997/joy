@@ -114,14 +114,6 @@ class DownloadingStore {
   }
   
   @computed get
-  totalSpent () {
-    
-    return this.torrentRowStores.reduce((accumulator, torrentRowStore) => {
-      return accumulator + torrentRowStore.torrentStore.totalSpent
-    }, 0)
-  }
-  
-  @computed get
   totalDownloadSpeed () {
     return this.torrentRowStores.reduce((accumulator, torrentStore) => {
       return accumulator + torrentStore.downloadSpeed
