@@ -23,7 +23,7 @@ var Unpaid = new BaseMachine({
 
             start : function (client) {
 
-              client.joystreamNodeTorrent.handle.resume()
+              client._joystreamNodeTorrent.handle.resume()
 
               Common.startExtension(client)
 

@@ -35,7 +35,7 @@ var Started = new BaseMachine({
               Common.stopExtension(client)
 
               // Stop libtorrent torrent
-              client.joystreamNodeTorrent.handle.pause()
+              client._joystreamNodeTorrent.handle.pause()
 
               this.go(client, '../Stopped')
             },
@@ -177,7 +177,7 @@ var Started = new BaseMachine({
 
                 } else {
 
-                    client.joystreamNodeTorrent.startDownloading(tx, client.downloadInfoMap, (err, res) => {
+                    client._joystreamNodeTorrent.startDownloading(tx, client.downloadInfoMap, (err, res) => {
                       client._submitInput('paidDownloadInitiationCompleted', err, res)
                     })
 
