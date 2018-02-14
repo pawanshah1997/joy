@@ -20,7 +20,7 @@ var Loading = new BaseMachine({
           addedToSession: function (client, torrent) {
             
             // Hold on to torrent
-            client.joystreamNodeTorrent = torrent
+            client._joystreamNodeTorrent = torrent
 
             // Hook into torrent events
 
