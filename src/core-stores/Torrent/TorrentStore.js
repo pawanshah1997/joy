@@ -293,8 +293,9 @@ class TorrentStore {
 
       this.peerStores.forEach((store, pid) => {
 
-        if(store.peerIsBuyer)
+        if(store.peerIsBuyer) {
           n++
+        }
 
       })
 
@@ -307,8 +308,10 @@ class TorrentStore {
 
       this.peerStores.forEach((store, pid) => {
 
-        if(store.peerIsSeller)
+        if(store.peerIsSeller) {
           n++
+        }
+        
       })
 
       return n
@@ -320,8 +323,10 @@ class TorrentStore {
 
       this.peerStores.forEach((store, pid) => {
 
-        if(store.peerIsObserver)
+        if(store.peerIsObserver) {
           n++
+        }
+        
       })
 
       return n
@@ -333,8 +338,10 @@ class TorrentStore {
 
       this.peerStores.forEach((store, pid) => {
 
-        if(store.peerSupportsProtocol)
+        if(store.peerSupportsProtocol) {
           n++
+        }
+        
       })
 
       return n
