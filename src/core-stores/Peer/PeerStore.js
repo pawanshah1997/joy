@@ -69,3 +69,5 @@ class PeerStore {
 function hasConnection(status) {
   return (status.peerBitSwaprBEPSupportStatus === BEPSupportStatus.supported) && status.connection
 }
+
+export default PeerStore
