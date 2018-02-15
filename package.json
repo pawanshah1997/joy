@@ -102,7 +102,8 @@
     "version_compare": "0.0.3"
   },
   "standard": {
-    "parser": "babel-eslint"
+    "parser": "babel-eslint",
+    "globals": ["describe", "it"]
   },
   "config": {
     "forge": "./forge-config.js"
