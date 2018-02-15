@@ -1,1 +1,1 @@
-import ApplicationStore from '../../../src/core-stores/Torrent'
+import TorrentStore from '../../../src/core-stores/Torrent'
