@@ -346,109 +346,112 @@ class UIStore {
     assert(this.applicationStore)
 
     // Create TorrentStore
-    let torrentStore = new TorrentStore(
-      torrent.infoHash,
-      torrent.name,
-      torrent.savePath,
-      torrent.state,
-      torrent.torrentInfo ? torrent.torrentInfo.totalSize : 0, // Total size of torrent
-      torrent.progress,
-      torrent.downloadedSize,
-      torrent.downloadSpeed,
-      torrent.uploadSpeed,
-      torrent.uploadedTotal,
-      torrent.numberOfSeeders,
-      torrent.sellerTerms,
-      torrent.buyerTerms,
-      torrent.start.bind(torrent),
-      torrent.stop.bind(torrent),
-      torrent.startPaidDownload.bind(torrent),
-      torrent.beginUpload.bind(torrent),
-      torrent.endUpload.bind(torrent)
-    )
+    let torrentStore = new TorrentStore({
+      infoHash: torrent.infoHash,
+      name: torrent.name,
+      savePath: torrent.savePath,
+      state: torrent.state,
+      totalSize: torrent.torrentInfo ? torrent.torrentInfo.totalSize : 0, // Total size of torrent
+      progress: torrent.progress,
+      downloadedSize: torrent.downloadedSize,
+      downloadSpeed: torrent.downloadSpeed,
+      uploadSpeed: torrent.uploadSpeed,
+      uploadedTotal: torrent.uploadedTotal,
+      numberOfSeeders: torrent.numberOfSeeders,
+      sellerTerms: torrent.sellerTerms,
+      buyerTerms: torrent.buyerTerms,
+      numberOfPiecesSoldAsSeller: 0,
+      totalRevenueFromPiecesAsSeller: 0,
+      totalSpendingOnPiecesAsBuyer: 0,
+      starter: torrent.start.bind(torrent),
+      stopper: torrent.stop.bind(torrent),
+      paidDownloadStarter: torrent.startPaidDownload.bind(torrent),
+      uploadBeginner: torrent.beginUpload.bind(torrent),
+      uploadStopper: torrent.endUpload.bind(torrent)
+    })
 
     /// Hook into events
 
     torrent.on('state', action((state) => {
       torrentStore.setState(state)
     }))
-    
+
     torrent.on('viabilityOfPaidDownloadInSwarm', action((viabilityOfPaidDownloadInSwarm) => {
       torrentStore.setViabilityOfPaidDownloadInSwarm(viabilityOfPaidDownloadInSwarm)
     }))
-    
+
     torrent.on('buyerTerms', action((buyerTerms) => {
       torrentStore.setBuyerTerms(buyerTerms)
     }))
-    
+
     torrent.on('sellerTerms', action((sellerTerms) => {
       torrentStore.setSellerTerms(sellerTerms)
     }))
-    
+
     torrent.on('resumeData', action((resumeData) => {
       // Nothing to do
     }))
-  
+
     /**
      * When metadata comes in, we need to set some values on
      * the store
      */
     torrent.on('torrentInfo', action((torrentInfo) => {
-      
+
       torrentStore.setName(torrentInfo.name())
       torrentStore.setTotalSize(torrentInfo.totalSize())
     }))
-    
+
     // When torrent is finished, we have to count towards the navigator
     torrent.once('Active.FinishedDownloading', action(() => {
-    
+
       assert(this.applicationNavigationStore)
       this.applicationNavigationStore.handleTorrentCompleted()
-    
+
       /**
        * Add desktop notifications
        */
-    
+
       // Tell uploading store, which may need to know
       if(this.uploadingStore)
         this.uploadingStore.torrentFinishedDownloading(torrent.infoHash)
-      
+
     }))
-    
+
     // When torrent is found to not be a complete download
     torrent.once('Active.DownloadIncomplete', action(() => {
-    
+
       // Tell uploading store, which may need to know
       if(this.uploadingStore)
         this.uploadingStore.torrentDownloadIncomplete(torrent.infoHash)
     }))
-    
+
     torrent.on('progress', action((progress) => {
       torrentStore.setProgress(progress)
     }))
-    
+
     torrent.on('downloadedSize', action((downloadedSize) => {
       torrentStore.setDownloadedSize(downloadedSize)
     }))
-    
+
     torrent.on('downloadSpeed', action((downloadSpeed) => {
       torrentStore.setDownloadSpeed(downloadSpeed)
     }))
-    
+
     torrent.on('uploadedTotal', action((uploadedTotal) => {
       torrentStore.setUploadedTotal(uploadedTotal)
     }))
-    
+
     torrent.on('uploadSpeed', action((uploadSpeed) => {
       torrentStore.setUploadSpeed(uploadSpeed)
     }))
-    
+
     torrent.on('numberOfSeeders', action((numberOfSeeders) => {
       torrentStore.setNumberOfSeeders(numberOfSeeders)
     }))
-    
+
     torrent.on('paymentSent', action((paymentIncrement, totalNumberOfPayments, totalAmountPaid, pieceIndex) => {
-  
+
       /**
        * A naive mistake here is to miss the fact that a single torrent may involve
        * multiple failed attempts at paying different peers at different times, hence

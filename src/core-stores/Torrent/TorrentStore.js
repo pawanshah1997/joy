@@ -82,8 +82,8 @@ class TorrentStore {
      * {Map.<String,PeerStore>} Maps peer id to peer store for corresponding peer
      */
     @observable peerStores
-  
-    constructor (infoHash,
+
+    constructor ({infoHash,
                  name,
                  savePath,
                  state,
@@ -103,8 +103,8 @@ class TorrentStore {
                  stopper,
                  paidDownloadStarter,
                  uploadBeginner,
-                 uploadStopper) {
-      
+                 uploadStopper}) {
+
       this.setInfoHash(infoHash)
       this.setName(name)
       this.setSavePath(savePath)
