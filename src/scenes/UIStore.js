@@ -147,34 +147,34 @@ class UIStore {
    * @param application {Application}
    */
   constructor(application) {
-    
+
     this.totalRevenueFromPieces = 0
     this.numberOfPiecesSoldAsSeller = 0
     this.totalSpendingOnPieces = 0
-    
+
     // Hold on to application instance
     this._application = application
 
     // Create application store
-    this.applicationStore = new ApplicationStore(
-      application.state,
-      application.startedResources,
-      application.onboardingTorrents,
-      application.applicationSettings,
+    this.applicationStore = new ApplicationStore({
+      state: application.state,
+      startedResources: application.startedResources,
+      onboardingTorrents: application.onboardingTorrents,
+      applicationSettings: application.applicationSettings,
 
       // We create WalletStore, PriceFeedStore instances when application starts
-      null,
-      null,
+      walletStore: null,
+      priceFeedStore: null,
 
-      new Map(),
+      torrentStores: new Map(),
 
       // Map store user actions onto underlying application
 
-      application.start.bind(application),
-      application.stop.bind(application),
-      application.addTorrent.bind(application),
-      application.removeTorrent.bind(application)
-    )
+      starter: application.start.bind(application),
+      stopper: application.stop.bind(application),
+      torrentAdder: application.addTorrent.bind(application),
+      torrentRemover: application.removeTorrent.bind(application)
+    })
 
     // Hook into key application events, and set our observables based
     // on current values

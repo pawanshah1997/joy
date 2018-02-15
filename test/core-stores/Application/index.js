@@ -20,31 +20,13 @@ const createInitialValues = () => {
   }
 }
 
-const createConstructorArgs = (initialValues) => {
-  return [
-    initialValues.state,
-    initialValues.startedResources,
-    initialValues.onboardingTorrents,
-    initialValues.onboardingIsEnabled,
-    initialValues.applicationSettings,
-    initialValues.walletStore,
-    initialValues.priceFeedStore,
-    initialValues.torrentStores,
-    initialValues.starter,
-    initialValues.stopper,
-    initialValues.torrentAdder,
-    initialValues.torrentRemover
-  ]
-}
-
 describe('Application Store', function () {
 
   let initialValues, constructorArgs, applicationStore
 
   beforeEach(function () {
     initialValues = createInitialValues()
-    constructorArgs = createConstructorArgs(initialValues)
-    applicationStore = new ApplicationStore(...constructorArgs)
+    applicationStore = new ApplicationStore(initialValues)
   })
 
   describe('constructor', function () {

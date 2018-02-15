@@ -59,7 +59,19 @@ class ApplicationStore {
    * @param torrentAdder {Function} -
    * @param torrentRemover {Function} -
    */
-  constructor(state, startedResources, onboardingTorrents, onboardingIsEnabled, applicationSettings, walletStore, priceFeedStore, torrentStores, starter, stopper, torrentAdder, torrentRemover) {
+  constructor({
+    state,
+    startedResources,
+    onboardingTorrents,
+    onboardingIsEnabled,
+    applicationSettings,
+    walletStore,
+    priceFeedStore,
+    torrentStores,
+    starter,
+    stopper,
+    torrentAdder,
+    torrentRemover}) {
 
     this.setState(state)
     this.setStartedResources(startedResources)
