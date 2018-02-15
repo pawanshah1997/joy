@@ -150,6 +150,37 @@ describe('Application Store', function () {
         applicationStore = new ApplicationStore(...constructorArgs)
       })
 
+      it('adds new torrent store to torrent stores', function () {
+        const settings = 'abc'
+        const callback = sinon.spy()
+
+        applicationStore.addTorrent(settings, callback)
+
+        const infoHash = 'xyz'
+
+        assert(!applicationStore.torrentStores.has(infoHash))
+
+        applicationStore.onNewTorrentStore({
+          infoHash: infoHash
+        })
+
+        assert(applicationStore.torrentStores.has(infoHash))
+      })
+
+      it('invokes pending user callback', function () {
+        const settings = {infoHash: 'abc'}
+        const callback = sinon.spy()
+
+        applicationStore.addTorrent(settings, callback)
+
+        assert(!callback.called)
+
+        applicationStore.onNewTorrentStore({
+          infoHash: settings.infoHash
+        })
+
+        assert(callback.called)
+      })
 
     })
 
