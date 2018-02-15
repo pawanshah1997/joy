@@ -39,15 +39,16 @@ const createConstructorArgs = (initialValues) => {
 
 describe('Application Store', function () {
 
+  let initialValues, constructorArgs, applicationStore
+
+  beforeEach(function () {
+    initialValues = createInitialValues()
+    constructorArgs = createConstructorArgs(initialValues)
+    applicationStore = new ApplicationStore(...constructorArgs)
+  })
+
   describe('constructor', function () {
-
     it('initializes observables', function () {
-      const initialValues = createInitialValues()
-      const constructorArgs = createConstructorArgs(initialValues)
-
-      // NB: ctor should really be passed in an object rather than a long list of arguments
-      const applicationStore = new ApplicationStore(...constructorArgs)
-
       // checks public observale value on store matches initial values
       function checkInitialValue (store, valuesMap, observableName) {
         assert.deepEqual(store[observableName], valuesMap[observableName])
@@ -67,14 +68,6 @@ describe('Application Store', function () {
   })
 
   describe('actions', function () {
-    let initialValues, constructorArgs, applicationStore
-
-    beforeEach(function () {
-      initialValues = createInitialValues()
-      constructorArgs = createConstructorArgs(initialValues)
-      applicationStore = new ApplicationStore(...constructorArgs)
-    })
-
     it('setState', function () {
       let value = 'newstate'
       applicationStore.setState(value)
@@ -105,13 +98,13 @@ describe('Application Store', function () {
       assert.equal(applicationStore.onboardingIsEnabled, value)
     })
 
-    it('start', function() {
+    it('start', function () {
       applicationStore.start()
 
       assert(initialValues.starter.called)
     })
 
-    it('stop', function() {
+    it('stop', function () {
       applicationStore.stop()
 
       assert(initialValues.stopper.called)
@@ -142,15 +135,7 @@ describe('Application Store', function () {
     })
 
     describe('onNewTorrentStore', function () {
-      let initialValues, constructorArgs, applicationStore
-
-      beforeEach(function () {
-        initialValues = createInitialValues()
-        constructorArgs = createConstructorArgs(initialValues)
-        applicationStore = new ApplicationStore(...constructorArgs)
-      })
-
-      it('adds new torrent store to torrent stores', function () {
+      it('adds new torrent store to torrentStores', function () {
         const settings = 'abc'
         const callback = sinon.spy()
 
@@ -169,32 +154,59 @@ describe('Application Store', function () {
 
       it('invokes pending user callback', function () {
         const settings = {infoHash: 'abc'}
-        const callback = sinon.spy()
+        const addedCallback = sinon.spy()
 
-        applicationStore.addTorrent(settings, callback)
+        applicationStore.addTorrent(settings, addedCallback)
 
-        assert(!callback.called)
+        assert(!addedCallback.called)
 
         applicationStore.onNewTorrentStore({
           infoHash: settings.infoHash
         })
 
-        assert(callback.called)
+        assert(addedCallback.called)
       })
 
     })
 
     describe('onTorrentRemoved', function () {
-      let initialValues, constructorArgs, applicationStore
+      let infoHash, settings, addedCallback, removedCallback
 
       beforeEach(function () {
-        initialValues = createInitialValues()
-        constructorArgs = createConstructorArgs(initialValues)
-        applicationStore = new ApplicationStore(...constructorArgs)
+        infoHash = 'abc'
+        settings = {infoHash: infoHash}
+        addedCallback = sinon.spy()
+        removedCallback = sinon.spy()
+
+        applicationStore.addTorrent(settings, addedCallback)
+
+        applicationStore.onNewTorrentStore({
+          infoHash: infoHash
+        })
       })
 
+      it('removes torrent store', function () {
+        assert(applicationStore.torrentStores.has(infoHash))
+
+        applicationStore.removeTorrent(infoHash, false, removedCallback)
+
+        applicationStore.onTorrentRemoved(infoHash)
+
+        assert(!applicationStore.torrentStores.has(infoHash))
+      })
+
+      it('invokes pending callback', function () {
+        assert(applicationStore.torrentStores.has(infoHash))
+
+        applicationStore.removeTorrent(infoHash, false, removedCallback)
+
+        assert(!removedCallback.called)
+
+        applicationStore.onTorrentRemoved(infoHash)
+
+        assert(removedCallback.called)
+      })
     })
 
   })
-
 })
