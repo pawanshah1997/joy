@@ -858,8 +858,8 @@ class Application extends EventEmitter {
   }
 
   _totalWalletBalanceChanged = (balance) => {
-
-    console.log('totalBalanceChanged: ' + balance)
+  
+    debug('new total balance: ' + balance)
 
     if(this.state === Application.STATE.STARTED) {
 
