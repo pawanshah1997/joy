@@ -176,7 +176,7 @@ class Torrent extends EventEmitter {
       // Update public state
       this.state = stateString
 
-      console.log('Torrent: ' + stateString)
+      debug('entering state: ' + stateString)
 
       this.emit('state', stateString)
       this.emit(stateString, data)
