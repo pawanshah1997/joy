@@ -204,6 +204,8 @@ class Application extends EventEmitter {
    */
 
   start(config, appDirectory, onStarted = () => {} ) {
+    
+    debug('starting')
 
     // Make sure we can start
     if(this.state !== Application.STATE.STOPPED)
@@ -316,7 +318,7 @@ class Application extends EventEmitter {
 
     // Create & start session
     // We assume that the session has already started after this call
-    this._joystreamNodeSession = new JoystreamNodeSession(sessionSettings)
+    this._joystreamNodeSession = new Session(sessionSettings)
 
     // Setup polling of torrent plugin statuses
     this._torrentUpdateInterval = setInterval(() => {
@@ -341,7 +343,7 @@ class Application extends EventEmitter {
 
     db.open(torrentDatabaseFolder)
       .then((torrentDatabase) => {
-
+        
         // Hold on to torrent database
         this._torrentDatabase = torrentDatabase
 
@@ -503,8 +505,9 @@ class Application extends EventEmitter {
       /**
        * Stop Joystream node session
        */
-
+      
       this._joystreamNodeSession.pauseLibtorrent((err) => {
+        
         assert(!err)
 
         clearInterval(this._torrentUpdateInterval)
@@ -550,7 +553,7 @@ class Application extends EventEmitter {
 
       this._stoppedResource(Application.RESOURCE.WALLET, onStopped)
     })
-
+    
     this.wallet.stop()
   }
 
@@ -890,7 +893,7 @@ class Application extends EventEmitter {
 
     console.log('priceFeed [error]:')
     console.log('Could not fetch exchange rate, likely due to no internet, or broken endpoint.')
-    console.error(err)
+    console.log(err)
   }
 
   addExampleTorrents () {
