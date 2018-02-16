@@ -3,9 +3,5 @@
  */
 
 import PriceFeed from './PriceFeed'
-import PriceFeedStore from '../../core-stores/PriceFeed'
 
 export default PriceFeed
-export {
-  PriceFeedStore
-}
