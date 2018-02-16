@@ -92,7 +92,7 @@ var Loading = new BaseMachine({
             torrent.on('sentPayment', function (alert) {
               client._submitInput('processSentPayment', alert)
             })
-
+            
             torrent.on('downloadStarted', function (alert) {
               // this only happens on success, we can't use this without a corresponding
               // error alert to indicate download starting failed
@@ -102,19 +102,10 @@ var Loading = new BaseMachine({
             torrent.on('allSellersGone', function (alert) {
               client._submitInput('allSellersGone', alert)
             })
-
-            // DO we have new peers
-            /* torrent.on('dhtGetPeersReply', function (peers) {
-              for (var i in peers) {
-                console.log(peers[i])
-                torrent.connectPeer(peers[i])
-              }
-              console.log(peers)
-            }) */
-
+            
             // If we don´t have metadata, wait for it
             if(client.torrentInfo && client.torrentInfo.isValid()) {
-
+          
               this.transition(client, 'CheckingPartialDownload')
               // We already have valid torrentInfo why getting again?
               // const torrentInfo = client._joystreamNodeTorrent.handle.torrentFile()
