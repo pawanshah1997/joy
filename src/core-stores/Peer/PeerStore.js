@@ -2,7 +2,7 @@
  * Created by bedeho on 10/02/2018.
  */
 
-import { observable, action } from 'mobx'
+import { observable, action, computed } from 'mobx'
 import { BEPSupportStatus } from 'joystream-node'
 
 class PeerStore {
