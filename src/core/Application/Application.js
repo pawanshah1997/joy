@@ -217,7 +217,7 @@ class Application extends EventEmitter {
 
     // Add a logger if log level is specified
     if(config.logLevel)
-      spvOptions.logger = bcoin.logger({ level: config.logLevel })
+      spvOptions.logger = new bcoin.logger({ level: config.logLevel })
 
     // Create the SPV Node
     let spvNode = new bcoin.SPVNode(spvOptions)
