@@ -195,6 +195,9 @@ class Application extends EventEmitter {
    * already exists.
    *
    * @param config
+   * @param config.network {String} - Bitcoin network (tesnet|mainnet)
+   * @param config.assistedPeerDiscovery {Bool} - enable SecondaryDHT (joystream assisted peer discovery)
+   * @param config.bitTorrentPort {Number} - libtorrent listening port (0 means libtorrent picks)
    * @param appDirectory {String} - the application directory, that is where the root
    * folder where the the file/folder tree of the application lives.
    * @param onStarted {Func} - callback called when start attempt is open
