@@ -63,8 +63,8 @@ class WalletStore {
   }
 
   @action.bound
-  setState(status) {
-    this.status = status
+  setState(state) {
+    this.state = state
   }
 
   @action.bound
