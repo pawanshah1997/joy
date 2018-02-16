@@ -147,34 +147,32 @@ class UIStore {
    * @param application {Application}
    */
   constructor(application) {
-    
+
     this.totalRevenueFromPieces = 0
     this.numberOfPiecesSoldAsSeller = 0
     this.totalSpendingOnPieces = 0
-    
+
     // Hold on to application instance
     this._application = application
 
     // Create application store
-    this.applicationStore = new ApplicationStore(
-      application.state,
-      application.startedResources,
-      application.onboardingTorrents,
-      application.applicationSettings,
+    this.applicationStore = new ApplicationStore({
+      state: application.state,
+      startedResources: application.startedResources,
+      onboardingTorrents: application.onboardingTorrents,
+      applicationSettings: application.applicationSettings,
 
       // We create WalletStore, PriceFeedStore instances when application starts
-      null,
-      null,
-
-      new Map(),
+      walletStore: null,
+      priceFeedStore: null,
 
       // Map store user actions onto underlying application
 
-      application.start.bind(application),
-      application.stop.bind(application),
-      application.addTorrent.bind(application),
-      application.removeTorrent.bind(application)
-    )
+      starter: application.start.bind(application),
+      stopper: application.stop.bind(application),
+      torrentAdder: application.addTorrent.bind(application),
+      torrentRemover: application.removeTorrent.bind(application)
+    })
 
     // Hook into key application events, and set our observables based
     // on current values
@@ -346,109 +344,112 @@ class UIStore {
     assert(this.applicationStore)
 
     // Create TorrentStore
-    let torrentStore = new TorrentStore(
-      torrent.infoHash,
-      torrent.name,
-      torrent.savePath,
-      torrent.state,
-      torrent.torrentInfo ? torrent.torrentInfo.totalSize : 0, // Total size of torrent
-      torrent.progress,
-      torrent.downloadedSize,
-      torrent.downloadSpeed,
-      torrent.uploadSpeed,
-      torrent.uploadedTotal,
-      torrent.numberOfSeeders,
-      torrent.sellerTerms,
-      torrent.buyerTerms,
-      torrent.start.bind(torrent),
-      torrent.stop.bind(torrent),
-      torrent.startPaidDownload.bind(torrent),
-      torrent.beginUpload.bind(torrent),
-      torrent.endUpload.bind(torrent)
-    )
+    let torrentStore = new TorrentStore({
+      infoHash: torrent.infoHash,
+      name: torrent.name,
+      savePath: torrent.savePath,
+      state: torrent.state,
+      totalSize: torrent.torrentInfo ? torrent.torrentInfo.totalSize : 0, // Total size of torrent
+      progress: torrent.progress,
+      downloadedSize: torrent.downloadedSize,
+      downloadSpeed: torrent.downloadSpeed,
+      uploadSpeed: torrent.uploadSpeed,
+      uploadedTotal: torrent.uploadedTotal,
+      numberOfSeeders: torrent.numberOfSeeders,
+      sellerTerms: torrent.sellerTerms,
+      buyerTerms: torrent.buyerTerms,
+      numberOfPiecesSoldAsSeller: 0,
+      totalRevenueFromPiecesAsSeller: 0,
+      totalSpendingOnPiecesAsBuyer: 0,
+      starter: torrent.start.bind(torrent),
+      stopper: torrent.stop.bind(torrent),
+      paidDownloadStarter: torrent.startPaidDownload.bind(torrent),
+      uploadBeginner: torrent.beginUpload.bind(torrent),
+      uploadStopper: torrent.endUpload.bind(torrent)
+    })
 
     /// Hook into events
 
     torrent.on('state', action((state) => {
       torrentStore.setState(state)
     }))
-    
+
     torrent.on('viabilityOfPaidDownloadInSwarm', action((viabilityOfPaidDownloadInSwarm) => {
       torrentStore.setViabilityOfPaidDownloadInSwarm(viabilityOfPaidDownloadInSwarm)
     }))
-    
+
     torrent.on('buyerTerms', action((buyerTerms) => {
       torrentStore.setBuyerTerms(buyerTerms)
     }))
-    
+
     torrent.on('sellerTerms', action((sellerTerms) => {
       torrentStore.setSellerTerms(sellerTerms)
     }))
-    
+
     torrent.on('resumeData', action((resumeData) => {
       // Nothing to do
     }))
-  
+
     /**
      * When metadata comes in, we need to set some values on
      * the store
      */
     torrent.on('torrentInfo', action((torrentInfo) => {
-      
+
       torrentStore.setName(torrentInfo.name())
       torrentStore.setTotalSize(torrentInfo.totalSize())
     }))
-    
+
     // When torrent is finished, we have to count towards the navigator
     torrent.once('Active.FinishedDownloading', action(() => {
-    
+
       assert(this.applicationNavigationStore)
       this.applicationNavigationStore.handleTorrentCompleted()
-    
+
       /**
        * Add desktop notifications
        */
-    
+
       // Tell uploading store, which may need to know
       if(this.uploadingStore)
         this.uploadingStore.torrentFinishedDownloading(torrent.infoHash)
-      
+
     }))
-    
+
     // When torrent is found to not be a complete download
     torrent.once('Active.DownloadIncomplete', action(() => {
-    
+
       // Tell uploading store, which may need to know
       if(this.uploadingStore)
         this.uploadingStore.torrentDownloadIncomplete(torrent.infoHash)
     }))
-    
+
     torrent.on('progress', action((progress) => {
       torrentStore.setProgress(progress)
     }))
-    
+
     torrent.on('downloadedSize', action((downloadedSize) => {
       torrentStore.setDownloadedSize(downloadedSize)
     }))
-    
+
     torrent.on('downloadSpeed', action((downloadSpeed) => {
       torrentStore.setDownloadSpeed(downloadSpeed)
     }))
-    
+
     torrent.on('uploadedTotal', action((uploadedTotal) => {
       torrentStore.setUploadedTotal(uploadedTotal)
     }))
-    
+
     torrent.on('uploadSpeed', action((uploadSpeed) => {
       torrentStore.setUploadSpeed(uploadSpeed)
     }))
-    
+
     torrent.on('numberOfSeeders', action((numberOfSeeders) => {
       torrentStore.setNumberOfSeeders(numberOfSeeders)
     }))
-    
+
     torrent.on('paymentSent', action((paymentIncrement, totalNumberOfPayments, totalAmountPaid, pieceIndex) => {
-  
+
       /**
        * A naive mistake here is to miss the fact that a single torrent may involve
        * multiple failed attempts at paying different peers at different times, hence

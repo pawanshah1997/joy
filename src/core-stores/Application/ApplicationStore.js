@@ -1,22 +1,22 @@
 import { observable, action, computed} from 'mobx'
 
 class ApplicationStore {
-  
+
   /**
    * {Application.STATE} State of application
    */
   @observable state
-  
+
   /**
    * {Set.<Application.RESOURCE>} The resources which are currently started
    */
   @observable startedResources
-  
+
   /**
    * {Array.<String>}
    */
   onboardingTorrents
-  
+
   /**
    * {Bool} Whether onboarding is enabled
    */
@@ -37,13 +37,13 @@ class ApplicationStore {
    * @propety {PriceFeedStore}
    */
   priceFeedStore
-  
+
   /**
    * {Map.<TorrentStore>} All torrent stores currently on application core
    * NB: Turn into Map later
    */
   @observable torrentStores
-  
+
   /**
    * Constructor
    * @param state {String} - current state of application
@@ -59,8 +59,19 @@ class ApplicationStore {
    * @param torrentAdder {Function} -
    * @param torrentRemover {Function} -
    */
-  constructor(state, startedResources, onboardingTorrents, onboardingIsEnabled, applicationSettings, walletStore, priceFeedStore, torrentStores, starter, stopper, torrentAdder, torrentRemover) {
-    
+  constructor({
+    state,
+    startedResources,
+    onboardingTorrents,
+    onboardingIsEnabled,
+    applicationSettings,
+    walletStore,
+    priceFeedStore,
+    starter,
+    stopper,
+    torrentAdder,
+    torrentRemover}) {
+
     this.setState(state)
     this.setStartedResources(startedResources)
     this.onboardingTorrents = onboardingTorrents
@@ -68,12 +79,12 @@ class ApplicationStore {
     this.applicationSettings = applicationSettings
     this.walletStore = walletStore
     this.priceFeedStore = priceFeedStore
-    this._setTorrentStores(torrentStores)
+    this._setTorrentStores(new Map())
     this._starter = starter
     this._stopper = stopper
     this._torrentAdder = torrentAdder
     this._torrentRemover = torrentRemover
-  
+
     /**
      * The purpose of this map is to provide a callback interface for `pay`,
      * which returns a `{@link TorrentStore}, but at the same time allows the
@@ -90,7 +101,7 @@ class ApplicationStore {
     this._pendingAddTorrentCallsMap = new Map()
     this._pendingRemoveTorrentCallsMap = new Map()
   }
-  
+
   @action.bound
   setState(state) {
     this.state = state
@@ -100,114 +111,114 @@ class ApplicationStore {
   setStartedResources(startedResources) {
     this.startedResources = startedResources
   }
-  
+
   @action.bound
   setOnboardingIsEnabled(onboardingIsEnabled) {
     this.onboardingIsEnabled = onboardingIsEnabled
   }
-  
+
   @action.bound
   onNewTorrentStore(torrentStore) {
-    
+
     const infoHash = torrentStore.infoHash
-    
+
     // Check that we don't already
     if(this.torrentStores.has(infoHash))
       throw Error('Torrent already added')
-    
+
     // Add to map
     this.torrentStores.set(infoHash, torrentStore)
-    
+
     // Service any pending `addTorrent` user callback
     let userCallback = this._pendingAddTorrentCallsMap.get(infoHash)
-    
+
     if(userCallback) {
-      
+
       // cleanup
       this._pendingAddTorrentCallsMap.delete(infoHash)
-      
+
       // make call
       userCallback()
     }
-    
+
   }
-  
+
   /**
    * Consider adding onAddTorrentFailed
    * in the future, to notify user of failed
    * attempts?
    */
-  
+
   @action.bound
   onTorrentRemoved(infoHash) {
-    
+
     if(!this.torrentStores.has(infoHash))
       throw Error('Torrent not present')
-    
+
     // Its here, so lets remove it from the map
     this.torrentStores.delete(infoHash)
-    
+
     // Service any pending `removeTorrent` user callbacks
     let userCallback = this._pendingRemoveTorrentCallsMap.get(infoHash)
-    
+
     if(userCallback) {
-      
+
       // cleanup
       this._pendingRemoveTorrentCallsMap.delete(infoHash)
-     
+
       // make call
       userCallback()
     }
-  
+
   }
-  
+
   /**
    * Consider adding onTorrentRemoveFailed
    * in the future, to notify user of failed
    * attempts?
    */
-  
+
   @action.bound
   _setTorrentStores(torrentStores) {
     this.torrentStores = torrentStores
   }
-  
+
   @action.bound
   addTorrent (settings, onTorrentStoreAdded) {
-    
+
     // We guard against duplicate pending calls
     if(this._pendingAddTorrentCallsMap.has(settings.infoHash))
       throw Error('Cannot add a torrent while a prior call is still being resolved for the same torrent.')
-    
+
     // Hold on to user callback
     this._pendingAddTorrentCallsMap.set(settings.infoHash, onTorrentStoreAdded)
-    
+
     // Add
     this._torrentAdder(settings)
   }
-  
+
   @action.bound
   removeTorrent (infoHash, deleteData, onTorrentRemoved) {
-    
+
     if(this._pendingRemoveTorrentCallsMap.has(infoHash))
       throw Error('Cannot remove torrent while pror call is still being respøved for the same torrent')
-    
+
     // Hold on to user callback
     this._pendingRemoveTorrentCallsMap.set(infoHash, onTorrentRemoved)
-    
-    this._torrentRemover(infoHash, deleteData, onTorrentRemoved)
+
+    this._torrentRemover(infoHash, deleteData, this.onTorrentRemoved)
   }
-  
+
   @action.bound
   start() {
     this._starter()
   }
-  
+
   @action.bound
   stop () {
     this._stopper()
   }
-  
+
 }
 
 export default ApplicationStore

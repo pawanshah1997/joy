@@ -505,7 +505,7 @@ class Application extends EventEmitter {
    * @param settings {Object} - document ???
    * @param fun {Func}  - Callback, returns {@link Torrent} on success, error string otherwise
    */
-  addTorrent(settings, onAdded) {
+  addTorrent(settings, onAdded = () => {}) {
 
     /**
      * There is a lot of weird copying and decoding going on here

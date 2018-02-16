@@ -70,8 +70,20 @@ class PaymentStore {
   /**
    * Constructor
    */
-  constructor(type, txId, outputIndex, seenDate, minedDate, toAddress, amount, fee, confirmed, blockIdOfBlockHoldingTransaction, blockHeightOfBlockHoldingTransaction, note) {
-    
+  constructor({
+        type,
+        txId,
+        outputIndex,
+        seenDate,
+        minedDate,
+        toAddress,
+        amount,
+        fee,
+        confirmed,
+        blockIdOfBlockHoldingTransaction,
+        blockHeightOfBlockHoldingTransaction,
+        note}) {
+
     this.setType(type)
     this.setTxId(txId)
     this.setOutputIndex(outputIndex)
@@ -80,10 +92,11 @@ class PaymentStore {
     this.setToAddress(toAddress)
     this.setAmount(amount)
     this.setFee(fee)
+    this.setConfirmed(confirmed)
     this.setBlockIdOfBlockHoldingTransaction(blockIdOfBlockHoldingTransaction)
     this.setBlockHeightOfBlockHoldingTransaction(blockHeightOfBlockHoldingTransaction)
     this.setNote(note)
-    
+
   }
 
   @action.bound

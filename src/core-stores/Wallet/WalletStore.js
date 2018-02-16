@@ -6,6 +6,8 @@ import {observable, action, computed} from 'mobx'
 
 import PaymentStore from './PaymentStore'
 
+import bcoin from 'bcoin'
+
 class WalletStore {
 
   /**
@@ -63,8 +65,8 @@ class WalletStore {
   }
 
   @action.bound
-  setState(status) {
-    this.status = status
+  setState(state) {
+    this.state = state
   }
 
   @action.bound
