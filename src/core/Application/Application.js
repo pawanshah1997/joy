@@ -832,18 +832,18 @@ class Application extends EventEmitter {
 
     // what about the fact that we never take wallet out?!
     // how can we be symmetric here in that case?
-
-    // If all resources have stopped, then we are done!
-    if(this.startedResources.size === 0) {
-      this._setState(Application.STATE.STOPPED)
-
-      // Make user callback
-      onStopped(null, true)
-    }
-
+    
     // tell the world
     this.emit('resourceStopped', resource)
     this.emit('startedResources', this.startedResources)
+  
+    // If all resources have stopped, then we are done!
+    if(this.startedResources.size === 0) {
+      this._setState(Application.STATE.STOPPED)
+    
+      // Make user callback
+      onStopped(null, true)
+    }
   }
 
   _setState(state) {
