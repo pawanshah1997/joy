@@ -344,7 +344,7 @@ class TorrentStore {
     }
 
     startPaidDownload() {
-        this._paidDownloadStarter
+        this._paidDownloadStarter()
     }
 
     beginUploading() {
