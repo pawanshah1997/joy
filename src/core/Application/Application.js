@@ -750,40 +750,54 @@ class Application extends EventEmitter {
       onRemoved('No torrent added corresponding to given hash')
       return
     }
-
-    // Stop torrent
-    torrent.terminate()
-
-    /**
-     * Remove the torrent from the session
-     *
-     * Notice that we take it for granted that this will work, and
-     * we don't need to wait for some resource to come back, like in the
-     * addTorrent scenario
-     */
-    this._joystreamNodeSession.removeTorrent(infoHash, (err) => {
-
-      assert(!err)
-
-    })
-
-    // Remove the torrent from the db
-    this._torrentDatabase.remove('torrents', infoHash)
-      .then(() => {})
-      .catch(() => { console.log('Removing torrent from database failed.')})
-
-    // Delete torrent from the this map
-    this.torrents.delete(infoHash)
-
-    // If deleteData we want to remove the folder/file
-    if (deleteData) {
-      fullPath = path.join(torrent.savePath, torrent.name, path.sep)
-      shell.moveItemToTrash(fullPath)
+    
+    // Make sure torrent is not in the process or being
+    // added or removed
+    if(!torrent.state.startsWith('Active')) {
+      onRemoved('Can only remove torrent when its active, not while its being added or removed.')
+      return
     }
-
-    // Tell user about success
-    onRemoved(null, true)
-
+    
+    torrent.once('Terminated', () => {
+      
+      /**
+       * Remove the torrent from the session
+       *
+       * Notice that we take it for granted that this will work, and
+       * we don't need to wait for some resource to come back, like in the
+       * addTorrent scenario
+       */
+      this._joystreamNodeSession.removeTorrent(infoHash, (err) => {
+    
+        assert(!err)
+    
+      })
+      
+      // Remove the torrent from the db
+      this._torrentDatabase.remove('torrents', infoHash)
+        .then(() => {})
+        .catch(() => { console.log('Removing torrent from database failed.')})
+  
+      // Delete torrent from the this map,
+      this.torrents.delete(infoHash)
+      
+      // If deleteData we want to remove the folder/file
+      if (deleteData) {
+        let fullPath = path.join(torrent.savePath, torrent.name, path.sep)
+        shell.moveItemToTrash(fullPath)
+      }
+  
+      // Emit event
+      this.emit('torrentRemoved', infoHash)
+  
+      // Tell user about success
+      onRemoved(null, true)
+      
+    })
+    
+    // Stop torrent
+    torrent._terminate()
+    
   }
 
   _startedResource = (resource, onStarted) => {
