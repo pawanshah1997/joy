@@ -100,13 +100,11 @@ class Application extends EventEmitter {
    * RENAME: not resource, loading/ter milestone ?
    */
   static RESOURCE = {
-
-    SETTINGS : 1,
-    WALLET : 2,
-
-    JOYSTREAM_NODE_SESSION: 9,
-    PRICE_FEED : 10,
-    STORED_TORRENTS : 11
+    SETTINGS : 0,
+    WALLET : 1,
+    JOYSTREAM_NODE_SESSION: 2,
+    PRICE_FEED : 3,
+    STORED_TORRENTS : 4
   }
 
   static get NUMBER_OF_RESOURCE_TYPES() { Object.keys(Application.RESOURCE).length }
