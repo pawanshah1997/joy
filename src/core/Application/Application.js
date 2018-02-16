@@ -261,10 +261,13 @@ class Application extends EventEmitter {
 
     // Open settings (is synchronous), with given default values,
     // these are set on the first run
-    this.applicationSettings.open(0,
+    this.applicationSettings.open(
+      0,
       DEFAULT_APPLIATION_SETTINGS.makeDefaultSavePathFromBaseFolder(appDirectory),
       DEFAULT_APPLIATION_SETTINGS.useAssistedPeerDiscovery,
-      DEFAULT_APPLIATION_SETTINGS.bittorrentPort
+      DEFAULT_APPLIATION_SETTINGS.bittorrentPort,
+      DEFAULT_APPLIATION_SETTINGS.buyerTerms,
+      DEFAULT_APPLIATION_SETTINGS.sellerTerms
       )
 
     // Make sure some download folder actually exists, which
