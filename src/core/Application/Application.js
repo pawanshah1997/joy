@@ -412,45 +412,87 @@ class Application extends EventEmitter {
     /**
      * Terminate and remove torrents, and store settings
      */
-
-    if(torrents.size === 0)
-      onTorrentsTerminatedStoredAndRemoved()
+    
+    if(this.torrents.size === 0)
+      onTorrentsTerminatedStoredAndRemoved.bind(this)()
     else {
       // Add terminated handler for each torrent
       this.torrents.forEach((torrent, infoHash) => {
-
-        torrent.once('Terminated', () => {
-
-          assert(this.state === Application.STATE.STOPPING)
-
-          // store this somewhere
-          let encodedTorrentSettings = encodeTorrentSettings(torrent)
-
-          this._torrentDatabase.save('torrents', infoHash, encodedTorrentSettings)
-            .then(() => {})
-            .catch(() => {
-              console.log('Failed to save torrent to torrent storage: ' + encodedTorrentSettings)
+        
+        // If torrent is already stopping, then we
+        if(
+          torrent.state.startsWith('StoppingExtension') ||
+          torrent.state.startsWith('GeneratingResumeData')
+        ) {
+          
+          // then we just ignore it
+          
+        } else {
+  
+          torrent.once('Terminated', () => {
+    
+            assert(this.state === Application.STATE.STOPPING)
+    
+            /**
+             * Remove the torrent from the session
+             *
+             * Notice that we take it for granted that this will work, and
+             * we don't need to wait for some resource to come back, like in the
+             * addTorrent scenario
+             */
+            this._joystreamNodeSession.removeTorrent(infoHash, (err) => {
+      
+              assert(!err)
+      
             })
-
-          // remove from map
-          this.torrents.delete(infoHash)
-
-          // if this was the last one, then we are done
-          // terminating torrents!
-          if(this.torrents.size === 0)
-            onTorrentsTerminatedStoredAndRemoved()
-
-        })
+    
+            // store this somewhere
+            let encodedTorrentSettings = encodeTorrentSettings(torrent)
+    
+            this._torrentDatabase.save('torrents', infoHash, encodedTorrentSettings)
+              .then(() => {})
+              .catch(() => {
+                console.log('Failed to save torrent to torrent storage: ' + encodedTorrentSettings)
+              })
+    
+            // remove from map
+            this.torrents.delete(infoHash)
+    
+            // if this was the last one, then we are done
+            // terminating torrents!
+            if(this.torrents.size === 0)
+              onTorrentsTerminatedStoredAndRemoved.bind(this)()
+    
+          })
+          
+          // otherwise, if its loading
+          if(torrent.state.startsWith('Loading')) {
+    
+            // then we first wait for it to finish loading
+            // before asking it to terminate
+            torrent.once('loaded', () => {
+              torrent._terminate()
+            })
+    
+          } else {
+            
+            // otherwise if its not just loading,
+            // then its active - which is the most frequent scenario,
+            // and we can ask it it terminate immediately
+            
+            assert(torrent.state.startsWith('Active'))
+  
+            torrent._terminate()
+          }
+          
+        }
+        
       })
 
-      // Terminate all torrents
-      this.torrents.ForEach((torrent) => {
-        torrent.terminate()
-      })
     }
 
     function onTorrentsTerminatedStoredAndRemoved() {
-
+      
       this._torrentDatabase.close((err) => {
 
         assert(!err)
