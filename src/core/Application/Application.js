@@ -1,12 +1,21 @@
 import assert from "assert"
 import {EventEmitter} from "events"
-import ApplicationSettings from '../ApplicationSettings/ApplicationSettings'
-import Wallet from './core/Wallet'
-import DeepInitialState from '../Torrent/Statemchine/DeepInitialState'
+import ApplicationSettings from '../ApplicationSettings'
+import PriceFeed from '../PriceFeed'
+import Wallet from '../Wallet'
+import Torrent from '../Torrent'
+import DeepInitialState from '../Torrent/Statemachine/DeepInitialState'
 import getCoins from './faucet'
 import mkdirp from 'mkdirp'
 import WalletTopUpOptions from "./WalletTopUpOptions"
 import fs from 'fs'
+import path from 'path'
+import bcoin from 'bcoin'
+import { TorrentInfo, Session } from 'joystream-node'
+import db from '../../db'
+
+var debug = require('debug')('application')
+import {shell} from 'electron'
 
 const FOLDER_NAME = {
   WALLET: 'wallet',
