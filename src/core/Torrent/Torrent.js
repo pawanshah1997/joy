@@ -133,7 +133,7 @@ class Torrent extends EventEmitter {
     this.name = settings.name
     this.savePath = settings.savePath
     this.resumeData = settings.resumeData
-    this.torrentInfo = settings.torrentInfo
+    this.torrentInfo = settings.metadata
     this._deepInitialState = settings.deepInitialState
     
     // Check that compatibility in deepInitialState and {buyerTerms, sellerTerms},
