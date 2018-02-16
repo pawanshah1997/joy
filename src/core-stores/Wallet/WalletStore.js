@@ -6,6 +6,8 @@ import {observable, action, computed} from 'mobx'
 
 import PaymentStore from './PaymentStore'
 
+import bcoin from 'bcoin'
+
 class WalletStore {
 
   /**
