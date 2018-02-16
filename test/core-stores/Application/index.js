@@ -12,7 +12,6 @@ const createInitialValues = () => {
     applicationSettings: {'a': 1},
     walletStore: {'b': 2},
     priceFeedStore: {'c': 3},
-    torrentStores: new Map(),
     starter: sinon.spy(),
     stopper: sinon.spy(),
     torrentAdder: sinon.spy(),
