@@ -841,7 +841,7 @@ class Application extends EventEmitter {
           }
 
           let settings = createStartingDownloadSettings(torrentInfo,
-                                                        this.applicationSettings.getDownloadFolder(),
+                                                        this.applicationSettings.downloadFolder(),
                                                         DEFAULT_APPLIATION_SETTINGS.buyerTerms)
 
           this.addTorrent(settings, () => {
