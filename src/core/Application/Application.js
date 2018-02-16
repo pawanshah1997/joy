@@ -271,8 +271,8 @@ class Application extends EventEmitter {
 
     // Make sure some download folder actually exists, which
     // may not be the case on the first run
-    let downloadFolder = this.applicationSettings.getDownloadFolder()
-
+    let downloadFolder = this.applicationSettings.downloadFolder()
+    
     mkdirp(downloadFolder, null, (err) => {
 
       if(err)
@@ -297,9 +297,9 @@ class Application extends EventEmitter {
     // Construct default session settings
     var sessionSettings = {
       // network port libtorrent session will open a listening socket on
-      port: this.applicationSettings.getBittorrentPort(),
+      port: this.applicationSettings.bittorrentPort(),
       // Assisted Peer Discovery (APD)
-      assistedPeerDiscovery: this.applicationSettings.getUseAssistedPeerDiscovery()
+      assistedPeerDiscovery: this.applicationSettings.useAssistedPeerDiscovery()
     }
 
     // Create & start session
@@ -655,8 +655,8 @@ class Application extends EventEmitter {
         // NB: Replace by querying application settings later!
         let terms = DEFAULT_APPLIATION_SETTINGS.buyerTerms
 
-        // change name
-        torrent.provideMissingBuyerTerms(terms)
+      // NB: Replace by querying application settings later!
+      let terms = this.applicationSettings.buyerTerms()
 
       })
 
