@@ -10,6 +10,8 @@ const NUMBER_OF_PRIOR_SESSIONS = 'numberOfPriorSessions'
 const DOWNLOAD_FOLDER = 'downloadFolder'
 const USE_ASSISTED_PEER_DISCOVERY = 'useAssistedPeerDiscovery'
 const BITTORRENT_PORT = 'bittorrentPort'
+const DEFAULT_BUYER_TERMS = 'defaultBuyerTerms'
+const DEFAULT_SELLER_TERMS = 'defaultSellerTerms'
 
 /**
  * ApplicationSettings.
@@ -34,12 +36,17 @@ class ApplicationSettings extends EventEmitter {
    */
   state
   
-  constructor () {
+  /**
+   * Constructor
+   * @param configFileName {String}
+   */
+  constructor (configFileName) {
     
     super()
     
     this.state = ApplicationSettings.STATE.CLOSED
     this._electronConfigStore = null
+    this._configFileName = configFileName
   }
   
   /**
@@ -50,18 +57,29 @@ class ApplicationSettings extends EventEmitter {
    * @param useAssistedPeerDiscovery
    * @param bittorrentPort
    */
-  open(numberOfPriorSessions, downloadFolder, useAssistedPeerDiscovery, bittorrentPort) {
+  open(numberOfPriorSessions, downloadFolder, useAssistedPeerDiscovery, bittorrentPort, defaultBuyerTerms, defaultSellerTerms) {
     
     if(this.state !== ApplicationSettings.STATE.CLOSED)
       throw Error('Can only open when closed')
     
     // Open store with default values
-    this._electronConfigStore = new ElectronConfig({
-      NUMBER_OF_PRIOR_SESSIONS : numberOfPriorSessions,
-      DOWNLOAD_FOLDER : downloadFolder,
-      USE_ASSISTED_PEER_DISCOVERY : useAssistedPeerDiscovery,
-      BITTORRENT_PORT : bittorrentPort
-    })
+    let opts = {}
+  
+    // Set default values
+    let defaults = {}
+    defaults[NUMBER_OF_PRIOR_SESSIONS] = numberOfPriorSessions
+    defaults[DOWNLOAD_FOLDER] = downloadFolder
+    defaults[USE_ASSISTED_PEER_DISCOVERY]  = useAssistedPeerDiscovery
+    defaults[BITTORRENT_PORT] = bittorrentPort
+    defaults[DEFAULT_BUYER_TERMS] = defaultBuyerTerms
+    defaults[DEFAULT_SELLER_TERMS] = defaultSellerTerms
+    opts.defaults = defaults
+    
+    // Set file name
+    if(this._configFileName)
+      opts.name = this._configFileName
+    
+    this._electronConfigStore = new ElectronConfig(opts)
     
     this.state = ApplicationSettings.STATE.OPENED
     this.emit('opened')
@@ -83,71 +101,72 @@ class ApplicationSettings extends EventEmitter {
     if(this.state !== ApplicationSettings.STATE.OPENED)
       throw Error('Must be opened')
     
-    return this._electronConfigStore.path()
+    return this._electronConfigStore.path
   }
   
   numberOfPriorSessions() {
-    
-    if(this.state !== ApplicationSettings.STATE.OPENED)
-      throw Error('Must be opened')
-    
-    return this._electronConfigStore.get(NUMBER_OF_PRIOR_SESSIONS)
+    return this._get(NUMBER_OF_PRIOR_SESSIONS)
   }
   
   setNumberOfPriorSessions(numberOfPriorSessions) {
-  
-    if(this.state !== ApplicationSettings.STATE.OPENED)
-      throw Error('Must be opened')
-    
-    this._electronConfigStore.set(NUMBER_OF_PRIOR_SESSIONS, numberOfPriorSessions)
+    this._set(NUMBER_OF_PRIOR_SESSIONS, numberOfPriorSessions)
   }
   
-  getDownloadFolder () {
-    
-    if(this.state !== ApplicationSettings.STATE.OPENED)
-      throw Error('Must be opened')
-    
-    return this._electronConfigStore.get(DOWNLOAD_FOLDER)
+  downloadFolder () {
+    return this._get(DOWNLOAD_FOLDER)
   }
 
   setDownloadFolder (downloadFolder) {
-    
-    if(this.state !== ApplicationSettings.STATE.OPENED)
-      throw Error('Must be opened')
-    
-    this._electronConfigStore.set(DOWNLOAD_FOLDER, downloadFolder)
+    this._set(DOWNLOAD_FOLDER, downloadFolder)
   }
   
-  getUseAssistedPeerDiscovery() {
-  
-    if(this.state !== ApplicationSettings.STATE.OPENED)
-      throw Error('Must be opened')
-  
-    return this._electronConfigStore.get(USE_ASSISTED_PEER_DISCOVERY)
+  useAssistedPeerDiscovery() {
+    return this._get(USE_ASSISTED_PEER_DISCOVERY)
   }
   
   setUseAssistedPeerDiscovery(useAssistedPeerDiscovery) {
-  
-    if(this.state !== ApplicationSettings.STATE.OPENED)
-      throw Error('Must be opened')
-  
-    this._electronConfigStore.set(USE_ASSISTED_PEER_DISCOVERY, useAssistedPeerDiscovery)
+    this._set(USE_ASSISTED_PEER_DISCOVERY, useAssistedPeerDiscovery)
   }
   
-  getBittorrentPort() {
-    
-    if(this.state !== ApplicationSettings.STATE.OPENED)
-      throw Error('Must be opened')
-    
-    return this._electronConfigStore.get(BITTORRENT_PORT)
+  bittorrentPort() {
+    return this._get(BITTORRENT_PORT)
   }
   
   setBittorrentPort(bittorrentPort) {
+    this._set(BITTORRENT_PORT, bittorrentPort)
+  }
+  
+  defaultSellerTerms() {
+    return this._get(DEFAULT_SELLER_TERMS)
+  }
+  
+  setDefaultSellerTerms(sellerTerms) {
+    this._set(DEFAULT_SELLER_TERMS, sellerTerms)
+  }
+  
+  defaultBuyerTerms() {
+    return this._get(DEFAULT_BUYER_TERMS)
+  }
+  
+  setDefaultBuyerTerms(buyerTerms) {
+    this._set(DEFAULT_BUYER_TERMS, buyerTerms)
+  }
+  
+  _get(key) {
   
     if(this.state !== ApplicationSettings.STATE.OPENED)
       throw Error('Must be opened')
   
-    this._electronConfigStore.set(BITTORRENT_PORT, bittorrentPort)
+    return this._electronConfigStore.get(key)
+  }
+  
+  _set(key, value) {
+  
+    if(this.state !== ApplicationSettings.STATE.OPENED)
+      throw Error('Must be opened')
+  
+    this._electronConfigStore.set(key, value)
+  
   }
 }
 
