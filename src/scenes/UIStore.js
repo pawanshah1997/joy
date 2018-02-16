@@ -166,8 +166,6 @@ class UIStore {
       walletStore: null,
       priceFeedStore: null,
 
-      torrentStores: new Map(),
-
       // Map store user actions onto underlying application
 
       starter: application.start.bind(application),

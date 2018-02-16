@@ -67,7 +67,6 @@ class ApplicationStore {
     applicationSettings,
     walletStore,
     priceFeedStore,
-    torrentStores,
     starter,
     stopper,
     torrentAdder,
@@ -80,7 +79,7 @@ class ApplicationStore {
     this.applicationSettings = applicationSettings
     this.walletStore = walletStore
     this.priceFeedStore = priceFeedStore
-    this._setTorrentStores(torrentStores)
+    this._setTorrentStores(new Map())
     this._starter = starter
     this._stopper = stopper
     this._torrentAdder = torrentAdder
