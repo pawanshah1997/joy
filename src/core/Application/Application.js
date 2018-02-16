@@ -633,7 +633,7 @@ class Application extends EventEmitter {
     }
 
     // Try to add torrent to session
-    this._joystreamNodeSession.addTorrent(params, function (err, newJoystreamNodeTorrent) {
+    this._joystreamNodeSession.addTorrent(params, (err, newJoystreamNodeTorrent) => {
 
       if(err)
         onAdded(err)
@@ -652,7 +652,7 @@ class Application extends EventEmitter {
   }
 
   _onTorrentAddedToSession(settings, joystreamNodeTorrent) {
-
+    
     const infoHash = settings.infoHash
 
     // Create new torrent
@@ -703,31 +703,31 @@ class Application extends EventEmitter {
       }
     )
 
-      // When torrent is missing buyer terms
-      torrent.on('Loading.WaitingForMissingBuyerTerms', function (data) {
-
-        // NB: Replace by querying application settings later!
-        let terms = DEFAULT_APPLIATION_SETTINGS.buyerTerms
+    // When torrent is missing buyer terms
+    torrent.on('Loading.WaitingForMissingBuyerTerms', (data) => {
 
       // NB: Replace by querying application settings later!
       let terms = this.applicationSettings.buyerTerms()
 
-      })
+      // change name
+      torrent.provideMissingBuyerTerms(terms)
 
-      // Add to torrents map
+    })
 
-      // where it obviously should not already be
-      assert(!this.torrents.has(infoHash))
+    // Add to torrents map
 
-      this.torrents.set(infoHash, torrent)
+    // where it obviously should not already be
+    assert(!this.torrents.has(infoHash))
 
-      // Tell torrent about result
-      torrent._addedToSession(t)
+    this.torrents.set(infoHash, torrent)
+    
+    // Tell torrent about result
+    torrent._addedToSession(joystreamNodeTorrent)
 
-      // Emit signal
-      this.emit('torrentAdded', torrent)
+    // Emit signal
+    this.emit('torrentAdded', torrent)
 
-     return torrent
+    return torrent
   }
 
   /**
