@@ -201,6 +201,9 @@ class Wallet extends EventEmitter {
 
     try {
 
+      // Ensure wallet prefix folder available. Creates it if not.
+      await this._spvNode.ensure()
+
       // Open
       await this._spvNode.open()
 
