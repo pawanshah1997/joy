@@ -56,4 +56,75 @@ describe('Torrent Store', function () {
     })
   })
 
+  describe('actions', function () {
+    function testActionSetsObservable (store, actionName, observableName, value) {
+      store[actionName](value)
+      assert.equal(store[observableName], value)
+    }
+
+    const actionToObvservableMap = new Map([
+      ['setInfoHash', 'infoHash'],
+      ['setState', 'state'],
+      ['setName', 'name'],
+      ['setTotalSize', 'totalSize'],
+      ['setDownloadedSize', 'downloadedSize'],
+      ['setDownloadSpeed', 'downloadSpeed'],
+      ['setUploadSpeed', 'uploadSpeed'],
+      ['setUploadedTotal', 'uploadedTotal'],
+      ['setNumberOfSeeders', 'numberOfSeeders'],
+      ['setProgress', 'progress'],
+      ['setViabilityOfPaidDownloadInSwarm', 'viabilityOfPaidDownloadInSwarm'],
+      ['setTorrentFiles', 'torrentFiles'],
+      ['setSellerTerms', 'sellerTerms'],
+      ['setNumberOfPiecesSoldAsSeller', 'numberOfPiecesSoldAsSeller'],
+      ['setTotalRevenueFromPiecesAsSeller', 'totalRevenueFromPiecesAsSeller'],
+      ['setBuyerTerms', 'buyerTerms'],
+      ['setTotalSpendingOnPiecesAsBuyer', 'totalSpendingOnPiecesAsBuyer']
+    ])
+
+    actionToObvservableMap.forEach(function (observableName, actionName) {
+      it(actionName, function () {
+        testActionSetsObservable(torrentStore, actionName, observableName, 'testValue')
+      })
+    })
+
+  })
+
+  describe('computed values', function () {
+
+  })
+
+  describe('starters and stoppers', function () {
+    it('start', function () {
+      assert(!initialValues.starter.called)
+      torrentStore.start()
+      assert(initialValues.starter.called)
+    })
+
+    it('stop', function () {
+      assert(!initialValues.stopper.called)
+      torrentStore.stop()
+      assert(initialValues.stopper.called)
+    })
+
+    it('startPaidDownload', function () {
+      assert(!initialValues.paidDownloadStarter.called)
+      torrentStore.startPaidDownload()
+      assert(initialValues.paidDownloadStarter.called)
+    })
+
+    it('beginUploading', function () {
+      assert(!initialValues.uploadBeginner.called)
+      torrentStore.beginUploading()
+      assert(initialValues.uploadBeginner.called)
+    })
+
+    it('endUploading', function () {
+      assert(!initialValues.uploadStopper.called)
+      torrentStore.endUploading()
+      assert(initialValues.uploadStopper.called)
+    })
+
+  })
+
 })
