@@ -107,7 +107,7 @@ class Application extends EventEmitter {
     STORED_TORRENTS : 4
   }
 
-  static get NUMBER_OF_RESOURCE_TYPES() { Object.keys(Application.RESOURCE).length }
+  static get NUMBER_OF_RESOURCE_TYPES() { return Object.keys(Application.RESOURCE).length }
 
   /**
    * {Set.<RESOURCES>} The resources which are currently started
