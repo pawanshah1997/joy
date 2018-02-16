@@ -7,8 +7,6 @@ import path from 'path'
 
 // Application config for application state machine
 var config = {
-  // Root path that will contain wallet, application database and default torrent data save path
-  appDirectory: path.join(os.homedir(), '.joystream'),
   // Bitcoin Network
   network: 'testnet',
   // Enable SecondaryDHT (joystream assisted peer discovery)

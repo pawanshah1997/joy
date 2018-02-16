@@ -62,11 +62,11 @@ function processPeerPluginStatuses(client, statuses) {
 
 function stopExtension(client) {
 
-  client._joystreamNodeTorrent.stopPlugin( (err, res) => {
+  client._joystreamNodeTorrent.stopPlugin( (err) => {
 
     LOG_ERROR("stopExtension", err)
 
-    client._submitInput('stopExtensionResult', err, res)
+    client._submitInput('stopExtensionResult', err)
 
   })
 
@@ -74,11 +74,11 @@ function stopExtension(client) {
 
 function startExtension(client) {
 
-  client._joystreamNodeTorrent.startPlugin((err, resp) => {
+  client._joystreamNodeTorrent.startPlugin((err) => {
 
     LOG_ERROR("startExtension", err)
 
-    client._submitInput('startExtensionResult', err, res)
+    client._submitInput('startExtensionResult', err)
 
   })
 }
@@ -89,40 +89,40 @@ function setLibtorrentInteraction(client, mode) {
 
     LOG_ERROR("setLibtorrentInteraction", err)
 
-    client._submitInput('setLibtorrentInteractionResult', err, res)
+    client._submitInput('setLibtorrentInteractionResult', err)
 
   })
 }
 
 function toObserveMode(client) {
 
-  client._joystreamNodeTorrent.toObserveMode((err, res) => {
+  client._joystreamNodeTorrent.toObserveMode((err) => {
 
     LOG_ERROR("toObserveMode", err)
 
-    client._submitInput('toObserveModeResult', err, res)
+    client._submitInput('toObserveModeResult', err)
 
   })
 }
 
 function toSellMode(client, sellerTerms) {
 
-  client._joystreamNodeTorrent.toSellMode(sellerTerms, (err, res) => {
+  client._joystreamNodeTorrent.toSellMode(sellerTerms, (err) => {
 
     LOG_ERROR("toSellMode", err)
 
-    client._submitInput('toSellModeResult', err, res)
+    client._submitInput('toSellModeResult', err)
 
   })
 }
 
 function toBuyMode(client, buyerTerms) {
 
-  client._joystreamNodeTorrent.toBuyMode(buyerTerms, (err, res) => {
+  client._joystreamNodeTorrent.toBuyMode(buyerTerms, (err) => {
 
     LOG_ERROR("toBuyMode", err)
 
-    client._submitInput('toBuyModeResult', err, res)
+    client._submitInput('toBuyModeResult', err)
 
   })
 }

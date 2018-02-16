@@ -132,7 +132,7 @@ class Wallet extends EventEmitter {
 
   /**
    * Constructor
-   * @param spvNode {SPVNode} - an unopened spv node
+   * @param spvNode {bcoin.spvnode} - an unopened spv node
    * @param paymentDatabase {PaymentDatabase}
    */
   constructor(spvNode, paymentDatabase)  {
@@ -176,7 +176,7 @@ class Wallet extends EventEmitter {
     this._spvNode.http = null
   
     // Ask for the mempool after syncing is done
-    overrideBcoinPoolHandleTxInv(spvNode.pool)
+    overrideBcoinPoolHandleTxInv(this._spvNode.pool)
 
     this._spvNode.chain.on('block', (block, entry) => {
 

@@ -38,7 +38,7 @@ var Torrent = new BaseMachine({
 
               client._generateResumeDataOnTermination = generateResumeData
 
-              Common.stopPlugin(client)
+              Common.stopExtension(client)
 
               this.transition(client, 'StoppingExtension')
             },

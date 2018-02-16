@@ -195,7 +195,7 @@ class DownloadingStore {
     }
   
     // Get the path to use as savepath from settings
-    let savePath = this._uiStore.applicationStore.applicationSettings.getDownloadFolder()
+    let savePath = this._uiStore.applicationStore.applicationSettings.downloadFolder()
   
     let settings = getStartingDownloadSettings(torrentInfo, savePath)
     

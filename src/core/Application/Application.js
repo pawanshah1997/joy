@@ -1,12 +1,21 @@
 import assert from "assert"
 import {EventEmitter} from "events"
-import ApplicationSettings from '../ApplicationSettings/ApplicationSettings'
-import Wallet from './core/Wallet'
-import DeepInitialState from '../Torrent/Statemchine/DeepInitialState'
+import ApplicationSettings from '../ApplicationSettings'
+import PriceFeed from '../PriceFeed'
+import Wallet from '../Wallet'
+import Torrent from '../Torrent'
+import DeepInitialState from '../Torrent/Statemachine/DeepInitialState'
 import getCoins from './faucet'
 import mkdirp from 'mkdirp'
 import WalletTopUpOptions from "./WalletTopUpOptions"
 import fs from 'fs'
+import path from 'path'
+import bcoin from 'bcoin'
+import { TorrentInfo, Session } from 'joystream-node'
+import db from '../../db'
+
+var debug = require('debug')('application')
+import {shell} from 'electron'
 
 const FOLDER_NAME = {
   WALLET: 'wallet',
@@ -100,16 +109,14 @@ class Application extends EventEmitter {
    * RENAME: not resource, loading/ter milestone ?
    */
   static RESOURCE = {
-
-    SETTINGS : 1,
-    WALLET : 2,
-
-    JOYSTREAM_NODE_SESSION: 9,
-    PRICE_FEED : 10,
-    STORED_TORRENTS : 11
+    SETTINGS : 0,
+    WALLET : 1,
+    JOYSTREAM_NODE_SESSION: 2,
+    PRICE_FEED : 3,
+    STORED_TORRENTS : 4
   }
 
-  static get NUMBER_OF_RESOURCE_TYPES() { Object.keys(Application.RESOURCE).length }
+  static get NUMBER_OF_RESOURCE_TYPES() { return Object.keys(Application.RESOURCE).length }
 
   /**
    * {Set.<RESOURCES>} The resources which are currently started
@@ -170,6 +177,7 @@ class Application extends EventEmitter {
     this.applicationSettings = null
     this.wallet = null
     this.priceFeed = null
+    this.torrents = new Map()
 
 
     this._enableOnboardingIfFirstRun = enableOnboardingIfFirstRun
@@ -187,12 +195,17 @@ class Application extends EventEmitter {
    * already exists.
    *
    * @param config
+   * @param config.network {String} - Bitcoin network (tesnet|mainnet)
+   * @param config.assistedPeerDiscovery {Bool} - enable SecondaryDHT (joystream assisted peer discovery)
+   * @param config.bitTorrentPort {Number} - libtorrent listening port (0 means libtorrent picks)
    * @param appDirectory {String} - the application directory, that is where the root
    * folder where the the file/folder tree of the application lives.
    * @param onStarted {Func} - callback called when start attempt is open
    */
 
   start(config, appDirectory, onStarted = () => {} ) {
+    
+    debug('starting')
 
     // Make sure we can start
     if(this.state !== Application.STATE.STOPPED)
@@ -218,10 +231,10 @@ class Application extends EventEmitter {
 
     // Add a logger if log level is specified
     if(config.logLevel)
-      spvOptions.logger = bcoin.logger({ level: config.logLevel })
+      spvOptions.logger = new bcoin.logger({ level: config.logLevel })
 
     // Create the SPV Node
-    let spvNode = new bcoin.SPVNode(spvOptions)
+    let spvNode = bcoin.spvnode(spvOptions)
 
     // Create and hold to wallet
     this.wallet = new Wallet(spvNode)
@@ -261,16 +274,19 @@ class Application extends EventEmitter {
 
     // Open settings (is synchronous), with given default values,
     // these are set on the first run
-    this.applicationSettings.open(0,
+    this.applicationSettings.open(
+      0,
       DEFAULT_APPLIATION_SETTINGS.makeDefaultSavePathFromBaseFolder(appDirectory),
       DEFAULT_APPLIATION_SETTINGS.useAssistedPeerDiscovery,
-      DEFAULT_APPLIATION_SETTINGS.bittorrentPort
+      DEFAULT_APPLIATION_SETTINGS.bittorrentPort,
+      DEFAULT_APPLIATION_SETTINGS.buyerTerms,
+      DEFAULT_APPLIATION_SETTINGS.sellerTerms
       )
 
     // Make sure some download folder actually exists, which
     // may not be the case on the first run
-    let downloadFolder = this.applicationSettings.getDownloadFolder()
-
+    let downloadFolder = this.applicationSettings.downloadFolder()
+    
     mkdirp(downloadFolder, null, (err) => {
 
       if(err)
@@ -295,14 +311,14 @@ class Application extends EventEmitter {
     // Construct default session settings
     var sessionSettings = {
       // network port libtorrent session will open a listening socket on
-      port: this.applicationSettings.getBittorrentPort(),
+      port: this.applicationSettings.bittorrentPort(),
       // Assisted Peer Discovery (APD)
-      assistedPeerDiscovery: this.applicationSettings.getUseAssistedPeerDiscovery()
+      assistedPeerDiscovery: this.applicationSettings.useAssistedPeerDiscovery()
     }
 
     // Create & start session
     // We assume that the session has already started after this call
-    this._joystreamNodeSession = new JoystreamNodeSession(sessionSettings)
+    this._joystreamNodeSession = new Session(sessionSettings)
 
     // Setup polling of torrent plugin statuses
     this._torrentUpdateInterval = setInterval(() => {
@@ -327,7 +343,7 @@ class Application extends EventEmitter {
 
     db.open(torrentDatabaseFolder)
       .then((torrentDatabase) => {
-
+        
         // Hold on to torrent database
         this._torrentDatabase = torrentDatabase
 
@@ -398,45 +414,87 @@ class Application extends EventEmitter {
     /**
      * Terminate and remove torrents, and store settings
      */
-
-    if(torrents.size === 0)
-      onTorrentsTerminatedStoredAndRemoved()
+    
+    if(this.torrents.size === 0)
+      onTorrentsTerminatedStoredAndRemoved.bind(this)()
     else {
       // Add terminated handler for each torrent
       this.torrents.forEach((torrent, infoHash) => {
-
-        torrent.once('Terminated', () => {
-
-          assert(this.state === Application.STATE.STOPPING)
-
-          // store this somewhere
-          let encodedTorrentSettings = encodeTorrentSettings(torrent)
-
-          this._torrentDatabase.save('torrents', infoHash, encodedTorrentSettings)
-            .then(() => {})
-            .catch(() => {
-              console.log('Failed to save torrent to torrent storage: ' + encodedTorrentSettings)
+        
+        // If torrent is already stopping, then we
+        if(
+          torrent.state.startsWith('StoppingExtension') ||
+          torrent.state.startsWith('GeneratingResumeData')
+        ) {
+          
+          // then we just ignore it
+          
+        } else {
+  
+          torrent.once('Terminated', () => {
+    
+            assert(this.state === Application.STATE.STOPPING)
+    
+            /**
+             * Remove the torrent from the session
+             *
+             * Notice that we take it for granted that this will work, and
+             * we don't need to wait for some resource to come back, like in the
+             * addTorrent scenario
+             */
+            this._joystreamNodeSession.removeTorrent(infoHash, (err) => {
+      
+              assert(!err)
+      
             })
-
-          // remove from map
-          this.torrents.delete(infoHash)
-
-          // if this was the last one, then we are done
-          // terminating torrents!
-          if(this.torrents.size === 0)
-            onTorrentsTerminatedStoredAndRemoved()
-
-        })
+    
+            // store this somewhere
+            let encodedTorrentSettings = encodeTorrentSettings(torrent)
+    
+            this._torrentDatabase.save('torrents', infoHash, encodedTorrentSettings)
+              .then(() => {})
+              .catch(() => {
+                console.log('Failed to save torrent to torrent storage: ' + encodedTorrentSettings)
+              })
+    
+            // remove from map
+            this.torrents.delete(infoHash)
+    
+            // if this was the last one, then we are done
+            // terminating torrents!
+            if(this.torrents.size === 0)
+              onTorrentsTerminatedStoredAndRemoved.bind(this)()
+    
+          })
+          
+          // otherwise, if its loading
+          if(torrent.state.startsWith('Loading')) {
+    
+            // then we first wait for it to finish loading
+            // before asking it to terminate
+            torrent.once('loaded', () => {
+              torrent._terminate()
+            })
+    
+          } else {
+            
+            // otherwise if its not just loading,
+            // then its active - which is the most frequent scenario,
+            // and we can ask it it terminate immediately
+            
+            assert(torrent.state.startsWith('Active'))
+  
+            torrent._terminate()
+          }
+          
+        }
+        
       })
 
-      // Terminate all torrents
-      this.torrents.ForEach((torrent) => {
-        torrent.terminate()
-      })
     }
 
     function onTorrentsTerminatedStoredAndRemoved() {
-
+      
       this._torrentDatabase.close((err) => {
 
         assert(!err)
@@ -447,8 +505,9 @@ class Application extends EventEmitter {
       /**
        * Stop Joystream node session
        */
-
+      
       this._joystreamNodeSession.pauseLibtorrent((err) => {
+        
         assert(!err)
 
         clearInterval(this._torrentUpdateInterval)
@@ -494,7 +553,7 @@ class Application extends EventEmitter {
 
       this._stoppedResource(Application.RESOURCE.WALLET, onStopped)
     })
-
+    
     this.wallet.stop()
   }
 
@@ -577,7 +636,7 @@ class Application extends EventEmitter {
     }
 
     // Try to add torrent to session
-    this._joystreamNodeSession.addTorrent(params, function (err, newJoystreamNodeTorrent) {
+    this._joystreamNodeSession.addTorrent(params, (err, newJoystreamNodeTorrent) => {
 
       if(err)
         onAdded(err)
@@ -596,7 +655,7 @@ class Application extends EventEmitter {
   }
 
   _onTorrentAddedToSession(settings, joystreamNodeTorrent) {
-
+    
     const infoHash = settings.infoHash
 
     // Create new torrent
@@ -647,31 +706,31 @@ class Application extends EventEmitter {
       }
     )
 
-      // When torrent is missing buyer terms
-      torrent.on('Loading.WaitingForMissingBuyerTerms', function (data) {
+    // When torrent is missing buyer terms
+    torrent.on('Loading.WaitingForMissingBuyerTerms', (data) => {
 
-        // NB: Replace by querying application settings later!
-        let terms = DEFAULT_APPLIATION_SETTINGS.buyerTerms
+      // NB: Replace by querying application settings later!
+      let terms = this.applicationSettings.buyerTerms()
 
-        // change name
-        torrent.provideMissingBuyerTerms(terms)
+      // change name
+      torrent.provideMissingBuyerTerms(terms)
 
-      })
+    })
 
-      // Add to torrents map
+    // Add to torrents map
 
-      // where it obviously should not already be
-      assert(!this.torrents.has(infoHash))
+    // where it obviously should not already be
+    assert(!this.torrents.has(infoHash))
 
-      this.torrents.set(infoHash, torrent)
+    this.torrents.set(infoHash, torrent)
+    
+    // Tell torrent about result
+    torrent._addedToSession(joystreamNodeTorrent)
 
-      // Tell torrent about result
-      torrent._addedToSession(t)
+    // Emit signal
+    this.emit('torrentAdded', torrent)
 
-      // Emit signal
-      this.emit('torrentAdded', torrent)
-
-     return torrent
+    return torrent
   }
 
   /**
@@ -694,40 +753,54 @@ class Application extends EventEmitter {
       onRemoved('No torrent added corresponding to given hash')
       return
     }
-
-    // Stop torrent
-    torrent.terminate()
-
-    /**
-     * Remove the torrent from the session
-     *
-     * Notice that we take it for granted that this will work, and
-     * we don't need to wait for some resource to come back, like in the
-     * addTorrent scenario
-     */
-    this._joystreamNodeSession.removeTorrent(infoHash, (err) => {
-
-      assert(!err)
-
-    })
-
-    // Remove the torrent from the db
-    this._torrentDatabase.remove('torrents', infoHash)
-      .then(() => {})
-      .catch(() => { console.log('Removing torrent from database failed.')})
-
-    // Delete torrent from the this map
-    this.torrents.delete(infoHash)
-
-    // If deleteData we want to remove the folder/file
-    if (deleteData) {
-      fullPath = path.join(torrent.savePath, torrent.name, path.sep)
-      shell.moveItemToTrash(fullPath)
+    
+    // Make sure torrent is not in the process or being
+    // added or removed
+    if(!torrent.state.startsWith('Active')) {
+      onRemoved('Can only remove torrent when its active, not while its being added or removed.')
+      return
     }
-
-    // Tell user about success
-    onRemoved(null, true)
-
+    
+    torrent.once('Terminated', () => {
+      
+      /**
+       * Remove the torrent from the session
+       *
+       * Notice that we take it for granted that this will work, and
+       * we don't need to wait for some resource to come back, like in the
+       * addTorrent scenario
+       */
+      this._joystreamNodeSession.removeTorrent(infoHash, (err) => {
+    
+        assert(!err)
+    
+      })
+      
+      // Remove the torrent from the db
+      this._torrentDatabase.remove('torrents', infoHash)
+        .then(() => {})
+        .catch(() => { console.log('Removing torrent from database failed.')})
+  
+      // Delete torrent from the this map,
+      this.torrents.delete(infoHash)
+      
+      // If deleteData we want to remove the folder/file
+      if (deleteData) {
+        let fullPath = path.join(torrent.savePath, torrent.name, path.sep)
+        shell.moveItemToTrash(fullPath)
+      }
+  
+      // Emit event
+      this.emit('torrentRemoved', infoHash)
+  
+      // Tell user about success
+      onRemoved(null, true)
+      
+    })
+    
+    // Stop torrent
+    torrent._terminate()
+    
   }
 
   _startedResource = (resource, onStarted) => {
@@ -737,19 +810,19 @@ class Application extends EventEmitter {
 
     // add to set of started resources
     this.startedResources.add(resource)
-
-    // If all resources have started, then we are done!
-    if(this.startedResources.size === Application.NUMBER_OF_RESOURCE_TYPES) {
-
-      this._setState(Application.STATE.STARTED)
-
-      // Make callback to user
-      onStarted(null, true)
-    }
-
+    
     // tell the world
     this.emit('resourceStarted', resource)
     this.emit('startedResources', this.startedResources)
+  
+    // If all resources have started, then we are done!
+    if(this.startedResources.size === Application.NUMBER_OF_RESOURCE_TYPES) {
+    
+      this._setState(Application.STATE.STARTED)
+    
+      // Make callback to user
+      onStarted(null, true)
+    }
   }
 
   _stoppedResource = (resource, onStopped) => {
@@ -762,18 +835,18 @@ class Application extends EventEmitter {
 
     // what about the fact that we never take wallet out?!
     // how can we be symmetric here in that case?
-
-    // If all resources have stopped, then we are done!
-    if(this.startedResources.size === 0) {
-      this._setState(Application.STATE.STOPPED)
-
-      // Make user callback
-      onStopped(null, true)
-    }
-
+    
     // tell the world
     this.emit('resourceStopped', resource)
     this.emit('startedResources', this.startedResources)
+  
+    // If all resources have stopped, then we are done!
+    if(this.startedResources.size === 0) {
+      this._setState(Application.STATE.STOPPED)
+    
+      // Make user callback
+      onStopped(null, true)
+    }
   }
 
   _setState(state) {
@@ -788,8 +861,8 @@ class Application extends EventEmitter {
   }
 
   _totalWalletBalanceChanged = (balance) => {
-
-    console.log('totalBalanceChanged: ' + balance)
+  
+    debug('new total balance: ' + balance)
 
     if(this.state === Application.STATE.STARTED) {
 
@@ -820,7 +893,7 @@ class Application extends EventEmitter {
 
     console.log('priceFeed [error]:')
     console.log('Could not fetch exchange rate, likely due to no internet, or broken endpoint.')
-    console.error(err)
+    console.log(err)
   }
 
   addExampleTorrents () {
@@ -841,7 +914,7 @@ class Application extends EventEmitter {
           }
 
           let settings = createStartingDownloadSettings(torrentInfo,
-                                                        this.applicationSettings.getDownloadFolder(),
+                                                        this.applicationSettings.downloadFolder(),
                                                         DEFAULT_APPLIATION_SETTINGS.buyerTerms)
 
           this.addTorrent(settings, () => {

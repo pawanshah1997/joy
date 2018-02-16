@@ -5,8 +5,14 @@
 import {EventEmitter} from 'events'
 var TorrentStatemachine = require('./Statemachine/Torrent')
 import FileSegmentStreamFactory from './FileSegmentStreamFactory'
-import Common from './Statemachine/Common'
-import {deepInitialStateFromActiveState} from './Statemachine/DeepInitialState'
+import {
+  deepInitialStateFromActiveState,
+  isUploading,
+  isPassive,
+  isDownloading,
+  isStopped} from './Statemachine/DeepInitialState'
+
+var debug = require('debug')('torrent')
 
 /**
  * Torrent
@@ -133,19 +139,19 @@ class Torrent extends EventEmitter {
     this.name = settings.name
     this.savePath = settings.savePath
     this.resumeData = settings.resumeData
-    this.torrentInfo = settings.torrentInfo
+    this.torrentInfo = settings.metadata
     this._deepInitialState = settings.deepInitialState
     
     // Check that compatibility in deepInitialState and {buyerTerms, sellerTerms},
     // and store terms on client
-    if(Common.isDownloading(settings.deepInitialState)) {
+    if(isDownloading(settings.deepInitialState)) {
     
       if(settings.extensionSettings.buyerTerms)
         this.buyerTerms = settings.extensionSettings.buyerTerms
       else
         throw Error('DownloadIncomplete state requires buyer terms')
     
-    } else if(Common.isUploading(settings.deepInitialState)) {
+    } else if(isUploading(settings.deepInitialState)) {
     
       if(settings.extensionSettings.sellerTerms)
         this.sellerTerms = settings.extensionSettings.sellerTerms
@@ -176,7 +182,7 @@ class Torrent extends EventEmitter {
       // Update public state
       this.state = stateString
 
-      console.log('Torrent: ' + stateString)
+      debug('entering state: ' + stateString)
 
       this.emit('state', stateString)
       this.emit(stateString, data)
