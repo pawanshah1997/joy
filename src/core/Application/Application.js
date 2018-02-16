@@ -220,7 +220,7 @@ class Application extends EventEmitter {
       spvOptions.logger = new bcoin.logger({ level: config.logLevel })
 
     // Create the SPV Node
-    let spvNode = new bcoin.SPVNode(spvOptions)
+    let spvNode = bcoin.spvnode(spvOptions)
 
     // Create and hold to wallet
     this.wallet = new Wallet(spvNode)
