@@ -807,19 +807,19 @@ class Application extends EventEmitter {
 
     // add to set of started resources
     this.startedResources.add(resource)
-
-    // If all resources have started, then we are done!
-    if(this.startedResources.size === Application.NUMBER_OF_RESOURCE_TYPES) {
-
-      this._setState(Application.STATE.STARTED)
-
-      // Make callback to user
-      onStarted(null, true)
-    }
-
+    
     // tell the world
     this.emit('resourceStarted', resource)
     this.emit('startedResources', this.startedResources)
+  
+    // If all resources have started, then we are done!
+    if(this.startedResources.size === Application.NUMBER_OF_RESOURCE_TYPES) {
+    
+      this._setState(Application.STATE.STARTED)
+    
+      // Make callback to user
+      onStarted(null, true)
+    }
   }
 
   _stoppedResource = (resource, onStopped) => {
