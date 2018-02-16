@@ -36,7 +36,7 @@ describe('Application Store', function () {
         assert.deepEqual(store[observableName], valuesMap[observableName])
       }
 
-      const check = checkInitialValue.bind(applicationStore, initialValues)
+      const check = checkInitialValue.bind(null, applicationStore, initialValues)
 
       check('state')
       check('startedResources')
@@ -45,7 +45,6 @@ describe('Application Store', function () {
       check('applicationSettings')
       check('walletStore')
       check('priceFeedStore')
-      check('torrentStores')
     })
   })
 
