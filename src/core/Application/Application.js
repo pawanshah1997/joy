@@ -168,6 +168,7 @@ class Application extends EventEmitter {
     this.applicationSettings = null
     this.wallet = null
     this.priceFeed = null
+    this.torrents = new Map()
 
 
     this._enableOnboardingIfFirstRun = enableOnboardingIfFirstRun
