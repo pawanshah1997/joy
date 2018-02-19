@@ -89,6 +89,7 @@ class TorrentStore {
                  state,
                  totalSize,
                  progress,
+                 viabilityOfPaidDownloadInSwarm,
                  downloadedSize,
                  downloadSpeed,
                  uploadSpeed,
@@ -111,6 +112,7 @@ class TorrentStore {
       this.setState(state)
       this.setTotalSize(totalSize)
       this.setProgress(progress)
+      this.setViabilityOfPaidDownloadInSwarm(viabilityOfPaidDownloadInSwarm)
       this.setDownloadedSize(downloadedSize)
       this.setDownloadSpeed(downloadSpeed)
       this.setUploadSpeed(uploadSpeed)
