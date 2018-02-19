@@ -11,6 +11,7 @@ const createInitialValues = () => {
     state: 1,
     totalSize: 100,
     progress: 50,
+    viabilityOfPaidDownloadInSwarm : new Object(),
     downloadedSize: 50,
     downloadSpeed: 15,
     uploadSpeed: 5,
@@ -45,7 +46,7 @@ describe('Torrent Store', function () {
     const check = checkInitialValue.bind(null, torrentStore, initialValues)
 
     const observables = [
-      'infoHash', 'name', 'savePath', 'state', 'totalSize', 'progress',
+      'infoHash', 'name', 'savePath', 'state', 'totalSize', 'progress', 'viabilityOfPaidDownloadInSwarm',
       'downloadedSize', 'downloadSpeed', 'uploadSpeed', 'uploadedTotal',
       'numberOfSeeders', 'sellerTerms', 'buyerTerms', 'numberOfPiecesSoldAsSeller',
       'totalRevenueFromPiecesAsSeller', 'totalSpendingOnPiecesAsBuyer'
