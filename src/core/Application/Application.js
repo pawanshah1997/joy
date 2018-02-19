@@ -13,6 +13,7 @@ import path from 'path'
 import bcoin from 'bcoin'
 import { TorrentInfo, Session } from 'joystream-node'
 import db from '../../db'
+import * as coinmarketcap from 'coinmarketcap'
 
 var debug = require('debug')('application')
 import {shell} from 'electron'
