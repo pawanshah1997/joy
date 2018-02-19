@@ -99,13 +99,14 @@ class DownloadingStore {
      * For now we just do naive insertion order into `rowStorefromTorrentInfoHash` map.
      */
   
-    return this.rowStorefromTorrentInfoHash.values()
+    return [...this.rowStorefromTorrentInfoHash.values()]
   }
   
   @computed get
   totalDownloadSpeed () {
-    return this.torrentRowStores.reduce((accumulator, torrentStore) => {
-      return accumulator + torrentStore.downloadSpeed
+    
+    return this.torrentRowStores.reduce((accumulator, row) => {
+      return accumulator + row.torrentStore.downloadSpeed
     }, 0)
   }
   
