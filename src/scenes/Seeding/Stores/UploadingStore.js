@@ -107,13 +107,13 @@ class UploadingStore {
      * For now we just do naive insertion order into `rowStorefromTorrentInfoHash` map.
      */
   
-    return this.rowStorefromTorrentInfoHash.values()
+    return [...this.rowStorefromTorrentInfoHash.values()]
   }
   
   @computed get
   totalUploadSpeed () {
-    return this.torrentRowStores.reduce(function (accumulator, torrent) {
-      return accumulator + torrent.uploadSpeed
+    return this.torrentRowStores.reduce(function (accumulator, row) {
+      return accumulator + row.torrentStore.uploadSpeed
     }, 0)
   }
 
