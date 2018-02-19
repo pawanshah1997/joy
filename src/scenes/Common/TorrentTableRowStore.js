@@ -58,7 +58,7 @@ class TorrentTableRowStore {
     if(this.torrentStore.torrentInfo) {
       return indexesOfPlayableFiles(this.torrentStore.torrentInfo.torrentFiles)
     } else
-      return false
+      return []
   }
   
   playMedia(fileIndex = 0) {
