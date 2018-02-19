@@ -55,7 +55,7 @@ function computeViabilityOfPaidDownloadingTorrent(state, walletStarted, balance,
     return new Stopped()
   else if(state.startsWith("Active.DownloadIncomplete.Paid"))
     return new AlreadyStarted()
-  else if(!(viabilityOfPaidDownloadInSwarm instanceof ViabilityOfPaidDownloadInSwarm.Viable))
+  else if(!(viabilityOfPaidDownloadInSwarm.constructor.name === 'Viable'))
     return new InViable(viabilityOfPaidDownloadInSwarm)
   else if(!walletStarted)
     return new WalletNotReady()
