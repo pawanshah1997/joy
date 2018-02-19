@@ -349,8 +349,9 @@ class UIStore {
       name: torrent.name,
       savePath: torrent.savePath,
       state: torrent.state,
-      totalSize: torrent.torrentInfo ? torrent.torrentInfo.totalSize : 0, // Total size of torrent
+      totalSize: torrent.torrentInfo ? torrent.torrentInfo.totalSize() : 0,
       progress: torrent.progress,
+      viabilityOfPaidDownloadInSwarm : torrent.viabilityOfPaidDownloadInSwarm,
       downloadedSize: torrent.downloadedSize,
       downloadSpeed: torrent.downloadSpeed,
       uploadSpeed: torrent.uploadSpeed,
