@@ -335,7 +335,7 @@ class UIStore {
     // Update application store signal about onboarding being enabled
     // and set store
     this.applicationStore.setOnboardingIsEnabled(isEnabled)
-    this.applicationStore.setOnboardingStore(onboardingStore)
+    this.setOnboardingStore(onboardingStore)
 
   })
 
@@ -524,7 +524,7 @@ class UIStore {
     }))
     
     // Add to application store
-    applicationStore.onNewTorrentStore(torrentStore)
+    this.applicationStore.onNewTorrentStore(torrentStore)
 
     // Add to relevant scenes if they currently exist,
     // which they only do when UI is active, not during loading
@@ -551,12 +551,8 @@ class UIStore {
 
   _onTorrentRemovedAction = action((infoHash) => {
 
-    let applicationStore = this.applicationStore
-
-    assert(applicationStore)
-
     // Remove from application store
-    applicationStore.onTorrentRemoved(infoHash)
+    this.applicationStore.onTorrentRemoved(infoHash)
 
     // Remove from relevant scenes
     this.uploadingStore.removeTorrentStore(infoHash)
@@ -674,7 +670,7 @@ class UIStore {
      * If onboarding is enabled, then display shutdown message - if its not already
      * showing, and block the shutdown for now
      */
-    if (this._applicationStore.onboardingIsEnabled) {
+    if (this._application.onboardingIsEnabled) {
 
       /**
        *  Only call for shutdown message if its not already showing, it is after all
@@ -698,13 +694,9 @@ class UIStore {
      * this renderes process about successful stopping, which which we don't block.
      */
     else {
-      this._applicationStore.stop()
+      this._application.stop()
     }
 
-  }
-
-  openFolder(path) {
-    shell.openItem(path)
   }
 
   @action.bound
