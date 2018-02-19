@@ -202,9 +202,9 @@ const StartedApp = observer((props) => {
                                 props.UIStore.torrentsBeingLoaded > 0
                               &&
                                 (
-                                  props.UIStore.activeTab === UIStore.TAB.Downloading ||
-                                  props.UIStore.activeTab === UIStore.TAB.Uploading ||
-                                  props.UIStore.activeTab === UIStore.TAB.Completed
+                                  props.UIStore.applicationNavigationStore.activeTab === UIStore.TAB.Downloading ||
+                                  props.UIStore.applicationNavigationStore.activeTab === UIStore.TAB.Uploading ||
+                                  props.UIStore.applicationNavigationStore.activeTab === UIStore.TAB.Completed
                                 )
                               }
       />

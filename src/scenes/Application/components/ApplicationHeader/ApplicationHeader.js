@@ -62,9 +62,8 @@ const ApplicationHeader = observer((props) => {
     notificationColor : props.notificationColor
   }
   
-  let activeScene = props.UIStore.activeTab
-
   let applicationNavigationStore = props.UIStore.applicationNavigationStore
+  let activeTab = applicationNavigationStore.activeTab
   
   return (
     <Header style={style.root}>
@@ -72,21 +71,21 @@ const ApplicationHeader = observer((props) => {
       <ButtonGroup separatorColor={props.separatorColor}>
   
         <DowloadButton
-          selected={activeScene === ApplicationNavigationStore.TAB.Downloading}
+          selected={activeTab === ApplicationNavigationStore.TAB.Downloading}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Downloading) }}
           style={style.button}
           {...buttonColorProps}
         />
   
         <UploadButton
-          selected={activeScene === ApplicationNavigationStore.TAB.Uploading}
+          selected={activeTab === ApplicationNavigationStore.TAB.Uploading}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Uploading) }}
           style={style.button}
           {...buttonColorProps}
         />
   
         <FinishedButton
-          selected={activeScene === ApplicationNavigationStore.TAB.Completed}
+          selected={activeTab === ApplicationNavigationStore.TAB.Completed}
           notificationCount={applicationNavigationStore.numberCompletedInBackground}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Completed) }}
           style={style.button}
@@ -94,7 +93,7 @@ const ApplicationHeader = observer((props) => {
         />
   
         <WalletButton
-          selected={activeScene === ApplicationNavigationStore.TAB.Wallet}
+          selected={activeTab === ApplicationNavigationStore.TAB.Wallet}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Wallet) }}
           style={style.button}
           disabled
@@ -102,7 +101,7 @@ const ApplicationHeader = observer((props) => {
         />
         
         <CommunityButton
-          selected={activeScene === ApplicationNavigationStore.TAB.Community}
+          selected={activeTab === ApplicationNavigationStore.TAB.Community}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Community) }}
           style={style.button}
           {...buttonColorProps}
