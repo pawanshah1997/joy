@@ -2,6 +2,9 @@ import {observable, action, computed} from 'mobx'
 import assert from 'assert'
 import {shell} from 'electron'
 
+// Core
+import Application from '../core/Application'
+
 // Core stores
 import {
   ApplicationStore,
@@ -9,6 +12,7 @@ import {
   PeerStore,
   WalletStore,
   PriceFeedStore} from '../core-stores'
+import {PaymentStore} from '../core-stores/Wallet'
 
 // UI stores
 import OnboardingStore from './Onboarding/Stores'
@@ -18,11 +22,6 @@ import UploadingStore from './Seeding/Stores'
 import CompletedStore from './Completed/Stores'
 import WalletSceneStore from './Wallet/Stores'
 import Doorbell from './Doorbell'
-
-import Application from '../core/Application'
-import {TorrentTableRowStore} from './Common'
-import PaymentStore from "../core-stores/Wallet/PaymentStore";
-
 
 /**
  * Root user interface model
