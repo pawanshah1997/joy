@@ -6,7 +6,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Provider, observer, inject } from 'mobx-react'
 
-import ViabilityOfPaidDownloadingTorrent from '../../core/Torrent/ViabilityOfPaidDownloadingTorrent'
+import ViabilityOfPaidDownloadingTorrent from '../../scenes/Common/ViabilityOfPaidDownloadingTorrent'
 import ViabilityOfPaidDownloadingSwarm from '../../core/Torrent/ViabilityOfPaidDownloadingSwarm'
 
 function getColors(props, state) {

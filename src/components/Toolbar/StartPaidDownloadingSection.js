@@ -6,7 +6,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { inject, observer } from 'mobx-react'
 import ButtonSection from './ButtonSection'
-import ViabilityOfPaidDownloadingTorrent from '../../core/Torrent/ViabilityOfPaidDownloadingTorrent'
+//import ViabilityOfPaidDownloadingTorrent from '../../scenes/Common/ViabilityOfPaidDownloadingTorrent'
 
 /**
  * Bizarre!!!!!: HMR seems to break the use instanceof
