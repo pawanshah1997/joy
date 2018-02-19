@@ -913,11 +913,20 @@ class Application extends EventEmitter {
             console.error('Failed to parse example torrent file from data:', torrentFileName)
             return
           }
-
-          let settings = createStartingDownloadSettings(torrentInfo,
-                                                        this.applicationSettings.downloadFolder(),
-                                                        DEFAULT_APPLIATION_SETTINGS.buyerTerms)
-
+          
+          // Make settings for downloading with default settings
+          let settings = {
+            infoHash : torrentInfo.infoHash(),
+            metadata : torrentInfo,
+            resumeData : null,
+            name: torrentInfo.name(),
+            savePath: this.applicationSettings.downloadFolder(),
+            deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
+            extensionSettings : {
+              buyerTerms: this.applicationSettings.defaultBuyerTerms()
+            }
+          }
+          
           this.addTorrent(settings, () => {
 
           })
@@ -995,18 +1004,8 @@ function encodeTorrentSettings(torrent) {
 // TODO: Move this into Torrent class as a static member method
 function createStartingDownloadSettings(torrentInfo, savePath, buyerTerms) {
   const infoHash = torrentInfo.infoHash()
-
-  return {
-    infoHash : infoHash,
-    metadata : torrentInfo,
-    resumeData : null,
-    name: torrentInfo.name() || infoHash,
-    savePath: savePath,
-    deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
-    extensionSettings : {
-      buyerTerms: buyerTerms
-    }
-  }
+  
+  return
 }
 
 
