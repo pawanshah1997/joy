@@ -1,7 +1,8 @@
 
 import { observable, action } from 'mobx'
 import {computed} from "mobx/lib/mobx";
-import {indexesOfPlayableFiles} from './utils'
+import {indexesOfPlayableFiles, computeViabilityOfPaidDownloadingTorrent} from './utils'
+import Wallet from '../../core/Wallet'
 
 /**
  * Model for row in downloading table
