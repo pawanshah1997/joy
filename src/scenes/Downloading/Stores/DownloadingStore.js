@@ -3,10 +3,6 @@ import { TorrentInfo } from 'joystream-node'
 import TorrentTableRowStore from '../../Common/TorrentTableRowStore'
 import { remote } from 'electron'
 
-// TEMPORARY
-// a) https://github.com/JoyStream/joystream-desktop/issues/652
-import {getStandardBuyerTerms} from '../../../core/Application/Statemachine/Common'
-
 /**
  * User interface store for downloading scene
  */
@@ -196,8 +192,10 @@ class DownloadingStore {
   
     // Get the path to use as savepath from settings
     let savePath = this._uiStore.applicationStore.applicationSettings.downloadFolder()
+
+    let terms = this._uiStore.applicationStore.applicationSettings.defaultBuyerTerms()
   
-    let settings = getStartingDownloadSettings(torrentInfo, savePath)
+    let settings = getStartingDownloadSettings(torrentInfo, savePath, terms)
     
     /// Try to add torrent
     this.setState(DownloadingStore.STATE.TorrentBeingAdded)
@@ -223,10 +221,7 @@ class DownloadingStore {
 
 }
 
-function getStartingDownloadSettings(torrentInfo, defaultSavePath) {
-  
-  // NB: Get from settings data store of some sort
-  let terms = getStandardBuyerTerms()
+function getStartingDownloadSettings(torrentInfo, defaultSavePath, terms) {
   
   const infoHash = torrentInfo.infoHash()
   
