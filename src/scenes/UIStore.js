@@ -720,25 +720,34 @@ class UIStore {
   setMediaPlayerStore(mediaPlayerStore) {
     this.mediaPlayerStore = mediaPlayerStore
   }
+  
+  @computed get
+  torrentStoresArray() {
+    return [...this.applicationStore.torrentStores.values()]
+  }
 
   @computed get torrentsBeingLoaded() {
-    return this.applicationStore.torrents.filter(function (torrent) {
+    
+    return this.torrentStoresArray.filter(function (torrent) {
       return torrent.isLoading
     })
+    
   }
 
   @computed get torrentsFullyLoadedPercentage() {
-    return 100 * (1 - (this.torrentsBeingLoaded.length / this.applicationStore.torrents.length))
+    
+    return 100 * (1 - (this.torrentsBeingLoaded.length / this.applicationStore.torrentStores.size))
   }
 
   @computed get startingTorrentCheckingProgressPercentage() {
+    
     // Compute total size
-    let totalSize = this.applicationStore.torrents.reduce(function (accumulator, torrent) {
+    let totalSize = this.torrentStoresArray.reduce(function (accumulator, torrent) {
       return accumulator + torrent.totalSize
     }, 0)
 
     // Computed total checked size
-    let totalCheckedSize = this.applicationStore.torrents.reduce(function (accumulator, torrent) {
+    let totalCheckedSize = this.torrentStoresArray.reduce(function (accumulator, torrent) {
       let checkedSize = torrent.totalSize * (torrent.isLoading ? torrent.progress / 100 : 1)
       return accumulator + checkedSize
     }, 0)
@@ -747,13 +756,15 @@ class UIStore {
   }
 
   @computed get torrentsBeingTerminated() {
-    return this.applicationStore.torrents.filter(function (torrent) {
+    
+    return this.torrentStoresArray.filter(function (torrent) {
       return torrent.isTerminating
     })
   }
 
   @computed get terminatingTorrentsProgressPercentage() {
-    return this.torrentsBeingTerminated * 100 / this.applicationStore.torrents.length
+    
+    return this.torrentsBeingTerminated * 100 / this.applicationStore.torrentStores.size
   }
 
   @action.bound
