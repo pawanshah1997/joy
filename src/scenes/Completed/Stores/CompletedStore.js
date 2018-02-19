@@ -54,7 +54,7 @@ class CompletedStore {
      * For now we just do naive insertion order into `rowStorefromTorrentInfoHash` map.
      */
     
-    return this.rowStorefromTorrentInfoHash.values()
+    return [...this.rowStorefromTorrentInfoHash.values()]
   }
 }
 
