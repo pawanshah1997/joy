@@ -105,13 +105,7 @@ var Loading = new BaseMachine({
             
             // If we don´t have metadata, wait for it
             if(client.torrentInfo && client.torrentInfo.isValid()) {
-          
               this.transition(client, 'CheckingPartialDownload')
-              // We already have valid torrentInfo why getting again?
-              // const torrentInfo = client._joystreamNodeTorrent.handle.torrentFile()
-              //
-              // client._setTorrentInfo(torrentInfo)
-
             } else {
                 this.transition(client, 'WaitingForMetadata')
             }
@@ -121,8 +115,6 @@ var Loading = new BaseMachine({
         WaitingForMetadata : {
 
             metadataReady : function (client, torrentInfo) {
-
-              //const torrentInfo = client._joystreamNodeTorrent.handle.torrentFile()
 
               // Hold on to metadata, is required when shutting down
               client._setTorrentInfo(torrentInfo)
