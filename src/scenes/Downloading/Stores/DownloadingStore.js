@@ -2,6 +2,7 @@ import { observable, action, computed } from 'mobx'
 import { TorrentInfo } from 'joystream-node'
 import TorrentTableRowStore from '../../Common/TorrentTableRowStore'
 import { remote } from 'electron'
+import DeepInitialState from '../../../core/Torrent/Statemachine/DeepInitialState'
 
 /**
  * User interface store for downloading scene
@@ -190,13 +191,19 @@ class DownloadingStore {
       this.setState(DownloadingStore.STATE.TorrentFileWasInvalid)
       return
     }
-  
-    // Get the path to use as savepath from settings
-    let savePath = this._uiStore.applicationStore.applicationSettings.downloadFolder()
-
-    let terms = this._uiStore.applicationStore.applicationSettings.defaultBuyerTerms()
-  
-    let settings = getStartingDownloadSettings(torrentInfo, savePath, terms)
+    
+    // Make downloading settings
+    let settings = {
+      infoHash : torrentInfo.infoHash(),
+      metadata : torrentInfo,
+      resumeData : null,
+      name: torrentInfo.name(),
+      savePath: this._uiStore.applicationStore.applicationSettings.downloadFolder(),
+      deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
+      extensionSettings : {
+        buyerTerms: this._uiStore.applicationStore.applicationSettings.defaultBuyerTerms()
+      }
+    }
     
     /// Try to add torrent
     this.setState(DownloadingStore.STATE.TorrentBeingAdded)
@@ -220,23 +227,6 @@ class DownloadingStore {
     })
   }
 
-}
-
-function getStartingDownloadSettings(torrentInfo, defaultSavePath, terms) {
-  
-  const infoHash = torrentInfo.infoHash()
-  
-  return {
-    infoHash : infoHash,
-    metadata : torrentInfo,
-    resumeData : null,
-    name: torrentInfo.name() || infoHash,
-    savePath: defaultSavePath,
-    deepInitialState: TorrentStatemachine.DeepInitialState.DOWNLOADING.UNPAID.STARTED,
-    extensionSettings : {
-      buyerTerms: terms
-    }
-  }
 }
 
 export default DownloadingStore
