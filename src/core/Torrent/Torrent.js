@@ -141,6 +141,7 @@ class Torrent extends EventEmitter {
     this.resumeData = settings.resumeData
     this.torrentInfo = settings.metadata
     this._deepInitialState = settings.deepInitialState
+    this.peers = new Map()
     
     // Check that compatibility in deepInitialState and {buyerTerms, sellerTerms},
     // and store terms on client
