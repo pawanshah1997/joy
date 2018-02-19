@@ -9,7 +9,7 @@ var ControlledPromise = require('../util/controlled_promise')
 var PromiseMock = require('promise-mock')
 
 var Torrent = require('../../src/core/Torrent/Statemachine')
-var ViabilityOfPaidDownloadingInSwarm = require('../../src/core/Torrent/ViabilityOfPaidDownloadingSwarm')
+var ViabilityOfPaidDownloadingInSwarm = require('../../src/core/Torrent/ViabilityOfPaidDownloadingSwarm').default
 var BEPSupportStatus = require('joystream-node').BEPSupportStatus
 var ConnectionInnerState = require('joystream-node').ConnectionInnerState
 
@@ -442,6 +442,7 @@ function MockClient(fix) {
     this._deepInitialState = fix.deepInitialState
     this.sellerTerms = fix.extensionSettings.sellerTerms
     this.buyerTerms = fix.extensionSettings.buyerTerms
+    this.peers = new Map()
 
     this.emit = sinon.spy() // EventEmitter
     this.on = sinon.spy() // EventEmitter
