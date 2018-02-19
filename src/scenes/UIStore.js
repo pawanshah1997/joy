@@ -196,8 +196,38 @@ class UIStore {
   }
 
   _onNewApplicationStateAction = action((newState) => {
+    
+    this.applicationStore.setState(newState)
+    this.setCurrentPhase(appStateToUIStorePhase(newState))
 
-    if(newState === Application.STATE.STARTED) {
+    if(newState === Application.STATE.STARTING) {
+  
+      /**
+       * Create UI stores that must be available in order to
+       * do basic UI of the app, which is possible at the earliest
+       * while the application is starting.
+       */
+  
+      // Application header
+      this.applicationNavigationStore = new ApplicationNavigationStore(ApplicationNavigationStore.TAB.Downloading, 0, 'USD', this.walletStore, this.priceFeedStore, bcoin.protocol.consensus.COIN)
+  
+      // Scene specific stores
+      this.uploadingStore = new UploadingStore(this)
+      this.downloadingStore = new DownloadingStore(this)
+      this.completedStore = new CompletedStore(this)
+  
+      // add existing torrents to scene stores
+      
+      this.applicationStore.torrentStores.forEach((torrentStore, infoHash) => {
+    
+        this.uploadingStore.addTorrentStore(torrentStore)
+        this.downloadingStore.addTorrentStore(torrentStore)
+        this.completedStore.addTorrentStore(torrentStore)
+    
+      })
+    
+    
+    } else if(newState === Application.STATE.STARTED) {
 
       /**
        * Now that all application resources have been started, we
@@ -263,28 +293,6 @@ class UIStore {
 
         this.priceFeedStore.setCryptoToUsdExchangeRate(cryptoToUsdExchangeRate)
       }))
-
-      /**
-       * Create major UI stores
-       */
-
-      // Application header
-      this.applicationNavigationStore = new ApplicationNavigationStore(ApplicationNavigationStore.TAB.Downloading, 0, 'USD', walletStore, priceFeedStore, bcoin.protocol.consensus.COIN)
-      
-      // Scene specific stores
-      this.uploadingStore = new UploadingStore(this)
-      this.downloadingStore = new DownloadingStore(this)
-      this.completedStore = new CompletedStore(this)
-      
-      // add existing torrents to scene stores
-      
-      this.applicationStore.torrents.forEach((torrentStore, infoHash) => {
-        
-        this.uploadingStore.addTorrentStore(torrentStore)
-        this.downloadingStore.addTorrentStore(torrentStore)
-        this.completedStore.addTorrentStore(torrentStore)
-        
-      })
       
       /**
        * Set wallet scene model
@@ -312,10 +320,7 @@ class UIStore {
       // hide doorbell again
       Doorbell.hide()
     }
-
-    this.applicationStore.setState(newState)
-    this.setCurrentPhase(appStateToUIStorePhase(newState))
-
+    
   })
 
   _updateStartedAppResourcesAction = action((resources) => {
@@ -800,7 +805,7 @@ function appStateToUIStorePhase(state) {
       break
 
     case Application.STATE.STARTING:
-      phase = UIStore.PHASE.Loading
+      phase = UIStore.PHASE.Alive
       break
 
     case Application.STATE.STARTED:
