@@ -275,64 +275,37 @@ class TorrentStore {
             this.state.startsWith("Active.FinishedDownloading.Uploading.Stopped")
     }
 
+    @computed get
+    peerStoresArray() {
+      return [...this.peerStores.values()]
+    }
+
     @computed get numberOfBuyers() {
 
-      let n = 0
-
-      this.peerStores.forEach((store, pid) => {
-
-        if(store.peerIsBuyer) {
-          n++
-        }
-
-      })
-
-      return n
+      return this.peerStoresArray.filter((peerStore) => {
+        return peerStore.peerIsBuyer
+      }).length
     }
 
     @computed get numberOfSellers() {
 
-      let n = 0
-
-      this.peerStores.forEach((store, pid) => {
-
-        if(store.peerIsSeller) {
-          n++
-        }
-        
-      })
-
-      return n
+      return this.peerStoresArray.filter((peerStore) => {
+        return peerStore.peerIsSeller
+      }).length
     }
 
     @computed get numberOfObservers() {
 
-      let n = 0
-
-      this.peerStores.forEach((store, pid) => {
-
-        if(store.peerIsObserver) {
-          n++
-        }
-        
-      })
-
-      return n
+      return this.peerStoresArray.filter((peerStore) => {
+        return peerStore.peerIsObserver
+      }).length
     }
 
     @computed get numberOfNormalPeers() {
 
-      let n = 0
-
-      this.peerStores.forEach((store, pid) => {
-
-        if(store.peerSupportsProtocol) {
-          n++
-        }
-        
-      })
-
-      return n
+      return this.peerStoresArray.filter((peerStore) => {
+        return peerStore.peerSupportsProtocol
+      }).length
     }
 
     start() {
