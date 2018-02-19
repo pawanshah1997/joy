@@ -320,7 +320,7 @@ class UIStore {
 
   _updateStartedAppResourcesAction = action((resources) => {
 
-    this.applicationStore.setStartedResources(resource)
+    this.applicationStore.setStartedResources(resources)
 
   })
 
