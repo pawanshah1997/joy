@@ -13,7 +13,7 @@ class CompletedStore {
   constructor(uiStore) {
     
     this._uiStore = uiStore
-    this.setRowStorefromTorrentInfoHash(rowStorefromTorrentInfoHash)
+    this.setRowStorefromTorrentInfoHash(new Map())
   }
   
   @action.bound
