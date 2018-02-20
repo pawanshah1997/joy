@@ -5,6 +5,8 @@ import {shell} from 'electron'
 // Core
 import Application from '../core/Application'
 
+import * as constants from '../constants'
+
 // Core stores
 import {
   ApplicationStore,
