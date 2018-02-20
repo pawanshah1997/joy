@@ -102,7 +102,6 @@ const ApplicationHeader = observer((props) => {
             
           }}
           style={style.button}
-          disabled
           {...buttonColorProps}
         />
         
