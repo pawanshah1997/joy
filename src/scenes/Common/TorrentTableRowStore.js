@@ -66,22 +66,36 @@ class TorrentTableRowStore {
    * A brighter mind should review this.
    *
    */
-  
+
   @computed get
   viabilityOfPaidDownloadingTorrent() {
-  
+
     let balance = 0
     let walletStarted = false
-  
+
     if (this._walletStore) {
       balance = this._walletStore.totalBalance
       walletStarted = this._walletStore.state === Wallet.STATE.STARTED
     }
-  
+
     return computeViabilityOfPaidDownloadingTorrent(this.torrentStore.state, walletStarted, balance, this.torrentStore.viabilityOfPaidDownloadInSwarm)
   }
-  
-  
+
+  @computed get
+  isDownloading () {
+    return this.torrentStore.isDownloading
+  }
+
+  @computed get
+  isFullyDownloaded () {
+    return this.torrentStore.isFullyDownloaded
+  }
+
+  @computed get
+  isUploading () {
+    return this.torrentStore.isUploading
+  }
+
   @computed get
   playableMediaList() {
 
