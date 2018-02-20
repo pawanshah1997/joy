@@ -94,7 +94,13 @@ const ApplicationHeader = observer((props) => {
   
         <WalletButton
           selected={activeTab === ApplicationNavigationStore.TAB.Wallet}
-          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Wallet) }}
+          onClick={() => {
+            
+            if(applicationNavigationStore.walletTabEnabled) {
+              applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Wallet)
+            }
+            
+          }}
           style={style.button}
           disabled
           {...buttonColorProps}

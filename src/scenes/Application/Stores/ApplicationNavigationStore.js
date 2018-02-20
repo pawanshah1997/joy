@@ -39,6 +39,11 @@ class ApplicationNavigationStore {
     
     this._numberOfUnitsPerCoin = numberOfUnitsPerCoin
   }
+  
+  @computed get
+  walletTabEnabled() {
+    return !!this._uiStore.walletSceneStore
+  }
 
   /**
    * {Number} Balance in relevant fiat currency
