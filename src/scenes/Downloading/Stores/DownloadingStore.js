@@ -101,6 +101,9 @@ class DownloadingStore {
      */
   
     return [...this.rowStorefromTorrentInfoHash.values()]
+      .filter((torrentRowStore) => {
+        return torrentRowStore.isDownloading
+      })
   }
   
   @computed get
