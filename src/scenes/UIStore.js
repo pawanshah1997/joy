@@ -521,7 +521,7 @@ class UIStore {
      */
     torrent.on('peerRemoved', action((peerId) => {
 
-      assert(torrentStore.has(peerId))
+      assert(torrentStore.peerStores.has(peerId))
 
       torrentStore.peerStores.delete(peerId)
 
