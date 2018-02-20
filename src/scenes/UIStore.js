@@ -2,6 +2,9 @@ import {observable, action, computed} from 'mobx'
 import assert from 'assert'
 import {shell} from 'electron'
 
+// Core
+import Application from '../core/Application'
+
 // Core stores
 import {
   ApplicationStore,
@@ -9,6 +12,7 @@ import {
   PeerStore,
   WalletStore,
   PriceFeedStore} from '../core-stores'
+import {PaymentStore} from '../core-stores/Wallet'
 
 // UI stores
 import OnboardingStore from './Onboarding/Stores'
@@ -18,11 +22,6 @@ import UploadingStore from './Seeding/Stores'
 import CompletedStore from './Completed/Stores'
 import WalletSceneStore from './Wallet/Stores'
 import Doorbell from './Doorbell'
-
-import Application from '../core/Application'
-import {TorrentTableRowStore} from './Common'
-import PaymentStore from "../core-stores/Wallet/PaymentStore";
-
 
 /**
  * Root user interface model
@@ -196,8 +195,38 @@ class UIStore {
   }
 
   _onNewApplicationStateAction = action((newState) => {
+    
+    this.applicationStore.setState(newState)
+    this.setCurrentPhase(appStateToUIStorePhase(newState))
 
-    if(newState === Application.STATE.STARTED) {
+    if(newState === Application.STATE.STARTING) {
+  
+      /**
+       * Create UI stores that must be available in order to
+       * do basic UI of the app, which is possible at the earliest
+       * while the application is starting.
+       */
+  
+      // Application header
+      this.applicationNavigationStore = new ApplicationNavigationStore(ApplicationNavigationStore.TAB.Downloading, 0, 'USD', this.walletStore, this.priceFeedStore, bcoin.protocol.consensus.COIN)
+  
+      // Scene specific stores
+      this.uploadingStore = new UploadingStore(this)
+      this.downloadingStore = new DownloadingStore(this)
+      this.completedStore = new CompletedStore(this)
+  
+      // add existing torrents to scene stores
+      
+      this.applicationStore.torrentStores.forEach((torrentStore, infoHash) => {
+    
+        this.uploadingStore.addTorrentStore(torrentStore)
+        this.downloadingStore.addTorrentStore(torrentStore)
+        this.completedStore.addTorrentStore(torrentStore)
+    
+      })
+    
+    
+    } else if(newState === Application.STATE.STARTED) {
 
       /**
        * Now that all application resources have been started, we
@@ -263,28 +292,6 @@ class UIStore {
 
         this.priceFeedStore.setCryptoToUsdExchangeRate(cryptoToUsdExchangeRate)
       }))
-
-      /**
-       * Create major UI stores
-       */
-
-      // Application header
-      this.applicationNavigationStore = new ApplicationNavigationStore(ApplicationNavigationStore.TAB.Downloading, 0, 'USD', walletStore, priceFeedStore, bcoin.protocol.consensus.COIN)
-      
-      // Scene specific stores
-      this.uploadingStore = new UploadingStore(this)
-      this.downloadingStore = new DownloadingStore(this)
-      this.completedStore = new CompletedStore(this)
-      
-      // add existing torrents to scene stores
-      
-      this.applicationStore.torrents.forEach((torrentStore, infoHash) => {
-        
-        this.uploadingStore.addTorrentStore(torrentStore)
-        this.downloadingStore.addTorrentStore(torrentStore)
-        this.completedStore.addTorrentStore(torrentStore)
-        
-      })
       
       /**
        * Set wallet scene model
@@ -312,15 +319,12 @@ class UIStore {
       // hide doorbell again
       Doorbell.hide()
     }
-
-    this.applicationStore.setState(newState)
-    this.setCurrentPhase(appStateToUIStorePhase(newState))
-
+    
   })
 
   _updateStartedAppResourcesAction = action((resources) => {
 
-    this.applicationStore.setStartedResources(resource)
+    this.applicationStore.setStartedResources(resources)
 
   })
 
@@ -335,7 +339,7 @@ class UIStore {
     // Update application store signal about onboarding being enabled
     // and set store
     this.applicationStore.setOnboardingIsEnabled(isEnabled)
-    this.applicationStore.setOnboardingStore(onboardingStore)
+    this.setOnboardingStore(onboardingStore)
 
   })
 
@@ -349,8 +353,9 @@ class UIStore {
       name: torrent.name,
       savePath: torrent.savePath,
       state: torrent.state,
-      totalSize: torrent.torrentInfo ? torrent.torrentInfo.totalSize : 0, // Total size of torrent
+      totalSize: torrent.torrentInfo ? torrent.torrentInfo.totalSize() : 0,
       progress: torrent.progress,
+      viabilityOfPaidDownloadInSwarm : torrent.viabilityOfPaidDownloadInSwarm,
       downloadedSize: torrent.downloadedSize,
       downloadSpeed: torrent.downloadSpeed,
       uploadSpeed: torrent.uploadSpeed,
@@ -523,7 +528,7 @@ class UIStore {
     }))
     
     // Add to application store
-    applicationStore.onNewTorrentStore(torrentStore)
+    this.applicationStore.onNewTorrentStore(torrentStore)
 
     // Add to relevant scenes if they currently exist,
     // which they only do when UI is active, not during loading
@@ -550,12 +555,8 @@ class UIStore {
 
   _onTorrentRemovedAction = action((infoHash) => {
 
-    let applicationStore = this.applicationStore
-
-    assert(applicationStore)
-
     // Remove from application store
-    applicationStore.onTorrentRemoved(infoHash)
+    this.applicationStore.onTorrentRemoved(infoHash)
 
     // Remove from relevant scenes
     this.uploadingStore.removeTorrentStore(infoHash)
@@ -673,7 +674,7 @@ class UIStore {
      * If onboarding is enabled, then display shutdown message - if its not already
      * showing, and block the shutdown for now
      */
-    if (this._applicationStore.onboardingIsEnabled) {
+    if (this._application.onboardingIsEnabled) {
 
       /**
        *  Only call for shutdown message if its not already showing, it is after all
@@ -697,13 +698,9 @@ class UIStore {
      * this renderes process about successful stopping, which which we don't block.
      */
     else {
-      this._applicationStore.stop()
+      this._application.stop()
     }
 
-  }
-
-  openFolder(path) {
-    shell.openItem(path)
   }
 
   @action.bound
@@ -720,25 +717,34 @@ class UIStore {
   setMediaPlayerStore(mediaPlayerStore) {
     this.mediaPlayerStore = mediaPlayerStore
   }
+  
+  @computed get
+  torrentStoresArray() {
+    return [...this.applicationStore.torrentStores.values()]
+  }
 
   @computed get torrentsBeingLoaded() {
-    return this.applicationStore.torrents.filter(function (torrent) {
+    
+    return this.torrentStoresArray.filter(function (torrent) {
       return torrent.isLoading
     })
+    
   }
 
   @computed get torrentsFullyLoadedPercentage() {
-    return 100 * (1 - (this.torrentsBeingLoaded.length / this.applicationStore.torrents.length))
+    
+    return 100 * (1 - (this.torrentsBeingLoaded.length / this.applicationStore.torrentStores.size))
   }
 
   @computed get startingTorrentCheckingProgressPercentage() {
+    
     // Compute total size
-    let totalSize = this.applicationStore.torrents.reduce(function (accumulator, torrent) {
+    let totalSize = this.torrentStoresArray.reduce(function (accumulator, torrent) {
       return accumulator + torrent.totalSize
     }, 0)
 
     // Computed total checked size
-    let totalCheckedSize = this.applicationStore.torrents.reduce(function (accumulator, torrent) {
+    let totalCheckedSize = this.torrentStoresArray.reduce(function (accumulator, torrent) {
       let checkedSize = torrent.totalSize * (torrent.isLoading ? torrent.progress / 100 : 1)
       return accumulator + checkedSize
     }, 0)
@@ -747,13 +753,15 @@ class UIStore {
   }
 
   @computed get torrentsBeingTerminated() {
-    return this.applicationStore.torrents.filter(function (torrent) {
+    
+    return this.torrentStoresArray.filter(function (torrent) {
       return torrent.isTerminating
     })
   }
 
   @computed get terminatingTorrentsProgressPercentage() {
-    return this.torrentsBeingTerminated * 100 / this.applicationStore.torrents.length
+    
+    return this.torrentsBeingTerminated * 100 / this.applicationStore.torrentStores.size
   }
 
   @action.bound
@@ -796,7 +804,7 @@ function appStateToUIStorePhase(state) {
       break
 
     case Application.STATE.STARTING:
-      phase = UIStore.PHASE.Loading
+      phase = UIStore.PHASE.Alive
       break
 
     case Application.STATE.STARTED:

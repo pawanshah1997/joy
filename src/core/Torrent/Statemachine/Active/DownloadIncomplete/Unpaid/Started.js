@@ -7,7 +7,7 @@ var Common = require('../../../Common')
 var ConnectionInnerState = require('joystream-node').ConnectionInnerState
 var commitmentToOutput = require('joystream-node').paymentChannel.commitmentToOutput
 
-var ViabilityOfPaidDownloadInSwarm = require('../../../../ViabilityOfPaidDownloadingSwarm')
+var ViabilityOfPaidDownloadInSwarm = require('../../../../ViabilityOfPaidDownloadingSwarm').default
 
 var Started = new BaseMachine({
 
@@ -73,7 +73,7 @@ var Started = new BaseMachine({
             startPaidDownload : function (client, fn) {
 
               // Check that we can actually start
-              if(!(client.viabilityOfPaidDownloadInSwarm instanceof ViabilityOfPaidDownloadInSwarm.Viable)) {
+              if(!(client.viabilityOfPaidDownloadInSwarm.constructor.name === 'Viable')) {
                   return fn(client.viabilityOfPaidDownloadInSwarm , null)
               }
 

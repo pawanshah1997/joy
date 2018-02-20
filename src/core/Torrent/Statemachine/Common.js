@@ -10,10 +10,7 @@ function processPeerPluginStatuses(client, statuses) {
      * Poor way of doing peer list maintenance, but
      * this is all we have without proper/reliable peer level events.
      */
-
-    if(!client.peers)
-        client.peers = new Map()
-
+    
     // Peer Ids for peers we are getting status snapshot for
     var peersInSnapshot = new Set()
 

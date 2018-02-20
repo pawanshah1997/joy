@@ -6,7 +6,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { inject, observer } from 'mobx-react'
 import ButtonSection from './ButtonSection'
-import ViabilityOfPaidDownloadingTorrent from '../../core/Torrent/ViabilityOfPaidDownloadingTorrent'
+//import ViabilityOfPaidDownloadingTorrent from '../../scenes/Common/ViabilityOfPaidDownloadingTorrent'
 
 /**
  * Bizarre!!!!!: HMR seems to break the use instanceof
@@ -40,16 +40,16 @@ const StartPaidDownloadingSection = observer((props) => {
      */
 
     // This one breaks
-    //console.log(props.torrent.startPaidDownloadViability instanceof StartPaidDownloadViability.NoJoyStreamPeerConnections)
-    //console.log(props.torrent.startPaidDownloadViability.constructor.name === 'NoJoyStreamPeerConnections')
+    //console.log(props.row.torrentStore.startPaidDownloadViability instanceof StartPaidDownloadViability.NoJoyStreamPeerConnections)
+    //console.log(props.row.torrentStore.startPaidDownloadViability.constructor.name === 'NoJoyStreamPeerConnections')
     
     // Derive ButtonSection props
     let className
     let onClick
   
-    if(props.torrent.viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart) {
+    if(props.row.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart') {
         className = "start_paid_downloading"
-        onClick = () => { props.torrent.startPaidDownload() }
+        onClick = () => { props.row.torrentStore.startPaidDownload() }
     } else {
         className = "start_paid_downloading-disabled"
         onClick = null
@@ -57,13 +57,13 @@ const StartPaidDownloadingSection = observer((props) => {
 
     return (
         <ButtonSection className={className} tooltip="Start paid speedup" onClick={onClick}>
-            <BlockedStartBadge viabilityOfPaidDownloadingTorrent={props.torrent.viabilityOfPaidDownloadingTorrent}/>
+            <BlockedStartBadge viabilityOfPaidDownloadingTorrent={props.row.viabilityOfPaidDownloadingTorrent}/>
         </ButtonSection>
     )
 })
 
 StartPaidDownloadingSection.propTypes = {
-    torrent : PropTypes.object.isRequired, // TorrentStore really
+    row : PropTypes.object.isRequired, // TorrentTableRowStore really, but HMR breaks instanceof
 }
 
 import SvgIcon from 'material-ui/SvgIcon'
@@ -99,9 +99,7 @@ const BlockedStartBadge = (props) => {
 
 function blockedBadgeContent(viabilityOfPaidDownloadingTorrent)  {
 
-    if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart ||
-        viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.AlreadyStarted ||
-        viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.Stopped)
+    if(viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart')
         return null
 
     let icon = <AlertIcon />
@@ -111,6 +109,8 @@ function blockedBadgeContent(viabilityOfPaidDownloadingTorrent)  {
         tooltip = "Download stopped"
     else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted')
         tooltip = "Already paying"
+    else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'WalletNotReady')
+        tooltip = 'Wallet not ready'
     else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'InViable') {
 
         let viability = viabilityOfPaidDownloadingTorrent.swarmViability
@@ -142,6 +142,8 @@ function blockedBadgeContent(viabilityOfPaidDownloadingTorrent)  {
     else {
 
         console.log('should not come here')
+      
+        assert(false)
 
         //assert(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart)
 

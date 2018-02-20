@@ -1,5 +1,5 @@
 import React from 'react'
-import { observer } from 'mobx-react'
+import { observer, inject } from 'mobx-react'
 import PropTypes from 'prop-types'
 
 import DownloadingStore from './Stores'
@@ -30,7 +30,7 @@ function getStyles (props) {
   }
 }
 
-const Downloading = observer((props) => {
+const Downloading = inject('UIStore')(observer((props) => {
   
   let styles = getStyles(props)
   
@@ -38,7 +38,7 @@ const Downloading = observer((props) => {
     backgroundColorLeft : props.middleSectionDarkBaseColor,
     backgroundColorRight : props.middleSectionHighlightColor
   }
-  
+
   return (
     <div style={styles.root}>
 
@@ -47,7 +47,7 @@ const Downloading = observer((props) => {
         <Toolbar>
 
           <ToolbarButton title="add download"
-                         onClick={() => { props.downloadingStore.startDownloadWithTorrentFileFromFilePicker()}}
+                         onClick={() => { props.UIStore.downloadingStore.startDownloadWithTorrentFileFromFilePicker()}}
                          iconNode={<AddTorrentIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>}
           />
 
@@ -57,17 +57,17 @@ const Downloading = observer((props) => {
 
         <LabelContainer>
 
-          <TorrentCountLabel count={props.downloadingStore.torrentRowStores.length}
+          <TorrentCountLabel count={props.UIStore.downloadingStore.torrentRowStores.length}
                              {...labelColorProps}
           />
 
           <CurrencyLabel labelText={"SPENDING"}
-                         satoshies={props.downloadingStore.totalSpent}
+                         satoshies={props.UIStore.totalSpendingOnPieces}
                          {...labelColorProps}
           />
 
           <BandwidthLabel labelText={'DOWNLOAD SPEED'}
-                          bytesPerSecond={props.downloadingStore.totalDownloadSpeed}
+                          bytesPerSecond={props.UIStore.downloadingStore.totalDownloadSpeed}
                           {...labelColorProps}
           />
 
@@ -75,17 +75,17 @@ const Downloading = observer((props) => {
 
       </MiddleSection>
 
-      <TorrentTable downloadingStore={props.downloadingStore}/>
+      <TorrentTable downloadingStore={props.UIStore.downloadingStore}/>
 
-      <StartDownloadingFlow downloadingStore={props.downloadingStore}/>
+      <StartDownloadingFlow downloadingStore={props.UIStore.downloadingStore}/>
 
     </div>
   )
 
-})
+}))
 
 Downloading.propTypes = {
-  downloadingStore : PropTypes.object.isRequired, // HMR breaks PropTypes.instanceOf(DownloadingStore).isRequired
+  //downloadingStore : PropTypes.object.isRequired, // HMR breaks PropTypes.instanceOf(DownloadingStore).isRequired
   
   // Colors: drop
   middleSectionBaseColor: PropTypes.string.isRequired,

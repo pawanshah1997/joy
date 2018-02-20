@@ -2,10 +2,7 @@ import { observable, action, computed } from 'mobx'
 import { TorrentInfo } from 'joystream-node'
 import TorrentTableRowStore from '../../Common/TorrentTableRowStore'
 import { remote } from 'electron'
-
-// TEMPORARY
-// a) https://github.com/JoyStream/joystream-desktop/issues/652
-import {getStandardBuyerTerms} from '../../../core/Application/Statemachine/Common'
+import DeepInitialState from '../../../core/Torrent/Statemachine/DeepInitialState'
 
 /**
  * User interface store for downloading scene
@@ -52,7 +49,7 @@ class DownloadingStore {
     if(this.rowStorefromTorrentInfoHash.has(torrentStore.infoHash))
       throw Error('Torrent store for same torrent already exists.')
 
-    let row = new TorrentTableRowStore(torrentStore, this._uiStore.applicationStore, false)
+    let row = new TorrentTableRowStore(torrentStore, this._uiStore.applicationStore, this._uiStore.applicationStore.walletStore, false)
     
     this.rowStorefromTorrentInfoHash.set(torrentStore.infoHash, row)
   }
@@ -103,13 +100,14 @@ class DownloadingStore {
      * For now we just do naive insertion order into `rowStorefromTorrentInfoHash` map.
      */
   
-    return this.rowStorefromTorrentInfoHash.values()
+    return [...this.rowStorefromTorrentInfoHash.values()]
   }
   
   @computed get
   totalDownloadSpeed () {
-    return this.torrentRowStores.reduce((accumulator, torrentStore) => {
-      return accumulator + torrentStore.downloadSpeed
+    
+    return this.torrentRowStores.reduce((accumulator, row) => {
+      return accumulator + row.torrentStore.downloadSpeed
     }, 0)
   }
   
@@ -193,11 +191,19 @@ class DownloadingStore {
       this.setState(DownloadingStore.STATE.TorrentFileWasInvalid)
       return
     }
-  
-    // Get the path to use as savepath from settings
-    let savePath = this._uiStore.applicationStore.applicationSettings.downloadFolder()
-  
-    let settings = getStartingDownloadSettings(torrentInfo, savePath)
+    
+    // Make downloading settings
+    let settings = {
+      infoHash : torrentInfo.infoHash(),
+      metadata : torrentInfo,
+      resumeData : null,
+      name: torrentInfo.name(),
+      savePath: this._uiStore.applicationStore.applicationSettings.downloadFolder(),
+      deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
+      extensionSettings : {
+        buyerTerms: this._uiStore.applicationStore.applicationSettings.defaultBuyerTerms()
+      }
+    }
     
     /// Try to add torrent
     this.setState(DownloadingStore.STATE.TorrentBeingAdded)
@@ -221,26 +227,6 @@ class DownloadingStore {
     })
   }
 
-}
-
-function getStartingDownloadSettings(torrentInfo, defaultSavePath) {
-  
-  // NB: Get from settings data store of some sort
-  let terms = getStandardBuyerTerms()
-  
-  const infoHash = torrentInfo.infoHash()
-  
-  return {
-    infoHash : infoHash,
-    metadata : torrentInfo,
-    resumeData : null,
-    name: torrentInfo.name() || infoHash,
-    savePath: defaultSavePath,
-    deepInitialState: TorrentStatemachine.DeepInitialState.DOWNLOADING.UNPAID.STARTED,
-    extensionSettings : {
-      buyerTerms: terms
-    }
-  }
 }
 
 export default DownloadingStore

@@ -13,7 +13,7 @@ class CompletedStore {
   constructor(uiStore) {
     
     this._uiStore = uiStore
-    this.setRowStorefromTorrentInfoHash(rowStorefromTorrentInfoHash)
+    this.setRowStorefromTorrentInfoHash(new Map())
   }
   
   @action.bound
@@ -22,7 +22,7 @@ class CompletedStore {
     if(this.rowStorefromTorrentInfoHash.has(torrentStore.infoHash))
       throw Error('Torrent store for same torrent already exists.')
     
-    let row = new TorrentTableRowStore(torrentStore, this._uiStore.applicationStore, false)
+    let row = new TorrentTableRowStore(torrentStore, this._uiStore.applicationStore, this._uiStore.applicationStore.walletStore, false)
     
     this.rowStorefromTorrentInfoHash.set(torrentStore.infoHash, row)
   }
@@ -54,7 +54,7 @@ class CompletedStore {
      * For now we just do naive insertion order into `rowStorefromTorrentInfoHash` map.
      */
     
-    return this.rowStorefromTorrentInfoHash.values()
+    return [...this.rowStorefromTorrentInfoHash.values()]
   }
 }
 

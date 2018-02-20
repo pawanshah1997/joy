@@ -21,11 +21,11 @@ const TorrentToolbar = observer((props) => {
   return (
     <Toolbar>
 
-      <PlaySection canPlay={props.torrentTableRowStore.canPlayMedia}
+      <PlaySection canPlay={props.torrentTableRowStore.playableMediaList.length > 0}
                    play={() => { props.torrentTableRowStore.playMedia() }}
       />
       
-      <StartPaidDownloadingSection torrent={props.torrentTableRowStore.torrentStore} />
+      <StartPaidDownloadingSection row={props.torrentTableRowStore} />
 
       <ToggleStatusSection canStart={props.torrentTableRowStore.torrentStore.canStart}
                            canStop={props.torrentTableRowStore.torrentStore.canStop}

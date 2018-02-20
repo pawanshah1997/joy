@@ -2,6 +2,16 @@
  * Created by bedeho on 13/02/2018.
  */
 
+import {
+  AlreadyStarted,
+  CanStart,
+  WalletNotReady,
+  InsufficientFunds,
+  InViable,
+  Stopped
+} from './ViabilityOfPaidDownloadingTorrent'
+import {ViabilityOfPaidDownloadInSwarm} from '../../core/Torrent'
+
 /**
  * Computes indexes of playable files.
  *
@@ -32,33 +42,36 @@ function indexesOfPlayableFiles(torrentFiles) {
 
 
 /**
- * Computes viability of paid dowlnoading on torrent
+ * Computes viability of paid downloading on torrent
  *
  * @param state {String} - state of torrent
+ * @param walletStarted {Boolean} - whether wallet has currently been started
  * @param balance {Number} -  (stats)
- * @returns {ViabilityOfPaidDownloadingTorrent}
+ * @returns {Stopped|AlreadyStarted|InViable|WalletNotReady|InsufficientFunds|CanStart}
  */
-function viabilityOfPaidDownloadingTorrent(state, balance, viabilityOfPaidDownloadInSwarm) {
-
+function computeViabilityOfPaidDownloadingTorrent(state, walletStarted, balance, viabilityOfPaidDownloadInSwarm) {
+  
   if(state.startsWith("Active.DownloadIncomplete.Unpaid.Stopped"))
-    return new ViabilityOfPaidDownloadingTorrent.Stopped()
+    return new Stopped()
   else if(state.startsWith("Active.DownloadIncomplete.Paid"))
-    return new ViabilityOfPaidDownloadingTorrent.AlreadyStarted()
-  else if(!(viabilityOfPaidDownloadInSwarm instanceof ViabilityOfPaidDownloadInSwarm.Viable))
-    return new ViabilityOfPaidDownloadingTorrent.InViable(viabilityOfPaidDownloadInSwarm)
+    return new AlreadyStarted()
+  else if(!(viabilityOfPaidDownloadInSwarm.constructor.name === 'Viable'))
+    return new InViable(viabilityOfPaidDownloadInSwarm)
+  else if(!walletStarted)
+    return new WalletNotReady()
   else {
-
+    
     // Here it must be that swarm is viable, by
     // test in prior step
-
+    
     if(balance == 0) // <== fix later to be a more complex constraint
-      return new ViabilityOfPaidDownloadingTorrent.InsufficientFunds(viabilityOfPaidDownloadInSwarm.estimate, balance)
+      return new InsufficientFunds(viabilityOfPaidDownloadInSwarm.estimate, balance)
     else
-      return new ViabilityOfPaidDownloadingTorrent.CanStart(viabilityOfPaidDownloadInSwarm.suitableAndJoined, viabilityOfPaidDownloadInSwarm.estimate)
+      return new CanStart(viabilityOfPaidDownloadInSwarm.suitableAndJoined, viabilityOfPaidDownloadInSwarm.estimate)
   }
 }
 
 export {
   indexesOfPlayableFiles,
-  viabilityOfPaidDownloadingTorrent
+  computeViabilityOfPaidDownloadingTorrent
 }

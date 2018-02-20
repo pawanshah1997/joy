@@ -11,6 +11,7 @@ import {
   isPassive,
   isDownloading,
   isStopped} from './Statemachine/DeepInitialState'
+import ViabilityOfPaidDownloadingSwarm from './ViabilityOfPaidDownloadingSwarm'
 
 var debug = require('debug')('torrent')
 
@@ -96,6 +97,13 @@ class Torrent extends EventEmitter {
    * {Number} Bytes per second upload rate
    */
   uploadSpeed
+
+  /**
+   * {Number} Number of seeders
+   * NB: For now we leave this here, but in the future
+   * we should put information on each peer.
+   */
+  numberOfSeeders
   
   /**
    * {Number} Bytes uploaded so far
@@ -141,6 +149,15 @@ class Torrent extends EventEmitter {
     this.resumeData = settings.resumeData
     this.torrentInfo = settings.metadata
     this._deepInitialState = settings.deepInitialState
+    this.progress = 0
+    this.downloadedSize = 0
+    this.downloadSpeed = 0
+    this.uploadSpeed = 0
+    this.numberOfSeeders = 0
+    this.uploadedTotal = 0
+    
+    this.peers = new Map()
+    this.viabilityOfPaidDownloadInSwarm = new ViabilityOfPaidDownloadingSwarm.NoJoyStreamPeerConnections()
     
     // Check that compatibility in deepInitialState and {buyerTerms, sellerTerms},
     // and store terms on client
@@ -322,7 +339,7 @@ class Torrent extends EventEmitter {
   
   _setProgress(progress) {
     this.progress = progress
-    this.emit('progress')
+    this.emit('progress', progress)
   }
   
   _setDownloadedSize(downloadedSize) {

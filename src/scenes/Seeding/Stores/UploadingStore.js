@@ -65,7 +65,7 @@ class UploadingStore {
     if(this.rowStorefromTorrentInfoHash.has(torrentStore.infoHash))
       throw Error('Torrent store for same torrent already exists.')
     
-    let row = new TorrentTableRowStore(torrentStore, this._uiStore.applicationStore, false)
+    let row = new TorrentTableRowStore(torrentStore, this._uiStore.applicationStore, this._uiStore.applicationStore.walletStore, false)
     
     this.rowStorefromTorrentInfoHash.set(torrentStore.infoHash, row)
   }
@@ -107,13 +107,13 @@ class UploadingStore {
      * For now we just do naive insertion order into `rowStorefromTorrentInfoHash` map.
      */
   
-    return this.rowStorefromTorrentInfoHash.values()
+    return [...this.rowStorefromTorrentInfoHash.values()]
   }
   
   @computed get
   totalUploadSpeed () {
-    return this.torrentRowStores.reduce(function (accumulator, torrent) {
-      return accumulator + torrent.uploadSpeed
+    return this.torrentRowStores.reduce(function (accumulator, row) {
+      return accumulator + row.torrentStore.uploadSpeed
     }, 0)
   }
 

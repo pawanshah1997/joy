@@ -12,6 +12,9 @@ function InViable(swarmViability) {
     this.swarmViability = swarmViability // <== this really can never be viable, so all inviable cases within ViabilityOfPaidDownloadingSwarm need to be factored out
 }
 
+function WalletNotReady() {
+}
+
 function InsufficientFunds(estimate, available) {
     this.estimate = estimate
     this.available = available
@@ -22,11 +25,12 @@ function CanStart(suitablePeers, estimate) {
     this.estimate = estimate
 }
 
-module.exports = {
-    Stopped,
-    AlreadyStarted,
-    InViable,
-    InsufficientFunds,
-    CanStart
-}
 
+export {
+  Stopped,
+  AlreadyStarted,
+  InViable,
+  WalletNotReady,
+  InsufficientFunds,
+  CanStart
+}
