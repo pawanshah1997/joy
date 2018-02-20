@@ -31,21 +31,20 @@ const Row = (props) => {
     let styles = getStyles(props)
 
     return (
-        <div style={styles.root}
-             {...props}
+        <div
+          style={styles.root}
+          onMouseEnter={props.onMouseEnter}
+          onMouseLeave={props.onMouseLeave}
         >
-            {props.children}
+          {props.children}
         </div>
     )
 }
 
 Row.propTypes = {
-  backgroundColor : PropTypes.string,
-  rowProps : PropTypes.object
-}
-
-Row.defaultPropTypes = {
-  backgroundColor : 'white'
+  onMouseEnter : PropTypes.func,
+  onMouseLeave : PropTypes.func,
+  backgroundColor : PropTypes.string.isRequired
 }
 
 export default Row
