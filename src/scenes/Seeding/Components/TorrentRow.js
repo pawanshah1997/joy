@@ -32,9 +32,9 @@ const TorrentRow = observer((props) => {
 
       <BytesPerSecondField bytes={torrentStore.uploadSpeed} />
 
-      <BitcoinValueField satoshis={torrentStore.sellerPrice} />
+      <BitcoinValueField satoshis={torrentStore.sellerTerms.minPrice} />
 
-      <BitcoinValueField satoshis={torrentStore.totalRevenue} />
+      <BitcoinValueField satoshis={torrentStore.totalRevenueFromPiecesAsSeller} />
 
       <PeerCountField count={torrentStore.numberOfBuyers} />
 
