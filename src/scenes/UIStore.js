@@ -208,7 +208,13 @@ class UIStore {
        */
   
       // Application header
-      this.applicationNavigationStore = new ApplicationNavigationStore(ApplicationNavigationStore.TAB.Downloading, 0, 'USD', this.walletStore, this.priceFeedStore, bcoin.protocol.consensus.COIN)
+      this.applicationNavigationStore = new ApplicationNavigationStore(
+        this,
+        ApplicationNavigationStore.TAB.Downloading,
+        0,
+        'USD',
+        bcoin.protocol.consensus.COIN
+      )
   
       // Scene specific stores
       this.uploadingStore = new UploadingStore(this)
