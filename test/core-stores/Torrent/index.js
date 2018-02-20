@@ -92,7 +92,23 @@ describe('Torrent Store', function () {
   })
 
   describe('computed values', function () {
+    it('isDownloading', function () {
+      torrentStore.setState('Active.DownloadIncomplete')
+      assert(torrentStore.isDownloading)
+      assert(!torrentStore.isFullyDownloaded)
+    })
 
+    it('isFullyDownloaded', function () {
+      torrentStore.setState('Active.FinishedDownloading')
+      assert(torrentStore.isFullyDownloaded)
+      assert(!torrentStore.isDownloading)
+    })
+
+    it('isUploading', function () {
+      torrentStore.setState('Active.FinishedDownloading.Uploading')
+      assert(torrentStore.isUploading)
+      assert(!torrentStore.isDownloading)
+    })
   })
 
   describe('starters and stoppers', function () {
