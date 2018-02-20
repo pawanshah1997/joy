@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
 import { inject, observer } from 'mobx-react'
 
 // Wallet
-import WalletSceneStore from '../Stores'
+
 import {
   SendDialogStore,
   ReceiveDialogStore,
@@ -120,7 +119,7 @@ const SeedIcon = (props) => {
   )
 }
 
-const WalletScene = observer((props) => {
+const WalletScene = inject('UIStore')(observer((props) => {
 
   let styles = getStyles(props)
 
@@ -139,7 +138,7 @@ const WalletScene = observer((props) => {
           <Toolbar>
 
             <ToolbarButton title="send"
-                           onClick={() => { props.walletSceneStore.sendClicked() }}
+                           onClick={() => { props.UIStore.walletSceneStore.sendClicked() }}
                            iconNode={<SendIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>}
             />
 
@@ -151,7 +150,7 @@ const WalletScene = observer((props) => {
             </div>
 
             <ToolbarButton title="receive"
-                           onClick={() => { props.walletSceneStore.receiveClicked()}}
+                           onClick={() => { props.UIStore.walletSceneStore.receiveClicked()}}
                            iconNode={<ReceiveIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>}
             />
 
@@ -178,12 +177,12 @@ const WalletScene = observer((props) => {
 
           <LabelContainer>
 
-              <WalletStatusLabel synchronizationPercentage={props.walletSceneStore.synchronizationPercentage}
+              <WalletStatusLabel synchronizationPercentage={props.UIStore.walletSceneStore.synchronizationPercentage}
                                  {...labelColorProps}
               />
 
               <CurrencyLabel labelText={"PENDING"}
-                             satoshies={props.walletSceneStore.pendingBalance}
+                             satoshies={props.UIStore.walletSceneStore.pendingBalance}
                              {...labelColorProps}
               />
 
@@ -194,22 +193,18 @@ const WalletScene = observer((props) => {
       </MiddleSection>
 
       <div style={styles.paymentsTableContainer}>
-        <PaymentsTable walletSceneStore={props.walletSceneStore}/>
+        <PaymentsTable walletSceneStore={props.UIStore.walletSceneStore}/>
       </div>
 
       <NoticationBanner>
         This wallet does not use real Bitcoins, rather testnet coins, real coins are coming in the next release.
       </NoticationBanner>
 
-      <SendingDialog sendDialogStore={props.walletSceneStore.visibleDialog instanceof SendDialogStore ? props.walletSceneStore.visibleDialog : null}/>
-      <ReceiveDialog receiveDialogStore={props.walletSceneStore.visibleDialog instanceof ReceiveDialogStore ? props.walletSceneStore.visibleDialog : null}/>
+      <SendingDialog sendDialogStore={props.UIStore.walletSceneStore.visibleDialog instanceof SendDialogStore ? props.UIStore.walletSceneStore.visibleDialog : null}/>
+      <ReceiveDialog receiveDialogStore={props.UIStore.walletSceneStore.visibleDialog instanceof ReceiveDialogStore ? props.UIStore.walletSceneStore.visibleDialog : null}/>
 
     </div>    
   )
-})
-
-WalletScene.propTypes = {
-  walletSceneStore : PropTypes.object.isRequired // HMR breaks PropTypes.instanceOf(WalletSceneStore).isRequired
-}
+}))
 
 export default WalletScene

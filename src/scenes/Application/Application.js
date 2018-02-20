@@ -167,7 +167,6 @@ const StartedApp = observer((props) => {
       
       elm =
         <Wallet
-          walletSceneStore={props.UIStore.walletSceneStore}
           backgroundColor={UI_CONSTANTS.primaryColor}
           {...middleSectionColorProps}
         />
