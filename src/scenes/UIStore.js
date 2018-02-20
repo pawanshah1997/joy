@@ -121,7 +121,7 @@ class UIStore {
   completedStore
 
   /**
-   * @property {DownloadingStore} Model for downloading scene.
+   * @property {WalletSceneStore} Model for downloading scene.
    */
   walletSceneStore
 
