@@ -143,7 +143,6 @@ const StartedApp = observer((props) => {
       
       elm =
         <Downloading
-          downloadingStore={props.UIStore.downloadingStore}
           {...middleSectionColorProps}
         />
       break
@@ -152,7 +151,6 @@ const StartedApp = observer((props) => {
       
       elm =
         <Seeding
-          uploadingStore={props.UIStore.uploadingStore}
           {...middleSectionColorProps}
         />
       break
@@ -161,7 +159,6 @@ const StartedApp = observer((props) => {
       
       elm =
         <Completed
-          completedStore={props.UIStore.completedStore}
           {...middleSectionColorProps}
         />
       break
@@ -170,7 +167,6 @@ const StartedApp = observer((props) => {
       
       elm =
         <Wallet
-          walletSceneStore={props.UIStore.walletSceneStore}
           backgroundColor={UI_CONSTANTS.primaryColor}
           {...middleSectionColorProps}
         />
@@ -180,7 +176,6 @@ const StartedApp = observer((props) => {
       
       elm =
         <Community
-          UIStore={props.UIStore}
           backgroundColor={UI_CONSTANTS.primaryColor}
         />
       break

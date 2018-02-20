@@ -29,7 +29,7 @@ const TorrentRow = observer((props) => {
     <Row
       onMouseEnter={() => { props.torrentTableRowStore.setShowToolbar(true) }}
       onMouseLeave={() => { props.torrentTableRowStore.setShowToolbar(false) }}
-      style={ {backgroundColor : props.backgroundColor}}
+      backgroundColor={props.backgroundColor}
     >
       <NameField name={torrentStore.name} />
 

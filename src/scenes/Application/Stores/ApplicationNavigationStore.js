@@ -30,15 +30,19 @@ class ApplicationNavigationStore {
    */
   @observable fiatUnit
   
-  constructor(activeTab, numberCompletedInBackground, fiatUnit, walletStore, priceFeedStore, numberOfUnitsPerCoin) {
+  constructor(uiStore, activeTab, numberCompletedInBackground, fiatUnit, numberOfUnitsPerCoin) {
 
+    this._uiStore = uiStore
     this.setActiveTab(activeTab)
     this.setNumberCompletedInBackground(numberCompletedInBackground)
     this.setFiatUnit(fiatUnit)
-
-    this._walletStore = walletStore
-    this._priceFeedStore = priceFeedStore
+    
     this._numberOfUnitsPerCoin = numberOfUnitsPerCoin
+  }
+  
+  @computed get
+  walletTabEnabled() {
+    return !!this._uiStore.walletSceneStore
   }
 
   /**
@@ -46,13 +50,16 @@ class ApplicationNavigationStore {
    */
   @computed get
   balanceInFiat() {
+    
+    let applicationStore = this._uiStore.applicationStore
 
-    if(!this._walletStore || !this._priceFeedStore)
+    // Make sure both wallet and price feed is set
+    if(!applicationStore.walletStore || !applicationStore.priceFeedStore)
       return null
 
-    let balance = this._walletStore.totalBalance
+    let balance = applicationStore.walletStore.totalBalance
 
-    return Math.floor((balance * this._priceFeedStore.cryptoToUsdExchangeRate) / this._numberOfUnitsPerCoin)
+    return Math.floor((balance * applicationStore.priceFeedStore.cryptoToUsdExchangeRate) / this._numberOfUnitsPerCoin)
   }
 
   /**
@@ -60,11 +67,14 @@ class ApplicationNavigationStore {
    */
   @computed get
   balanceInBTC() {
-
-    if(!this._walletStore || !this._priceFeedStore)
+  
+    let applicationStore = this._uiStore.applicationStore
+  
+    // Make sure wallet is set
+    if(!applicationStore.walletStore)
       return null
 
-    let balance = this._walletStore.totalBalance
+    let balance = applicationStore.walletStore.totalBalance
 
     return balance / this._numberOfUnitsPerCoin
   }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { observer } from 'mobx-react'
+import { observer, inject } from 'mobx-react'
 import PropTypes from 'prop-types'
 import {
   LabelContainer,
@@ -10,7 +10,6 @@ import {
 } from './../../components/MiddleSection'
 
 import { TorrentTable } from './components'
-import {TorrentTableRowStore} from "../Common";
 
 function getStyles (props) {
   return {
@@ -22,7 +21,7 @@ function getStyles (props) {
   }
 }
 
-const Completed = observer((props) => {
+const Completed = inject('UIStore')(observer((props) => {
   
   let styles = getStyles(props)
   
@@ -40,31 +39,29 @@ const Completed = observer((props) => {
 
         <LabelContainer>
           <TorrentCountLabel
-            count={props.completedStore.torrentRowStores.length}
+            count={props.UIStore.completedStore.torrentRowStores.length}
             {...labelColorProps} />
 
           <CurrencyLabel
             labelText={'SPENDING'}
-            satoshies={props.completedStore.totalSpent}
+            satoshies={props.UIStore.totalSpendingOnPieces}
             {...labelColorProps} />
 
           <CurrencyLabel
             labelText={'REVENUE'}
-            satoshies={props.completedStore.totalRevenue}
+            satoshies={props.UIStore.totalRevenueFromPieces}
             {...labelColorProps} />
         </LabelContainer>
       </MiddleSection>
 
-      <TorrentTable completedStore={props.completedStore}/>
+      <TorrentTable completedStore={props.UIStore.completedStore}/>
 
     </div>
   )
   
-})
+}))
 
 Completed.propTypes = {
-  completedStore: PropTypes.object.isRequired, // HMR breaks instanceOf(TorrentTableRowStore)
-  
   middleSectionBaseColor: PropTypes.string.isRequired,
   middleSectionDarkBaseColor: PropTypes.string.isRequired,
   middleSectionHighlightColor: PropTypes.string.isRequired

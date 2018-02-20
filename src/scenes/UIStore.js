@@ -5,6 +5,8 @@ import {shell} from 'electron'
 // Core
 import Application from '../core/Application'
 
+import * as constants from '../constants'
+
 // Core stores
 import {
   ApplicationStore,
@@ -119,7 +121,7 @@ class UIStore {
   completedStore
 
   /**
-   * @property {DownloadingStore} Model for downloading scene.
+   * @property {WalletSceneStore} Model for downloading scene.
    */
   walletSceneStore
 
@@ -161,7 +163,8 @@ class UIStore {
       onboardingTorrents: application.onboardingTorrents,
       applicationSettings: application.applicationSettings,
 
-      // We create WalletStore, PriceFeedStore instances when application starts
+      // We create WalletStore, PriceFeedStore those resource have bee
+      // constructed
       walletStore: null,
       priceFeedStore: null,
 
@@ -178,10 +181,18 @@ class UIStore {
 
     application.on('state', this._onNewApplicationStateAction)
     this._onNewApplicationStateAction(application.state)
+    
+    // NB: We only hook into `resourceStarted` and `resourceStopped`,
+    // not `startedResources`, as they are redundant w.r.t. the same canonical
+    // state change, and this opens up the possibility of race conditions in updating
+    // view, even when using actions.
 
-    application.on('startedResources', this._updateStartedAppResourcesAction)
-    this._updateStartedAppResourcesAction(application.startedResources)
-
+    application.on('resourceStarted', this._onResourceStartedAction)
+    for(const resource of application.startedResources)
+      this._onResourceStartedAction(resource)
+    
+    application.on('resourceStopped', this._onResourceStoppedAction)
+    
     application.on('onboardingIsEnabled', this._updateOnboardingStatusAction)
     this._updateOnboardingStatusAction(application.onboardingIsEnabled)
 
@@ -208,7 +219,13 @@ class UIStore {
        */
   
       // Application header
-      this.applicationNavigationStore = new ApplicationNavigationStore(ApplicationNavigationStore.TAB.Downloading, 0, 'USD', this.walletStore, this.priceFeedStore, bcoin.protocol.consensus.COIN)
+      this.applicationNavigationStore = new ApplicationNavigationStore(
+        this,
+        ApplicationNavigationStore.TAB.Downloading,
+        0,
+        'USD',
+        bcoin.protocol.consensus.COIN
+      )
   
       // Scene specific stores
       this.uploadingStore = new UploadingStore(this)
@@ -224,43 +241,84 @@ class UIStore {
         this.completedStore.addTorrentStore(torrentStore)
     
       })
-    
+      
+      // Imperatively display doorbell widget
+      Doorbell.load()
     
     } else if(newState === Application.STATE.STARTED) {
-
+  
       /**
-       * Now that all application resources have been started, we
-       * can create new corresponding domain stores, and set on application store.
+       * Is there really anything to do here any more?
        */
-
+      
+    }
+    else if(newState === Application.STATE.STOPPING) {
+      // hide doorbell again
+      Doorbell.hide()
+    }
+    
+  })
+  
+  _onResourceStartedAction = action((resource) => {
+  
+    // Update started resource set
+    this.applicationStore.setStartedResources(resource)
+    
+    if(resource === Application.RESOURCE.SETTINGS) {
+  
       /**
        * ApplicationSettings
        * Nothing much to do here beyond exposing it, since there is no actual store
        */
-
+  
       let applicationSettings = this._application.applicationSettings
       assert(applicationSettings)
+      
+      assert(!this.applicationStore.applicationSettings)
       this.applicationStore.applicationSettings = applicationSettings
-
+      
+    } else if(resource === Application.RESOURCE.PRICE_FEED) {
+  
+      /**
+       * Create and setup price feed store
+       */
+  
+      let priceFeed = this._application.priceFeed
+      assert(priceFeed)
+  
+      // Create
+      assert(!this.applicationStore.priceFeedStore)
+      this.applicationStore.priceFeedStore = new PriceFeedStore(priceFeed.cryptoToUsdExchangeRate)
+  
+      // Hook into events
+      priceFeed.on('tick', action((cryptoToUsdExchangeRate) => {
+    
+        this.applicationStore.priceFeedStore.setCryptoToUsdExchangeRate(cryptoToUsdExchangeRate)
+      }))
+      
+    } else if(resource === Application.RESOURCE.WALLET) {
+      
       /**
        * Create and setup wallet store
        */
-
+    
       let wallet = this._application.wallet
       assert(wallet)
-
-      // Create
-      this.walletStore = new WalletStore(
+      
+      // Create walletStore
+      assert(!this.applicationStore.walletStore)
+      
+      this.applicationStore.walletStore = new WalletStore(
         wallet.state,
         wallet.totalBalance,
         wallet.confirmedBalance,
         wallet.receiveAddress,
         wallet.blockTipHeight,
         wallet.synchronizedBlockHeight,
-        wallet.paymentStores,
+        [],
         wallet.pay.bind(wallet)
       )
-
+    
       // Hook into events
       wallet.on('stateChanged', this._onWalletStateChanged)
       wallet.on('totalBalanceChanged', this._onWalletTotalBalanceChanged)
@@ -269,29 +327,11 @@ class UIStore {
       wallet.on('blockTipHeightChanged', this._onWalletBlockTipHeightChanged)
       wallet.on('synchronizedBlockHeightChanged', this._onWalletSynchronizedBlockHeightChanged)
       wallet.on('paymentAdded', this._onWalletPaymentAdded)
-
+      
       // add any payments which are already present
       wallet.paymentsInTransactionWithTXID.forEach((payments, txHash) => {
-
-        payments.forEach(this._onWalletPaymentAdded.bind(this))
-
+          payments.forEach(this._onWalletPaymentAdded.bind(this))
       })
-
-      /**
-       * Create and setup price feed store
-       */
-
-      let priceFeed = this._application.priceFeed
-      assert(priceFeed)
-
-      // Create
-      this.priceFeedStore = new PriceFeedStore(priceFeed.cryptoToUsdExchangeRate)
-
-      // Hook into events
-      this.priceFeed.on('tick', action((cryptoToUsdExchangeRate) => {
-
-        this.priceFeedStore.setCryptoToUsdExchangeRate(cryptoToUsdExchangeRate)
-      }))
       
       /**
        * Set wallet scene model
@@ -301,32 +341,28 @@ class UIStore {
        * Estimate picked from: https://live.blockcypher.com/btc-testnet/
        */
       let satsPrkBFee = 0.00239 * bcoin.protocol.consensus.COIN
-
+      
+      assert(!this.walletSceneStore)
       this.walletSceneStore = new WalletSceneStore(
-        walletStore,
-        priceFeedStore,
+        this.applicationStore.walletStore,
+        this.applicationStore.priceFeedStore,
         satsPrkBFee,
         null,
         '',
         launchExternalTxViewer
       )
-
-      // Imperatively display doorbell widget
-      Doorbell.load()
-      
+    
     }
-    else if(newState === Application.STATE.STOPPING) {
-      // hide doorbell again
-      Doorbell.hide()
-    }
+  
+  })
+  
+  _onResourceStoppedAction = action((resource) => {
+  
+    // Update started resource set
+    this.applicationStore.setStartedResources(resource)
     
   })
 
-  _updateStartedAppResourcesAction = action((resources) => {
-
-    this.applicationStore.setStartedResources(resources)
-
-  })
 
   _updateOnboardingStatusAction = action((isEnabled) => {
 
@@ -521,7 +557,7 @@ class UIStore {
      */
     torrent.on('peerRemoved', action((peerId) => {
 
-      assert(torrentStore.has(peerId))
+      assert(torrentStore.peerStores.has(peerId))
 
       torrentStore.peerStores.delete(peerId)
 
@@ -617,20 +653,20 @@ class UIStore {
     assert(this.applicationStore)
 
     // Create payment store
-    let paymentStore = new PaymentStore(
-      payment.type,
-      payment.txId,
-      payment.outputIndex,
-      payment.seenDate,
-      payment.minedDate,
-      payment.toAddress,
-      payment.amount,
-      payment.fee,
-      payment.confirmed,
-      payment.blockIdOfBlockHoldingTransaction,
-      payment.blockHeightOfBlockHoldingTransaction,
-      payment.note
-    )
+    let paymentStore = new PaymentStore({
+      type: payment.type,
+      txId: payment.txId,
+      outputIndex: payment.outputIndex,
+      seendDate: payment.seenDate,
+      minedDate: payment.minedDate,
+      toAddress: payment.toAddress,
+      amount: payment.amount,
+      fee: payment.fee,
+      confirmed: payment.confirmed,
+      blockIdOfBlockHoldingTransaction: payment.blockIdOfBlockHoldingTransaction,
+      blockHeightOfBlockHoldingTransaction: payment.blockHeightOfBlockHoldingTransaction,
+      note: payment.note
+    })
 
     /**
      * NB: REVISIT when we work on WalletStore.pay

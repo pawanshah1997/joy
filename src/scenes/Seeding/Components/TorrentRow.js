@@ -23,7 +23,7 @@ const TorrentRow = observer((props) => {
     <Row
       onMouseEnter={() => { props.torrentTableRowStore.setShowToolbar(true) }}
       onMouseLeave={() => { props.torrentTableRowStore.setShowToolbar(false) }}
-      style={ {backgroundColor : props.backgroundColor}}
+      backgroundColor={props.backgroundColor}
     >
 
       <NameField name={torrentStore.name} />
@@ -32,9 +32,9 @@ const TorrentRow = observer((props) => {
 
       <BytesPerSecondField bytes={torrentStore.uploadSpeed} />
 
-      <BitcoinValueField satoshis={torrentStore.sellerPrice} />
+      <BitcoinValueField satoshis={torrentStore.sellerTerms.minPrice} />
 
-      <BitcoinValueField satoshis={torrentStore.totalRevenue} />
+      <BitcoinValueField satoshis={torrentStore.totalRevenueFromPiecesAsSeller} />
 
       <PeerCountField count={torrentStore.numberOfBuyers} />
 

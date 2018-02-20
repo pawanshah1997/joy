@@ -55,6 +55,9 @@ class CompletedStore {
      */
     
     return [...this.rowStorefromTorrentInfoHash.values()]
+      .filter((torrentRowStore) => {
+        return torrentRowStore.isFullyDownloaded
+      })
   }
 }
 

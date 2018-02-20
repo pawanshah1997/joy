@@ -1,5 +1,5 @@
 import React from 'react'
-import { observer } from 'mobx-react'
+import { observer, inject } from 'mobx-react'
 import PropTypes from 'prop-types'
 
 import {
@@ -27,7 +27,7 @@ function getStyles (props) {
   }
 }
 
-const Seeding = observer((props) => {
+const Seeding = inject('UIStore')(observer((props) => {
   
   let styles = getStyles(props)
 
@@ -44,7 +44,7 @@ const Seeding = observer((props) => {
         <Toolbar>
           
           <ToolbarButton title="add upload"
-                         onClick={() => { props.uploadingStore.uploadTorrentFile() }}
+                         onClick={() => { props.UIStore.uploadingStore.uploadTorrentFile() }}
                          iconNode={<AddTorrentIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}} />}
           />
           
@@ -53,31 +53,29 @@ const Seeding = observer((props) => {
         <MaxFlexSpacer />
 
         <LabelContainer>
-          <TorrentCountLabel count={props.uploadingStore.torrentRowStores.length}
+          <TorrentCountLabel count={props.UIStore.uploadingStore.torrentRowStores.length}
             {...labelColorProps} />
 
           <CurrencyLabel labelText={'REVENUE'}
-            satoshies={props.uploadingStore.totalRevenue}
+            satoshies={props.UIStore.totalRevenueFromPieces}
             {...labelColorProps} />
 
           <BandwidthLabel labelText={'UPLOAD SPEED'}
-            bytesPerSecond={props.uploadingStore.totalUploadSpeed}
+            bytesPerSecond={props.UIStore.uploadingStore.totalUploadSpeed}
             {...labelColorProps} />
 
         </LabelContainer>
       </MiddleSection>
 
-      <TorrentTable uploadingStore={props.uploadingStore}/>
+      <TorrentTable uploadingStore={props.UIStore.uploadingStore}/>
 
-      <StartUploadingFlow uploadingStore={props.uploadingStore} />
+      <StartUploadingFlow uploadingStore={props.UIStore.uploadingStore} />
 
     </div>
   )
-})
+}))
 
 Seeding.propTypes = {
-  uploadingStore: PropTypes.object.isRequired, // HMR breaks instanceOf(UploadingStore)
-  
   middleSectionBaseColor: PropTypes.string.isRequired,
   middleSectionDarkBaseColor: PropTypes.string.isRequired,
   middleSectionHighlightColor: PropTypes.string.isRequired

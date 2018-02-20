@@ -85,9 +85,6 @@ const Downloading = inject('UIStore')(observer((props) => {
 }))
 
 Downloading.propTypes = {
-  //downloadingStore : PropTypes.object.isRequired, // HMR breaks PropTypes.instanceOf(DownloadingStore).isRequired
-  
-  // Colors: drop
   middleSectionBaseColor: PropTypes.string.isRequired,
   middleSectionDarkBaseColor: PropTypes.string.isRequired,
   middleSectionHighlightColor: PropTypes.string.isRequired

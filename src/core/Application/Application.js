@@ -71,8 +71,8 @@ const DEFAULT_APPLIATION_SETTINGS = {
 /**
  * Application
  *
- * emits resourceStarted
- * emits resourceStopped
+ * emits resourceStarted(<Application.RESOURCE>)
+ * emits resourceStopped(<Application.RESOURCE>)
  * emits startedResources({Set.<RESOURCES>}) - reports change in set of started resources
  * emits onboardingIsEnabled(enabled {Bool}) - onboarding status was altereds
  * emits state({Application.STATE})

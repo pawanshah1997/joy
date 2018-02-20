@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { observer } from 'mobx-react'
+import { observer, inject } from 'mobx-react'
 import { Header } from '../../../../components/Header'
 import ButtonGroup from './ButtonGroup'
 import WalletPanel from './WalletPanel'
@@ -43,7 +43,7 @@ function getStyle (props) {
   }
 }
 
-const ApplicationHeader = observer((props) => {
+const ApplicationHeader = inject('UIStore')(observer((props) => {
   
   var style = getStyle(props)
   
@@ -94,9 +94,14 @@ const ApplicationHeader = observer((props) => {
   
         <WalletButton
           selected={activeTab === ApplicationNavigationStore.TAB.Wallet}
-          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Wallet) }}
+          onClick={() => {
+            
+            if(applicationNavigationStore.walletTabEnabled) {
+              applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Wallet)
+            }
+            
+          }}
           style={style.button}
-          disabled
           {...buttonColorProps}
         />
         
@@ -189,11 +194,9 @@ const ApplicationHeader = observer((props) => {
     </Header>
   )
   
-})
+}))
 
 ApplicationHeader.propTypes = {
-  UIStore: PropTypes.instanceOf(UIStore).isRequired,
-  
   height: PropTypes.string.isRequired,
   baseColor: PropTypes.string,
   attentionColor: PropTypes.string,
