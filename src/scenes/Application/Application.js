@@ -177,7 +177,6 @@ const StartedApp = observer((props) => {
       
       elm =
         <Community
-          UIStore={props.UIStore}
           backgroundColor={UI_CONSTANTS.primaryColor}
         />
       break

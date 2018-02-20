@@ -4,6 +4,7 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
+import { inject } from 'mobx-react'
 import open from 'open'
 
 import {TELEGRAM_URL, SLACK_URL, REDDIT_URL} from '../../constants'
@@ -52,7 +53,7 @@ function getStyles (props) {
   }
 }
 
-const Community = (props) => {
+const Community = inject('UIStore')((props) => {
   let styles = getStyles(props)
 
   return (
@@ -85,7 +86,7 @@ const Community = (props) => {
       </div>
     </div>
   )
-}
+})
 
 Community.propTypes = {
   backgroundColor: PropTypes.string.isRequired
