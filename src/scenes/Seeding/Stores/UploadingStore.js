@@ -108,6 +108,9 @@ class UploadingStore {
      */
   
     return [...this.rowStorefromTorrentInfoHash.values()]
+      .filter((torrentRowStore) => {
+        return torrentRowStore.isUploading
+      })
   }
   
   @computed get
