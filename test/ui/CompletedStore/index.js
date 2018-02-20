@@ -25,6 +25,15 @@ describe('CompletedStore', function () {
     assert.equal(completedStore.torrentRowStores.length, 0)
   })
 
+  it('computes rows', function () {
+    completedStore.setRowStorefromTorrentInfoHash(new Map([
+      ['a', {infoHash: 'a', isFullyDownloaded: true}],
+      ['b', {infoHash: 'b', isFullyDownloaded: false}]
+    ]))
+
+    assert.equal(completedStore.torrentRowStores.length, 1)
+  })
+
   describe('addTorrentStore', function () {
     const infoHash1 = 'infoHash-1'
     beforeEach(function () {
