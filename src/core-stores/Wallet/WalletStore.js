@@ -11,7 +11,7 @@ import bcoin from 'bcoin'
 class WalletStore {
 
   /**
-   * {STATUS} Status of the wallet store
+   * {Wallet.STATE} Status of the wallet store
    */
   @observable state
 
