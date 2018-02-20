@@ -617,20 +617,20 @@ class UIStore {
     assert(this.applicationStore)
 
     // Create payment store
-    let paymentStore = new PaymentStore(
-      payment.type,
-      payment.txId,
-      payment.outputIndex,
-      payment.seenDate,
-      payment.minedDate,
-      payment.toAddress,
-      payment.amount,
-      payment.fee,
-      payment.confirmed,
-      payment.blockIdOfBlockHoldingTransaction,
-      payment.blockHeightOfBlockHoldingTransaction,
-      payment.note
-    )
+    let paymentStore = new PaymentStore({
+      type: payment.type,
+      txId: payment.txId,
+      outputIndex: payment.outputIndex,
+      seendDate: payment.seenDate,
+      minedDate: payment.minedDate,
+      toAddress: payment.toAddress,
+      amount: payment.amount,
+      fee: payment.fee,
+      confirmed: payment.confirmed,
+      blockIdOfBlockHoldingTransaction: payment.blockIdOfBlockHoldingTransaction,
+      blockHeightOfBlockHoldingTransaction: payment.blockHeightOfBlockHoldingTransaction,
+      note: payment.note
+    })
 
     /**
      * NB: REVISIT when we work on WalletStore.pay
