@@ -23,12 +23,12 @@ class OnboardingStore {
    * {OnboardingState} State of onboarding
    */
   @observable state
-  
+
   constructor (uiStore, state) {
     this._uiStore = uiStore
-    this.state = state
+    this.setState(state)
   }
-  
+
   @action.bound
   setState (state) {
     this.state = state

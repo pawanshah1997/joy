@@ -4,20 +4,23 @@ import Application from '../../../src/core/Application'
 import sinon from 'sinon'
 
 class MockApplication extends EventEmitter {
-  
+
   state
-  
+
   constructor(state) {
     super()
-    
+
     this.state = state
-    
+
     this.start = sinon.spy()
     this.stop = sinon.spy()
     this.addTorrent = sinon.spy()
     this.removeTorrent = sinon.spy()
+
+    this.torrents = new Map()
+    this.startedResources = new Set()
   }
-  
+
   updateState(state) {
     this.state = state
     this.emit('state', state)

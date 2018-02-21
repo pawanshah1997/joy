@@ -104,7 +104,7 @@
   },
   "standard": {
     "parser": "babel-eslint",
-    "globals": ["describe", "it"]
+    "globals": ["describe", "it", "before", "after", "beforeEach", "afterEach"]
   },
   "config": {
     "forge": "./forge-config.js"
