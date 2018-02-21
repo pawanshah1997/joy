@@ -374,12 +374,9 @@ class Application extends EventEmitter {
             savedTorrent.metadata = new TorrentInfo(Buffer.from(savedTorrent.metadata, 'base64'))
 
             // add to session
-            this._joystreamNodeSession.addTorrent(savedTorrent, (err, joystreamNodeTorrent) => {
+            this._addTorrent(savedTorrent, (err, torrent) => {
 
               assert(!err)
-
-              // Process that torrent was added to session
-              let torrent = this._onTorrentAddedToSession(savedTorrent, joystreamNodeTorrent)
 
               // When loaded, check if we are done loading all,
               // if so note this
@@ -567,16 +564,28 @@ class Application extends EventEmitter {
    */
   addTorrent(settings, onAdded = () => {}) {
 
+    if (this.state !== Application.STATE.STARTED) {
+      onAdded('Can add torrent when started')
+      return
+    }
+
+    this._addTorrent(settings, onAdded)
+  }
+
+  /**
+   * Add torrent with given settings
+   *
+   *
+   * @param settings {Object} - document ???
+   * @param fun {Func}  - Callback, returns {@link Torrent} on success, error string otherwise
+   */
+  _addTorrent(settings, onAdded = () => {}) {
+
     /**
      * There is a lot of weird copying and decoding going on here
      * which I don't want to break, but which should be fixed,
      * see:
      */
-
-    if (this.state !== Application.STATE.STARTED) {
-      onAdded('Can add torrent when started')
-      return
-    }
 
     const infoHash = settings.infoHash
 
