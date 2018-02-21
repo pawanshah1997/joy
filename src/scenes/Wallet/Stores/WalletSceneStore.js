@@ -64,7 +64,7 @@ class WalletSceneStore {
     let cryptoToFiatExchangeRate = parseFloat(this.priceFeedStore.cryptoToUsdExchangeRate)
     let paymentFailureErrorMessage = ''
     let minimumPaymentAmount = 0 // pass in dust limit
-    
+
     // Its critical that the actual fee rate is compatible with bcoin.util.isNumber, which requires that its a safe integer,
     // hence we just take ceiling to be sure.
     let satsPrKbFee = Math.ceil(this._satsPrkBFee)
@@ -137,7 +137,7 @@ class WalletSceneStore {
     else
       return this._walletStore.paymentStores.filter((paymentStore) => {
 
-        return
+        let foundMatchingPayment =
 
         // Match note
         (paymentStore.note && paymentStore.note.indexOf(this.searchString) != -1) ||
@@ -148,6 +148,8 @@ class WalletSceneStore {
         // Match txId
         (paymentStore.txId && paymentStore.txId.indexOf(this.searchString) != -1)
 
+
+        return foundMatchingPayment
     })
   }
 
