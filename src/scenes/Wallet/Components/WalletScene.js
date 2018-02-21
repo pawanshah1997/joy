@@ -200,10 +200,10 @@ const WalletScene = inject('UIStore')(observer((props) => {
         This wallet does not use real Bitcoins, rather testnet coins, real coins are coming in the next release.
       </NoticationBanner>
 
-      <SendingDialog sendDialogStore={props.UIStore.walletSceneStore.visibleDialog instanceof SendDialogStore ? props.UIStore.walletSceneStore.visibleDialog : null}/>
-      <ReceiveDialog receiveDialogStore={props.UIStore.walletSceneStore.visibleDialog instanceof ReceiveDialogStore ? props.UIStore.walletSceneStore.visibleDialog : null}/>
+      <SendingDialog sendDialogStore={props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'SendDialogStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
+      <ReceiveDialog receiveDialogStore={props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'ReceiveDialogStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
 
-    </div>    
+    </div>
   )
 }))
 

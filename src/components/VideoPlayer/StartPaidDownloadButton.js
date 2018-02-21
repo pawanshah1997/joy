@@ -11,7 +11,7 @@ import ViabilityOfPaidDownloadingSwarm from '../../core/Torrent/ViabilityOfPaidD
 
 function getColors(props, state) {
 
-    if (props.torrent.viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart) {
+    if (props.torrent.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart') {
 
         if (state.hover)
             return {
@@ -24,7 +24,7 @@ function getColors(props, state) {
                 background : 'rgba(92, 184, 92, 0.3)'
             }
 
-    } else if (props.torrent.viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.AlreadyStarted) {
+    } else if (props.torrent.viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted') {
         return {
             foreground : 'hsla(180, 1%, 80%, 0.6)',
             background : 'hsla(180, 1%, 80%, 0.4)'
@@ -89,29 +89,29 @@ function getText(viabilityOfPaidDownloadingTorrent) {
     let text = null
     let subText = null
 
-    if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.AlreadyStarted)
+    if(viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted')
         text = "Paying for speedup"
-    else if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart)
+    else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart')
         text = "Pay for speedup"
     else {
 
         text = "Paid speedup unavailable"
 
-        if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.InsufficientFunds)
+        if(viabilityOfPaidDownloadingTorrent.constructor.name === 'InsufficientFunds')
             subText = "Insufficient funds"
-        else if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.Stopped)
+        else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'Stopped')
             subText = "Download stopped"
-        else if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.InViable) {
+        else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'InViable') {
 
-            if(viabilityOfPaidDownloadingTorrent.swarmViability instanceof ViabilityOfPaidDownloadingSwarm.NoJoyStreamPeerConnections)
+            if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'NoJoyStreamPeerConnections')
                 subText = "No JoyStream peers available"
-            else if(viabilityOfPaidDownloadingTorrent.swarmViability instanceof ViabilityOfPaidDownloadingSwarm.NoSellersAmongJoyStreamPeers)
+            else if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'NoSellersAmongJoyStreamPeers')
                 subText = "No sellers among JoyStream peers"
-            else if(viabilityOfPaidDownloadingTorrent.swarmViability instanceof ViabilityOfPaidDownloadingSwarm.InSufficientNumberOfSellersInvited)
+            else if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'InSufficientNumberOfSellersInvited')
                 subText = "Insufficient number of sellers invited"
-            else if(viabilityOfPaidDownloadingTorrent.swarmViability instanceof ViabilityOfPaidDownloadingSwarm.InSufficientNumberOfSellersHaveJoined)
+            else if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'InSufficientNumberOfSellersHaveJoined')
                 subText = "Insufficient number of sellers have joined"
-            else if(viabilityOfPaidDownloadingTorrent.swarmViability instanceof ViabilityOfPaidDownloadingSwarm.Viable)
+            else if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'Viable')
                 assert(false) // <== not possible
 
         } else
@@ -156,7 +156,7 @@ class StartPaidDownloadButton extends Component {
 
         console.log('handleClick')
 
-        if(this.props.torrent.viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart)
+        if(this.props.torrent.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart')
             this.props.torrent.startPaidDownload()
 
     }
