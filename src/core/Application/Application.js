@@ -998,7 +998,7 @@ function encodeTorrentSettings(torrent) {
 
   // Only encode metadata if it is available and valid
   if (torrent.torrentInfo && torrent.torrentInfo.isValid()) {
-    encoded.metadata = torrent.metadata.toBencodedEntry().toString('base64')
+    encoded.metadata = torrent.torrentInfo.toBencodedEntry().toString('base64')
   }
 
   // It is possible that resume data generation has failed and resumeData could be null
