@@ -997,7 +997,7 @@ function encodeTorrentSettings(torrent) {
   }
 
   // Only encode metadata if it is available and valid
-  if (torrent.metadata && torrent.metadata.isValid()) {
+  if (torrent.torrentInfo && torrent.torrentInfo.isValid()) {
     encoded.metadata = torrent.metadata.toBencodedEntry().toString('base64')
   }
 
