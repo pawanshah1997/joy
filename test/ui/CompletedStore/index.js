@@ -1,5 +1,6 @@
 import CompletedStore from '../../../src/scenes/Completed/Stores/'
 import TorrentTableRowStore from '../../../src/scenes/Common/TorrentTableRowStore'
+import TorrentStore from '../../../src/core-stores/Torrent'
 
 var assert = require('chai').assert
 
@@ -25,25 +26,16 @@ describe('CompletedStore', function () {
     assert.equal(completedStore.torrentRowStores.length, 0)
   })
 
-  it('computes rows', function () {
-    completedStore.setRowStorefromTorrentInfoHash(new Map([
-      ['a', {infoHash: 'a', isFullyDownloaded: true}],
-      ['b', {infoHash: 'b', isFullyDownloaded: false}]
-    ]))
-
-    assert.equal(completedStore.torrentRowStores.length, 1)
-  })
-
   describe('addTorrentStore', function () {
     const infoHash1 = 'infoHash-1'
     beforeEach(function () {
       completedStore.setRowStorefromTorrentInfoHash(new Map([
-        [infoHash1, {infoHash: infoHash1}]
+        [infoHash1, new TorrentStore({infoHash: infoHash1, state: 'Active.FinishedDownloading'})]
       ]))
     })
 
     it('adds new torrent row store to map', function () {
-      const newTorrentStore = { infoHash: 'infohash-2', state: 'Active.FinishedDownloading' }
+      const newTorrentStore = new TorrentStore({ infoHash: 'infohash-2', state: 'Active.FinishedDownloading' })
 
       let numberOfTorrentStores = completedStore.torrentRowStores.length
 

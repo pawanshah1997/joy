@@ -1,5 +1,6 @@
 import UploadingStore from '../../../src/scenes/Seeding/Stores/'
 import TorrentTableRowStore from '../../../src/scenes/Common/TorrentTableRowStore'
+import TorrentStore from '../../../src/core-stores/Torrent'
 
 var assert = require('chai').assert
 
@@ -26,15 +27,6 @@ describe('UploadingStore', function () {
     assert.equal(uploadingStore.state, UploadingStore.STATE.InitState)
   })
 
-  it('computes rows', function () {
-    uploadingStore.setRowStorefromTorrentInfoHash(new Map([
-      ['a', {infoHash: 'a', isUploading: true}],
-      ['b', {infoHash: 'b', isUploading: false}]
-    ]))
-
-    assert.equal(uploadingStore.torrentRowStores.length, 1)
-  })
-
   describe('addTorrentStore', function () {
     const infoHash1 = 'infoHash-1'
     beforeEach(function () {
@@ -44,20 +36,20 @@ describe('UploadingStore', function () {
     })
 
     it('adds new torrent row store to map', function () {
-      const newTorrentStore = { infoHash: 'infohash-2', state:'Active.FinishedDownloading.Uploading' }
+      const newTorrentStore = new TorrentStore({ infoHash: 'infohash-2', state:'Active.FinishedDownloading.Uploading' })
 
-      // let numberOfTorrentStores = uploadingStore.torrentRowStores.length
+      let numberOfTorrentStores = uploadingStore.torrentRowStores.length
 
       uploadingStore.addTorrentStore(newTorrentStore)
 
-      // assert.equal(uploadingStore.torrentRowStores.length, numberOfTorrentStores + 1)
-      //
-      // const addedRowStore = uploadingStore.torrentRowStores.slice(-1).pop()
-      //
-      // assert(addedRowStore instanceof TorrentTableRowStore)
+      assert.equal(uploadingStore.torrentRowStores.length, numberOfTorrentStores + 1)
+
+      const addedRowStore = uploadingStore.torrentRowStores.slice(-1).pop()
+
+      assert(addedRowStore instanceof TorrentTableRowStore)
 
       assert(uploadingStore.rowStorefromTorrentInfoHash.has(newTorrentStore.infoHash))
-      // assert.deepEqual(uploadingStore.rowStorefromTorrentInfoHash.get(newTorrentStore.infoHash), addedRowStore)
+      assert.deepEqual(uploadingStore.rowStorefromTorrentInfoHash.get(newTorrentStore.infoHash), addedRowStore)
     })
 
     it('throws if duplicate infoHash', function () {
