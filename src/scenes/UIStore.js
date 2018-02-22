@@ -439,6 +439,7 @@ class UIStore {
 
       torrentStore.setName(torrentInfo.name())
       torrentStore.setTotalSize(torrentInfo.totalSize())
+      torrentStore.setTorrentFiles(torrentInfo.files())
     }))
 
     // When torrent is finished, we have to count towards the navigator
@@ -562,7 +563,12 @@ class UIStore {
       torrentStore.peerStores.delete(peerId)
 
     }))
-    
+
+    // If we have metadata set the torrentFiles
+    if (torrent.torrentInfo && torrent.torrentInfo.isValid()) {
+      torrentStore.setTorrentFiles(torrent.torrentInfo.files())
+    }
+
     // Add to application store
     this.applicationStore.onNewTorrentStore(torrentStore)
 

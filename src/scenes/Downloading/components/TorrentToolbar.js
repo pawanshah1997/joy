@@ -17,14 +17,14 @@ import Toolbar, {
 import TorrentTableRowStore from '../../Common/TorrentTableRowStore'
 
 const TorrentToolbar = observer((props) => {
-  
+
   return (
     <Toolbar>
 
-      <PlaySection canPlay={props.torrentTableRowStore.playableMediaList.length > 0}
+      <PlaySection canPlay={props.torrentTableRowStore.canPlayMedia}
                    play={() => { props.torrentTableRowStore.playMedia() }}
       />
-      
+
       <StartPaidDownloadingSection row={props.torrentTableRowStore} />
 
       <ToggleStatusSection canStart={props.torrentTableRowStore.torrentStore.canStart}

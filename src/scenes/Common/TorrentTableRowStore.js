@@ -19,10 +19,11 @@ class TorrentTableRowStore {
    */
   torrentStore
 
-  constructor(torrentStore, applicationStore, walletStore, showToolbar) {
+  constructor(torrentStore, uiStore, walletStore, showToolbar) {
 
     this.torrentStore = torrentStore
-    this._applicationStore = applicationStore
+    this._uiStore = uiStore
+    this._applicationStore = this._uiStore.applicationStore
     this._walletStore = walletStore
     this.setShowToolbar(showToolbar)
   }
@@ -84,14 +85,20 @@ class TorrentTableRowStore {
   @computed get
   playableMediaList() {
 
-    if(this.torrentStore.torrentInfo) {
-      return indexesOfPlayableFiles(this.torrentStore.torrentInfo.torrentFiles)
-    } else
+    if(this.torrentStore.torrentFiles) {
+      return indexesOfPlayableFiles(this.torrentStore.torrentFiles)
+    } else {
       return []
+    }
+  }
+
+  @computed get
+  canPlayMedia () {
+    return this.playableMediaList.length > 0
   }
 
   playMedia(fileIndex = 0) {
-    this.torrentStore.play(this.playableMediaList[fileIndex])
+    this._uiStore.playMedia(this.infoHash, fileIndex)
   }
 
 }
