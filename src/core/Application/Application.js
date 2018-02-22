@@ -555,7 +555,25 @@ class Application extends EventEmitter {
       this._stoppedResource(Application.RESOURCE.WALLET, onStopped)
     })
     
-    this.wallet.stop()
+    // Check if the wallet is not yet started, if so
+    if(this.wallet.state !== Wallet.STATE.STARTED) {
+      
+      debug('Delaying stopping wallet until it has actually started.')
+      
+      // then it must mean its still starting
+      //assert(this.wallet.state === Wallet.STATE.<lots of states here>)
+      
+      // and we have to wait until its ready, before we try
+      // to stop
+      this.wallet.once('started', () => {
+        
+        debug('Now we can finally stop wallet.')
+        
+        this.wallet.stop()
+      })
+      
+    } else
+      this.wallet.stop()
   }
 
   /**
