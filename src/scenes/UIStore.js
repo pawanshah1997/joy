@@ -24,6 +24,7 @@ import UploadingStore from './Seeding/Stores'
 import CompletedStore from './Completed/Stores'
 import WalletSceneStore from './Wallet/Stores'
 import Doorbell from './Doorbell'
+import MediaPlayerStore from './VideoPlayer/Stores/MediaPlayerStore'
 
 /**
  * Root user interface model
@@ -759,27 +760,70 @@ class UIStore {
   setMediaPlayerStore(mediaPlayerStore) {
     this.mediaPlayerStore = mediaPlayerStore
   }
-  
+
+  @action.bound
+  playMedia(torrentStore, fileIndex) {
+
+    // state guard?
+    console.log('trying to play media for torrent', torrentStore.infoHash)
+
+    assert(this._application.torrents.has(torrentStore.infoHash))
+
+    const torrent = this._application.torrents.get(torrentStore.infoHash)
+
+    // Hide feedback in player
+    Doorbell.hide()
+
+    // Turn on power saving blocker
+    powerSavingBlocker(true)
+
+    // Create store for player
+    const mediaSourceType = torrentStore.isFullyDownloaded ? MediaPlayerStore.MEDIA_SOURCE_TYPE.DISK : MediaPlayerStore.MEDIA_SOURCE_TYPE.STREAMING_TORRENT
+    const loadedSecondsRequiredForPlayback = 10
+    let autoPlay = true
+
+    const file = torrent.createStreamFactory(fileIndex)
+
+    const store = new MediaPlayerStore(
+      mediaSourceType,
+      torrentStore,
+      file,
+      loadedSecondsRequiredForPlayback,
+      autoPlay,
+      mediaPlayerWindowSizeFetcher,
+      mediaPlayerWindowSizeUpdater,
+      () => { // When player exits
+        Doorbell.show()
+        this.setMediaPlayerStore(null)
+        powerSavingBlocker(false)
+        torrent.endStream()
+      }
+    )
+
+    // Display the media player
+    this.setMediaPlayerStore(store)
+  }
+
   @computed get
   torrentStoresArray() {
     return [...this.applicationStore.torrentStores.values()]
   }
 
   @computed get torrentsBeingLoaded() {
-    
+
     return this.torrentStoresArray.filter(function (torrent) {
       return torrent.isLoading
     })
-    
+
   }
 
   @computed get torrentsFullyLoadedPercentage() {
-    
+
     return 100 * (1 - (this.torrentsBeingLoaded.length / this.applicationStore.torrentStores.size))
   }
 
   @computed get startingTorrentCheckingProgressPercentage() {
-    
+
     // Compute total size
     let totalSize = this.torrentStoresArray.reduce(function (accumulator, torrent) {
       return accumulator + torrent.totalSize
@@ -950,49 +994,17 @@ function peerCountsFromPluginStatuses(peerPluginStatuses) {
 }
  */
 
-/**
 
- function startMediaPlayer(client, fileIndex, completed) {
-
-    // Hide feedback in player
-    Doorbell.hide()
-
-    console.log('startMediaPlayer')
-
-    // Create store for player
-    let mediaSourceType = completed ? MediaPlayerStore.MEDIA_SOURCE_TYPE.DISK : MediaPlayerStore.MEDIA_SOURCE_TYPE.STREAMING_TORRENT
-    const loadedSecondsRequiredForPlayback = 10
-    let autoPlay = true
-
-    let store = new MediaPlayerStore(mediaSourceType,
-                                    client.store,
-                                    file,
-                                    loadedSecondsRequiredForPlayback,
-                                    autoPlay,
-                                    mediaPlayerWindowSizeFetcher,
-                                    mediaPlayerWindowSizeUpdater,
-                                    powerSavingBlocker,
-                                    showDoorbellWidget)
+function mediaPlayerWindowSizeFetcher () {
+  return { width: window.innerWidth, height: window.innerHeight }
 }
 
- var electron = require('electron')
-
- function mediaPlayerWindowSizeFetcher() {
-    return { width : window.innerWidth, height : window.innerHeight}
+function mediaPlayerWindowSizeUpdater (bounds) {
+  require('electron').ipcRenderer.send('set-bounds', bounds)
 }
 
- function mediaPlayerWindowSizeUpdater(bounds) {
-    electron.ipcRenderer.send('set-bounds', bounds)
+function powerSavingBlocker (enable) {
+  require('electron').ipcRenderer.send('power-save-blocker', {enable: enable})
 }
-
- function powerSavingBlocker(enable) {
-    electron.ipcRenderer.send('power-save-blocker', {enable: enable})
-}
-
- function showDoorbellWidget() {
-    Doorbell.show()
-}
-
- */
 
 export default UIStore

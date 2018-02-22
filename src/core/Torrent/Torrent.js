@@ -274,7 +274,7 @@ class Torrent extends EventEmitter {
     let completed = this.state.startsWith('Active.FinishedDownloading')
 
     // Create factory and set
-    this.fileSegmentStreamFactory = new FileSegmentStreamFactory(client._joystreamNodeTorrent, fileIndex, completed)
+    this.fileSegmentStreamFactory = new FileSegmentStreamFactory(this._joystreamNodeTorrent, fileIndex, completed)
 
     return this.fileSegmentStreamFactory
   }

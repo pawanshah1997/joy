@@ -97,8 +97,11 @@ class TorrentTableRowStore {
     return this.playableMediaList.length > 0
   }
 
-  playMedia(fileIndex = 0) {
-    this._uiStore.playMedia(this.infoHash, fileIndex)
+  playMedia(/*fileIndex = 0*/) {
+    if (this.playableMediaList.length) {
+      let firstPlayableFileIndex = this.playableMediaList[0]
+      this._uiStore.playMedia(this.torrentStore, firstPlayableFileIndex)
+    }
   }
 
 }
