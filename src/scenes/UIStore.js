@@ -85,19 +85,19 @@ class UIStore {
    * session
    */
   @observable numberOfPiecesSoldAsSeller
-  
+
   /**
    * {Number} Total revenue so far from spending, does not include
    * tx fees for closing channel (they are deducted).
    */
   @observable totalRevenueFromPieces
-  
+
   /**
    * {Number} The total amount (sats) sent as payments so far,
    * does not include tx fees used to open and close channel.
    */
   @observable totalSpendingOnPieces
-  
+
   /**
    * {ApplicationNavigationStore} Model for application navigator.
    * Is set when `currentPhase` is `PHASE.Alive`.
@@ -182,7 +182,7 @@ class UIStore {
 
     application.on('state', this._onNewApplicationStateAction)
     this._onNewApplicationStateAction(application.state)
-    
+
     // NB: We only hook into `resourceStarted` and `resourceStopped`,
     // not `startedResources`, as they are redundant w.r.t. the same canonical
     // state change, and this opens up the possibility of race conditions in updating
@@ -191,9 +191,9 @@ class UIStore {
     application.on('resourceStarted', this._onResourceStartedAction)
     for(const resource of application.startedResources)
       this._onResourceStartedAction(resource)
-    
+
     application.on('resourceStopped', this._onResourceStoppedAction)
-    
+
     application.on('onboardingIsEnabled', this._updateOnboardingStatusAction)
     this._updateOnboardingStatusAction(application.onboardingIsEnabled)
 
@@ -207,18 +207,18 @@ class UIStore {
   }
 
   _onNewApplicationStateAction = action((newState) => {
-    
+
     this.applicationStore.setState(newState)
     this.setCurrentPhase(appStateToUIStorePhase(newState))
 
     if(newState === Application.STATE.STARTING) {
-  
+
       /**
        * Create UI stores that must be available in order to
        * do basic UI of the app, which is possible at the earliest
        * while the application is starting.
        */
-  
+
       // Application header
       this.applicationNavigationStore = new ApplicationNavigationStore(
         this,
@@ -227,88 +227,88 @@ class UIStore {
         'USD',
         bcoin.protocol.consensus.COIN
       )
-  
+
       // Scene specific stores
       this.uploadingStore = new UploadingStore(this)
       this.downloadingStore = new DownloadingStore(this)
       this.completedStore = new CompletedStore(this)
-  
+
       // add existing torrents to scene stores
-      
+
       this.applicationStore.torrentStores.forEach((torrentStore, infoHash) => {
-    
+
         this.uploadingStore.addTorrentStore(torrentStore)
         this.downloadingStore.addTorrentStore(torrentStore)
         this.completedStore.addTorrentStore(torrentStore)
-    
+
       })
-      
+
       // Imperatively display doorbell widget
       Doorbell.load()
-    
+
     } else if(newState === Application.STATE.STARTED) {
-  
+
       /**
        * Is there really anything to do here any more?
        */
-      
+
     }
     else if(newState === Application.STATE.STOPPING) {
       // hide doorbell again
       Doorbell.hide()
     }
-    
+
   })
-  
+
   _onResourceStartedAction = action((resource) => {
-  
+
     // Update started resource set
     this.applicationStore.setStartedResources(resource)
-    
+
     if(resource === Application.RESOURCE.SETTINGS) {
-  
+
       /**
        * ApplicationSettings
        * Nothing much to do here beyond exposing it, since there is no actual store
        */
-  
+
       let applicationSettings = this._application.applicationSettings
       assert(applicationSettings)
-      
+
       assert(!this.applicationStore.applicationSettings)
       this.applicationStore.applicationSettings = applicationSettings
-      
+
     } else if(resource === Application.RESOURCE.PRICE_FEED) {
-  
+
       /**
        * Create and setup price feed store
        */
-  
+
       let priceFeed = this._application.priceFeed
       assert(priceFeed)
-  
+
       // Create
       assert(!this.applicationStore.priceFeedStore)
       this.applicationStore.priceFeedStore = new PriceFeedStore(priceFeed.cryptoToUsdExchangeRate)
-  
+
       // Hook into events
       priceFeed.on('tick', action((cryptoToUsdExchangeRate) => {
-    
+
         this.applicationStore.priceFeedStore.setCryptoToUsdExchangeRate(cryptoToUsdExchangeRate)
       }))
-      
+
     } else if(resource === Application.RESOURCE.WALLET) {
-      
+
       /**
        * Create and setup wallet store
        */
-    
+
       let wallet = this._application.wallet
       assert(wallet)
-      
+
       // Create walletStore
       assert(!this.applicationStore.walletStore)
-      
+
       this.applicationStore.walletStore = new WalletStore(
         wallet.state,
         wallet.totalBalance,
@@ -319,7 +319,7 @@ class UIStore {
         [],
         wallet.pay.bind(wallet)
       )
-    
+
       // Hook into events
       wallet.on('stateChanged', this._onWalletStateChanged)
       wallet.on('totalBalanceChanged', this._onWalletTotalBalanceChanged)
@@ -328,12 +328,12 @@ class UIStore {
       wallet.on('blockTipHeightChanged', this._onWalletBlockTipHeightChanged)
       wallet.on('synchronizedBlockHeightChanged', this._onWalletSynchronizedBlockHeightChanged)
       wallet.on('paymentAdded', this._onWalletPaymentAdded)
-      
+
       // add any payments which are already present
       wallet.paymentsInTransactionWithTXID.forEach((payments, txHash) => {
           payments.forEach(this._onWalletPaymentAdded.bind(this))
       })
-      
+
       /**
        * Set wallet scene model
        * For now just set a constant fee rate, in the
@@ -342,7 +342,7 @@ class UIStore {
        * Estimate picked from: https://live.blockcypher.com/btc-testnet/
        */
       let satsPrkBFee = 0.00239 * bcoin.protocol.consensus.COIN
-      
+
       assert(!this.walletSceneStore)
       this.walletSceneStore = new WalletSceneStore(
         this.applicationStore.walletStore,
@@ -352,16 +352,16 @@ class UIStore {
         '',
         launchExternalTxViewer
       )
-    
+
     }
-  
+
   })
-  
+
   _onResourceStoppedAction = action((resource) => {
-  
+
     // Update started resource set
     this.applicationStore.setStartedResources(resource)
-    
+
   })
 
 
@@ -500,33 +500,33 @@ class UIStore {
        */
 
       torrentStore.totalSpendingOnPiecesAsBuyer += paymentIncrement
-      
+
       // Global counters
       this.totalSpendingOnPieces += paymentIncrement
     }))
-    
+
     torrent.on('validPaymentReceived', action((paymentIncrement, totalNumberOfPayments, totalAmountPaid) => {
-      
+
       torrentStore.numberOfPiecesSoldAsSeller++
       torrentStore.totalRevenueFromPiecesAsSeller += paymentIncrement
-      
+
       // Global counters
       this.numberOfPiecesSoldAsSeller++
       this.totalRevenueFromPieces += paymentIncrement
     }))
-    
+
     torrent.on('lastPaymentReceived', action((settlementTx) => {
-      
+
       // Raw transaction
       console.log('settlementTx')
       console.log(settlementTx)
-      
+
     }))
-  
+
     torrent.on('failedToMakeSignedContract', action((failedToMakeSignedContract) => {
       console.log('failedToMakeSignedContract: ' + failedToMakeSignedContract)
     }))
-    
+
     /**
      * When a peer is added,
      * we create a peer store which watches the peer and
@@ -577,7 +577,7 @@ class UIStore {
     // which they only do when UI is active, not during loading
 
     if(this.currentPhase === UIStore.PHASE.Alive) {
-      
+
       assert(this.uploadingStore)
       assert(this.downloadingStore)
       assert(this.completedStore)
@@ -588,12 +588,12 @@ class UIStore {
        * the torrent may be in an irrelevant state. This avoids
        * having to add/remove through reactions as state changes
        */
-      
+
       this.uploadingStore.addTorrentStore(torrentStore)
       this.downloadingStore.addTorrentStore(torrentStore)
       this.completedStore.addTorrentStore(torrentStore)
     }
-    
+
   })
 
   _onTorrentRemovedAction = action((infoHash) => {
@@ -765,17 +765,10 @@ class UIStore {
   playMedia(torrentStore, fileIndex) {
 
     // state guard?
-    console.log('trying to play media for torrent', torrentStore.infoHash)
 
     assert(this._application.torrents.has(torrentStore.infoHash))
 
     const torrent = this._application.torrents.get(torrentStore.infoHash)
-
-    // Hide feedback in player
-    Doorbell.hide()
-
-    // Turn on power saving blocker
-    powerSavingBlocker(true)
 
     // Create store for player
     const mediaSourceType = torrentStore.isFullyDownloaded ? MediaPlayerStore.MEDIA_SOURCE_TYPE.DISK : MediaPlayerStore.MEDIA_SOURCE_TYPE.STREAMING_TORRENT
@@ -802,6 +795,12 @@ class UIStore {
 
     // Display the media player
     this.setMediaPlayerStore(store)
+
+    // Hide feedback in player
+    Doorbell.hide()
+
+    // Turn on power saving blocker
+    powerSavingBlocker(true)
   }
 
   @computed get
@@ -839,14 +838,14 @@ class UIStore {
   }
 
   @computed get torrentsBeingTerminated() {
-    
+
     return this.torrentStoresArray.filter(function (torrent) {
       return torrent.isTerminating
     })
   }
 
   @computed get terminatingTorrentsProgressPercentage() {
-    
+
     return this.torrentsBeingTerminated * 100 / this.applicationStore.torrentStores.size
   }
 
