@@ -46,6 +46,15 @@ describe('Application', function() {
   describe('normal cycle', function() {
   
     let application = null
+    
+    afterEach(function() {
+  
+      /**
+       * Since we add state assertions on application events,
+       * we have to make sure to drop them after each test.
+       */
+      application.removeAllListeners()
+    })
   
     it('create', function() {
     
@@ -64,14 +73,9 @@ describe('Application', function() {
   
       let appDirectory = path.join(os.tmpdir(), '.joystream-test')
       
-      // If an old directory exists, we delete it,
-      // to give a fresh start
-      if(fs.existsSync(appDirectory)) {
-        rimraf.sync(appDirectory)
-      }
+      // Reset directory
+      resetDirectory(appDirectory)
       
-      // Create fresh directory
-      fs.mkdirSync(appDirectory)
     
       let config = {
         network: 'testnet',
@@ -129,16 +133,22 @@ describe('Application', function() {
     
     })
   
-    let torrentInfo = loadTorrentInfoFixture('tears-of-steel.torrent')
+    let torrentName = 'tears-of-steel'
+    let torrentInfo = loadTorrentInfoFixture(torrentName + '.torrent')
   
     const infoHash = torrentInfo.infoHash()
+  
+    let savePath = path.join(os.tmpdir(), torrentName)
+  
+    // Prepare savepath
+    resetDirectory(savePath)
   
     let settings = {
       infoHash : infoHash,
       metadata : torrentInfo,
       resumeData : null,
       name: torrentInfo.name() || infoHash,
-      savePath: os.tmpdir(),
+      savePath: savePath,
       deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
       extensionSettings : {
         buyerTerms: buyerTerms
@@ -265,13 +275,41 @@ describe('Application', function() {
       done()
     })
     
-    it('adding two new torrents to be persisted', function(done) {
+    it('add new torrent to be persisted', function(done) {
+      
+      let torrentName = 'sintel'
   
-      // TBD
+      // Create settings for new torrent
+      let torrentInfo = loadTorrentInfoFixture(torrentName + '.torrent')
       
-      // add two torrents for presisiting
+      let savePath = path.join(os.tmpdir(), torrentName)
       
-      done()
+      // Prepare savepath
+      resetDirectory(savePath)
+  
+      let settings = {
+        infoHash : torrentInfo.infoHash(),
+        metadata : torrentInfo,
+        resumeData : null,
+        name: torrentInfo.name(),
+        savePath: savePath,
+        deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
+        extensionSettings : {
+          buyerTerms: buyerTerms
+        }
+      }
+      
+      // Add to session
+      application.addTorrent(settings, (err, torrent) => {
+      
+        console.log('do we get here')
+        
+        expect(err).to.be.null
+  
+        done()
+  
+      })
+      
     })
     
     it('stop', function(done) {
@@ -342,7 +380,19 @@ describe('Application', function() {
 
 function loadTorrentInfoFixture(filename) {
   
-  let data = fs.readFileSync('test/core/application/torrents/' + filename)
+  let data = fs.readFileSync('src/assets/torrents/' + filename)
   
   return new TorrentInfo(data)
+}
+
+function resetDirectory(directory) {
+  
+  // If an old directory exists, we delete it,
+  // to give a fresh start
+  if(fs.existsSync(directory)) {
+    rimraf.sync(directory)
+  }
+  
+  // Create fresh directory
+  fs.mkdirSync(directory)
 }
