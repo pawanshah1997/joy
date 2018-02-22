@@ -772,7 +772,7 @@ class Application extends EventEmitter {
     torrent.on('Loading.WaitingForMissingBuyerTerms', (data) => {
 
       // NB: Replace by querying application settings later!
-      let terms = this.applicationSettings.buyerTerms()
+      let terms = this.applicationSettings.defaultBuyerTerms()
 
       // change name
       torrent.provideMissingBuyerTerms(terms)
