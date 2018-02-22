@@ -295,6 +295,11 @@ class Torrent extends EventEmitter {
   deepInitialState() {
     return deepInitialStateFromActiveState(this.state)
   }
+  
+  isTerminating() {
+    return this.state.startsWith('StoppingExtension') ||
+      this.state.startsWith('GeneratingResumeData')
+  }
 
   _addedToSession(torrent) {
     this._submitInput('addedToSession', torrent)
