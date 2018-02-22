@@ -4,6 +4,7 @@ import {shell} from 'electron'
 
 // Core
 import Application from '../core/Application'
+import Wallet from '../core/Wallet'
 
 import * as constants from '../constants'
 
@@ -25,6 +26,8 @@ import CompletedStore from './Completed/Stores'
 import WalletSceneStore from './Wallet/Stores'
 import Doorbell from './Doorbell'
 import MediaPlayerStore from './VideoPlayer/Stores/MediaPlayerStore'
+
+import {computeViabilityOfPaidDownloadingTorrent} from './Common/utils'
 
 /**
  * Root user interface model
@@ -790,7 +793,8 @@ class UIStore {
         this.setMediaPlayerStore(null)
         powerSavingBlocker(false)
         torrent.endStream()
-      }
+      },
+      this
     )
 
     // Display the media player
@@ -847,6 +851,29 @@ class UIStore {
   @computed get terminatingTorrentsProgressPercentage() {
 
     return this.torrentsBeingTerminated * 100 / this.applicationStore.torrentStores.size
+  }
+
+  @computed get
+  downloadingTorrentsViabilityOfPaidDownloading () {
+    let viabilities = new Map()
+    let balance = 0
+    let walletStarted = false
+    const walletStore = this.applicationStore.walletStore
+
+    if (walletStore) {
+      balance = walletStore.totalBalance
+      walletStarted = walletStore.state === Wallet.STATE.STARTED
+    }
+
+    this.torrentStoresArray.forEach(function (torrent) {
+      if (!torrent.isDownloading) return
+
+      let viability = computeViabilityOfPaidDownloadingTorrent(torrent.state, walletStarted, balance, torrent.viabilityOfPaidDownloadInSwarm)
+
+      viabilities.set(torrent.infoHash, viability)
+    })
+
+    return viabilities
   }
 
   @action.bound

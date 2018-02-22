@@ -6,12 +6,12 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Provider, observer, inject } from 'mobx-react'
 
-import ViabilityOfPaidDownloadingTorrent from '../../scenes/Common/ViabilityOfPaidDownloadingTorrent'
-import ViabilityOfPaidDownloadingSwarm from '../../core/Torrent/ViabilityOfPaidDownloadingSwarm'
+// import ViabilityOfPaidDownloadingTorrent from '../../scenes/Common/ViabilityOfPaidDownloadingTorrent'
+// import ViabilityOfPaidDownloadingSwarm from '../../core/Torrent/ViabilityOfPaidDownloadingSwarm'
 
 function getColors(props, state) {
-
-    if (props.torrent.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart') {
+  if (props.torrent.isDownloading) {
+    if (props.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart') {
 
         if (state.hover)
             return {
@@ -24,16 +24,19 @@ function getColors(props, state) {
                 background : 'rgba(92, 184, 92, 0.3)'
             }
 
-    } else if (props.torrent.viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted') {
+    } else if (props.viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted') {
         return {
             foreground : 'hsla(180, 1%, 80%, 0.6)',
             background : 'hsla(180, 1%, 80%, 0.4)'
         }
-    } else
-        return {
-            foreground : 'rgba(240, 173, 78, 1)',
-            background : 'rgba(240, 173, 78, 0.4)'
-        }
+    }
+  }
+
+  // not viable or torrent is already downloaded
+  return {
+      foreground : 'rgba(240, 173, 78, 1)',
+      background : 'rgba(240, 173, 78, 0.4)'
+  }
 
 }
 
@@ -156,7 +159,7 @@ class StartPaidDownloadButton extends Component {
 
         console.log('handleClick')
 
-        if(this.props.torrent.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart')
+        if(this.props.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart')
             this.props.torrent.startPaidDownload()
 
     }
@@ -164,7 +167,7 @@ class StartPaidDownloadButton extends Component {
     render() {
 
         let styles = getStyles(this.props, this.state)
-        let texts = getText(this.props.torrent.viabilityOfPaidDownloadingTorrent)
+        let texts = getText(this.props.viabilityOfPaidDownloadingTorrent)
 
         return (
             <div style={styles.root}

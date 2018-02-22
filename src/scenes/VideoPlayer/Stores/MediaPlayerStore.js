@@ -122,7 +122,8 @@ class MediaPlayerStore {
                 autoPlay,
                 mediaPlayerWindowSizeFetcher,
                 mediaPlayerWindowSizeUpdater,
-                onExit) {
+                onExit,
+                uiStore) {
 
         this.mediaSourceType = mediaSourceType
         this.torrent = torrentStore
@@ -141,6 +142,8 @@ class MediaPlayerStore {
         // we must keep track of this in order to adjust
         // size back
         this._windowSizePriorToResize = null
+
+        this._uiStore = uiStore
     }
 
     @action.bound
@@ -291,7 +294,10 @@ class MediaPlayerStore {
             return 0
     }
 
-
+    @computed get
+    viabilityOfPaidDownloadingTorrent() {
+      return this._uiStore.downloadingTorrentsViabilityOfPaidDownloading.get(this.torrent.infoHash)
+    }
 }
 
 function playbackTimeAvailable(currentTime, timeRanges) {
