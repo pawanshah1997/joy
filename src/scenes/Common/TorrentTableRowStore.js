@@ -8,25 +8,25 @@ import Wallet from '../../core/Wallet'
  * Model for row in downloading table
  */
 class TorrentTableRowStore {
-  
+
   /**
    * {Bool} Whether to display toolbar over this row
    */
   @observable showToolbar
-  
+
   /**
    * {@link TorrentStore} The underlying torrent for this row
    */
   torrentStore
-  
+
   constructor(torrentStore, applicationStore, walletStore, showToolbar) {
-    
+
     this.torrentStore = torrentStore
     this._applicationStore = applicationStore
     this._walletStore = walletStore
     this.setShowToolbar(showToolbar)
   }
-  
+
   @action.bound
   setShowToolbar(showToolbar) {
     this.showToolbar = showToolbar
@@ -41,19 +41,19 @@ class TorrentTableRowStore {
   mouseLeave() {
     this.setShowToolbar(false)
   }
-  
+
   remove() {
     this._applicationStore.remove(this.torrentStore.infoHash, false)
   }
-  
+
   removeAndDeleteData() {
     this._applicationStore.remove(this.torrentStore.infoHash, true)
   }
-  
+
   openFolder() {
     shell.openItem(this.torrentStore.savePath)
   }
-  
+
   /**
    *
    * NB: Possible hack note
@@ -82,21 +82,6 @@ class TorrentTableRowStore {
   }
 
   @computed get
-  isDownloading () {
-    return this.torrentStore.isDownloading
-  }
-
-  @computed get
-  isFullyDownloaded () {
-    return this.torrentStore.isFullyDownloaded
-  }
-
-  @computed get
-  isUploading () {
-    return this.torrentStore.isUploading
-  }
-
-  @computed get
   playableMediaList() {
 
     if(this.torrentStore.torrentInfo) {
@@ -104,11 +89,11 @@ class TorrentTableRowStore {
     } else
       return []
   }
-  
+
   playMedia(fileIndex = 0) {
     this.torrentStore.play(this.playableMediaList[fileIndex])
   }
-  
+
 }
 
 export default TorrentTableRowStore
