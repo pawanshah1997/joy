@@ -414,23 +414,40 @@ class Application extends EventEmitter {
 
     /**
      * Terminate and remove torrents, and store settings
+     * NB: This is not being done as well as it should, with
+     * weird hooking into a public signal, but we can't invest
+     * more time in this now, see here for proper redo.
+     * https://github.com/JoyStream/joystream-desktop/issues/714
      */
     
     if(this.torrents.size === 0)
-      onTorrentsTerminatedStoredAndRemoved.bind(this)()
+      onAllTorrentsGone.bind(this)()
     else {
       // Add terminated handler for each torrent
       this.torrents.forEach((torrent, infoHash) => {
         
         // If torrent is already stopping, then we
-        if(
-          torrent.state.startsWith('StoppingExtension') ||
-          torrent.state.startsWith('GeneratingResumeData')
-        ) {
-          
-          // then we just ignore it
+        if(torrent.isTerminating()) {
+  
+          // then we just ignore it,
+          debug('Ignoring initiating termination of this torrent, because its already being terminated: ' + torrent.name)
+  
+          /**
+           * and when its actually removed, we detect this through the
+           * public interface. The reason we use the public interface,
+           * rather than the `Terminated` event from the torrent itself,
+           * is that we don't want to compete with the termination processing
+           * we are doing in `Application.removeTorrent`
+           */
+          this.on('torrentRemoved', (infoHashOfRemovedTorrent) => {
+            
+            if(infoHashOfRemovedTorrent === infoHash)
+              onTorrentTerminated.bind(this)()
+          })
           
         } else {
+  
+          let encodedTorrentSettings
   
           torrent.once('Terminated', () => {
     
@@ -448,10 +465,9 @@ class Application extends EventEmitter {
               assert(!err)
       
             })
-    
-            // store this somewhere
-            let encodedTorrentSettings = encodeTorrentSettings(torrent)
-    
+            
+            assert(encodedTorrentSettings)
+
             this._torrentDatabase.save('torrents', infoHash, encodedTorrentSettings)
               .then(() => {})
               .catch(() => {
@@ -460,21 +476,20 @@ class Application extends EventEmitter {
     
             // remove from map
             this.torrents.delete(infoHash)
-    
-            // if this was the last one, then we are done
-            // terminating torrents!
-            if(this.torrents.size === 0)
-              onTorrentsTerminatedStoredAndRemoved.bind(this)()
-    
+            
+            onTorrentTerminated.bind(this)()
           })
           
           // otherwise, if its loading
           if(torrent.state.startsWith('Loading')) {
+            
+            debug('Torrent is being loaded, hence we wait until its done before we initiate termination: ' + torrent.name)
     
             // then we first wait for it to finish loading
             // before asking it to terminate
             torrent.once('loaded', () => {
-              torrent._terminate()
+  
+              terminateLoadedTorrent(torrent)
             })
     
           } else {
@@ -482,10 +497,20 @@ class Application extends EventEmitter {
             // otherwise if its not just loading,
             // then its active - which is the most frequent scenario,
             // and we can ask it it terminate immediately
-            
+            terminateLoadedTorrent(torrent)
+
+          }
+          
+          function terminateLoadedTorrent(torrent) {
+  
+            encodedTorrentSettings = encodeTorrentSettings(torrent)
+  
             assert(torrent.state.startsWith('Active'))
   
+            debug('Initiating termination of torrent: ' + torrent.name)
+  
             torrent._terminate()
+            
           }
           
         }
@@ -494,37 +519,46 @@ class Application extends EventEmitter {
 
     }
 
-    function onTorrentsTerminatedStoredAndRemoved() {
+    function onTorrentTerminated() {
+      
+      // if this was the last one, then we are done
+      // terminating torrents!
+      if(this.torrents.size === 0)
+        onAllTorrentsGone.bind(this)()
+    }
+    
+    function onAllTorrentsGone() {
+      
+      assert(this.torrents.size === 0)
       
       this._torrentDatabase.close((err) => {
-
+    
         assert(!err)
-
+    
         this._stoppedResource(Application.RESOURCE.STORED_TORRENTS, onStopped)
       })
-
+  
       /**
        * Stop Joystream node session
        */
-      
+  
       this._joystreamNodeSession.pauseLibtorrent((err) => {
-        
+    
         assert(!err)
-
+    
         clearInterval(this._torrentUpdateInterval)
         this._joystreamNodeSession = null
         this._torrentUpdateInterval = null
-
+    
         this._stoppedResource(Application.RESOURCE.JOYSTREAM_NODE_SESSION, onStopped)
       })
-
+      
     }
 
     /**
      * Application settings
      */
-
-
+    
     // Count session
     let numberOfPriorSessions = this.applicationSettings.numberOfPriorSessions()
 
