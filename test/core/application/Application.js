@@ -46,6 +46,15 @@ describe('Application', function() {
   describe('normal cycle', function() {
   
     let application = null
+    
+    afterEach(function() {
+  
+      /**
+       * Since we add state assertions on application events,
+       * we have to make sure to drop them after each test.
+       */
+      application.removeAllListeners()
+    })
   
     it('create', function() {
     
