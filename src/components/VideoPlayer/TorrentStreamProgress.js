@@ -157,7 +157,8 @@ const TorrentStreamProgress = observer((props) => {
             </div>
 
             <div style={styles.buttonContainer}>
-                <StartPaidDownloadButton torrent={props.mediaPlayerStore.torrent}/>
+                <StartPaidDownloadButton torrent={props.mediaPlayerStore.torrent}
+                       viabilityOfPaidDownloadingTorrent={props.mediaPlayerStore.viabilityOfPaidDownloadingTorrent} />
             </div>
 
         </div>

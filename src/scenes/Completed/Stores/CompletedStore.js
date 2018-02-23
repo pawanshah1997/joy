@@ -22,7 +22,7 @@ class CompletedStore {
     if(this.rowStorefromTorrentInfoHash.has(torrentStore.infoHash))
       throw Error('Torrent store for same torrent already exists.')
 
-    let row = new TorrentTableRowStore(torrentStore, this._uiStore.applicationStore, this._uiStore.applicationStore.walletStore, false)
+    let row = new TorrentTableRowStore(torrentStore, this._uiStore, false)
 
     this.rowStorefromTorrentInfoHash.set(torrentStore.infoHash, row)
   }

@@ -116,17 +116,17 @@ class MediaPlayerStore {
      * @param loadedTimeRequiredForPlayback {Number} - seconds of media data required before playback is allowed
      */
     constructor(mediaSourceType,
-                torrent,
+                torrentStore,
                 file,
                 loadedTimeRequiredForPlayback,
                 autoPlay,
                 mediaPlayerWindowSizeFetcher,
                 mediaPlayerWindowSizeUpdater,
-                powerSavingBlocker,
-                showDoorbellWidget) {
+                onExit,
+                uiStore) {
 
         this.mediaSourceType = mediaSourceType
-        this.torrent = torrent
+        this.torrent = torrentStore
         this.file = file
         this._loadedTimeRequiredForPlayback = loadedTimeRequiredForPlayback
         this.autoPlay = autoPlay
@@ -134,8 +134,7 @@ class MediaPlayerStore {
         // Hold on to callbacks to static resources
         this._mediaPlayerWindowSizeFetcher = mediaPlayerWindowSizeFetcher
         this._mediaPlayerWindowSizeUpdater = mediaPlayerWindowSizeUpdater
-        this._powerSavingBlocker = powerSavingBlocker
-        this._showDoorbellWidget = showDoorbellWidget
+        this._onExit = onExit
 
         //this.setVideoIsPlaying(false)
 
@@ -143,6 +142,8 @@ class MediaPlayerStore {
         // we must keep track of this in order to adjust
         // size back
         this._windowSizePriorToResize = null
+
+        this._uiStore = uiStore
     }
 
     @action.bound
@@ -188,9 +189,6 @@ class MediaPlayerStore {
 
         // Adjust window size to match media dimensions
         this._mediaPlayerWindowSizeUpdater({width: event.target.videoWidth, height: event.target.videoHeight})
-
-        // Turn on power saving blocking
-        this._powerSavingBlocker(true)
     }
 
     @action.bound
@@ -277,18 +275,12 @@ class MediaPlayerStore {
     @action.bound
     exit() {
 
-        // Reset media player store
-        this.torrent.setActiveMediaPlayerStore(null)
-
         // Adjust window size back to old dimensions, if it has been resized
         if(this._windowSizePriorToResize)
             this._mediaPlayerWindowSizeUpdater({width: this._windowSizePriorToResize.width, height: this._windowSizePriorToResize.height})
 
-        // Turn off power saving blocking
-        this._powerSavingBlocker(false)
-
-        // Show doorbell again
-        this._showDoorbellWidget()
+        // Infrom UI we are exiting
+        this._onExit()
     }
 
     @computed get
@@ -302,7 +294,10 @@ class MediaPlayerStore {
             return 0
     }
 
-
+    @computed get
+    viabilityOfPaidDownloadingTorrent() {
+      return this._uiStore.downloadingTorrentsViabilityOfPaidDownloading.get(this.torrent.infoHash)
+    }
 }
 
 function playbackTimeAvailable(currentTime, timeRanges) {
