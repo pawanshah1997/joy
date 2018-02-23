@@ -77,7 +77,7 @@ application.on('started', () => {
   // window context menu.
   ipcRenderer.on('openPreferences', () => {
 
-    if(application.state === App.STATE.STARTED)
+    if(application.state === Application.STATE.STARTED)
       shell.openItem(application.applicationSettings.filePath())
   })
 
@@ -209,7 +209,7 @@ function beforeWindowUnload(e) {
    * when main process says application.quit. We must handle both case.
    */
 
-  if(application.state === App.STATE.STARTING || application.state === App.STATE.STOPPING) {
+  if(application.state === Application.STATE.STARTING || application.state === Application.STATE.STOPPING) {
 
     /**
      * We prevent stopping of any kind while starting up, for now, and obviously when stopping!
@@ -220,7 +220,8 @@ function beforeWindowUnload(e) {
     // BLOCK SHUTDOWN
     e.returnValue = false
 
-  } else if(application.state === App.STATE.STARTED) {
+
+  } else if(application.state === Application.STATE.STARTED) {
 
     rootUIStore.stop()
 
@@ -234,7 +235,7 @@ function beforeWindowUnload(e) {
      * closing of window, which we do by not doing anything.
      */
 
-    assert(application.state === App.STATE.STOPPED)
+    assert(application.state === Application.STATE.STOPPED)
 
     console.log('Allowing closing of window')
 
