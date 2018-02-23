@@ -4,14 +4,10 @@ import TorrentStore from '../../../src/core-stores/Torrent'
 
 var assert = require('chai').assert
 
-const createInitialValues = () => {
-  return [
-    { // UIStore
-      applicationStore: {
-        walletStore: {}
-      }
-    }
-  ]
+const mockUIStore = {
+  applicationStore: {
+    walletStore: {}
+  }
 }
 
 function initStoreWithOneTorrent (store, infoHash) {
@@ -22,18 +18,17 @@ function initStoreWithOneTorrent (store, infoHash) {
     state: 'Active.DownloadIncomplete'
   })
 
-  map.set(infoHash, new TorrentTableRowStore(torrentStore))
+  map.set(infoHash, new TorrentTableRowStore(torrentStore, mockUIStore))
 
   store.setRowStorefromTorrentInfoHash(map)
 }
 
 describe('DownloadingStore', function () {
-  let downloadingStore, initialValues
+  let downloadingStore
   const infoHash1 = 'infoHash-1'
 
   beforeEach(function () {
-    initialValues = createInitialValues()
-    downloadingStore = new DownloadingStore(...initialValues)
+    downloadingStore = new DownloadingStore(mockUIStore)
   })
 
   it('constructor initializes empty infoHash to TorrentTableRowStore map', function () {
