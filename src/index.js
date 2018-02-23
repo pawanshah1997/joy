@@ -1,4 +1,28 @@
 
+var debug = require('debug')('main-renderer')
+
+var t0 = performance.now()
+debug('Starting to load index.js after:' + t0)
+
+import ReactDOM from "react-dom"
+import IdleScene from './scenes/Idle'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+
+/**
+ * Emergency rendering of loader interface!
+ * This is done before any other loading is attempted,
+ * as the rest of the loading below will depend on loading a while
+ * tree of dependencies which is very slow to load.
+ */
+
+ReactDOM.render(
+  <MuiThemeProvider>
+    <IdleScene/>
+  </MuiThemeProvider>
+  ,
+  document.getElementById('root')
+)
+
 // babel-polyfill for generator (async/await)
 import 'babel-polyfill'
 
