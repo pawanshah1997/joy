@@ -296,7 +296,7 @@ class MediaPlayerStore {
 
     @computed get
     viabilityOfPaidDownloadingTorrent() {
-      return this._uiStore.downloadingTorrentsViabilityOfPaidDownloading.get(this.torrent.infoHash)
+      return this._uiStore.torrentsViabilityOfPaidDownloading.get(this.torrent.infoHash)
     }
 }
 

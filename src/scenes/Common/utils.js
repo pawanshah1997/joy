@@ -8,7 +8,9 @@ import {
   WalletNotReady,
   InsufficientFunds,
   InViable,
-  Stopped
+  Stopped,
+  NotLoaded,
+  FullyDownloaded
 } from './ViabilityOfPaidDownloadingTorrent'
 import {ViabilityOfPaidDownloadInSwarm} from '../../core/Torrent'
 
@@ -47,10 +49,13 @@ function indexesOfPlayableFiles(torrentFiles) {
  * @param state {String} - state of torrent
  * @param walletStarted {Boolean} - whether wallet has currently been started
  * @param balance {Number} -  (stats)
- * @returns {Stopped|AlreadyStarted|InViable|WalletNotReady|InsufficientFunds|CanStart}
+ * @returns {Stopped|AlreadyStarted|InViable|WalletNotReady|InsufficientFunds|CanStart|NotStarted|FullyDownloaded}
  */
 function computeViabilityOfPaidDownloadingTorrent(state, walletStarted, balance, viabilityOfPaidDownloadInSwarm) {
-  
+  if(state.startsWith('Loading'))
+    return new NotLoaded()
+  if(state.startsWith('Active.FinishedDownloading'))
+    return new FullyDownloaded()
   if(state.startsWith("Active.DownloadIncomplete.Unpaid.Stopped"))
     return new Stopped()
   else if(state.startsWith("Active.DownloadIncomplete.Paid"))
@@ -60,10 +65,10 @@ function computeViabilityOfPaidDownloadingTorrent(state, walletStarted, balance,
   else if(!walletStarted)
     return new WalletNotReady()
   else {
-    
+
     // Here it must be that swarm is viable, by
     // test in prior step
-    
+
     if(balance == 0) // <== fix later to be a more complex constraint
       return new InsufficientFunds(viabilityOfPaidDownloadInSwarm.estimate, balance)
     else

@@ -6,30 +6,26 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Provider, observer, inject } from 'mobx-react'
 
-// import ViabilityOfPaidDownloadingTorrent from '../../scenes/Common/ViabilityOfPaidDownloadingTorrent'
-// import ViabilityOfPaidDownloadingSwarm from '../../core/Torrent/ViabilityOfPaidDownloadingSwarm'
-
 function getColors(props, state) {
-  if (props.torrent.isDownloading) {
-    if (props.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart') {
 
-        if (state.hover)
-            return {
-                foreground : 'rgba(92, 254, 92, 0.7)',
-                background : 'rgba(92, 254, 92, 0.4)'
-            }
-        else
-            return {
-                foreground : 'rgba(92, 184, 92, 0.7)',
-                background : 'rgba(92, 184, 92, 0.3)'
-            }
+  if (props.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart') {
+      if (state.hover) {
+          return {
+              foreground : 'rgba(92, 254, 92, 0.7)',
+              background : 'rgba(92, 254, 92, 0.4)'
+          }
+      } else {
+          return {
+              foreground : 'rgba(92, 184, 92, 0.7)',
+              background : 'rgba(92, 184, 92, 0.3)'
+          }
+      }
 
-    } else if (props.viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted') {
-        return {
-            foreground : 'hsla(180, 1%, 80%, 0.6)',
-            background : 'hsla(180, 1%, 80%, 0.4)'
-        }
-    }
+  } else if (props.viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted') {
+      return {
+          foreground : 'hsla(180, 1%, 80%, 0.6)',
+          background : 'hsla(180, 1%, 80%, 0.4)'
+      }
   }
 
   // not viable or torrent is already downloaded
@@ -116,9 +112,13 @@ function getText(viabilityOfPaidDownloadingTorrent) {
                 subText = "Insufficient number of sellers have joined"
             else if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'Viable')
                 assert(false) // <== not possible
-
-        } else
+        } else if (viabilityOfPaidDownloadingTorrent.constructor.name === 'NotLoaded') {
+            assert(false, 'Media Player should not have been started for a that is torrent still loading')
+        } else if (viabilityOfPaidDownloadingTorrent.constructor.name === 'FullyDownloaded') {
+            assert(false, 'Media Player should not show start paid download button for a fully downloaded torrent')
+        } else {
             assert(false) // <== not possible
+        }
     }
 
     return {

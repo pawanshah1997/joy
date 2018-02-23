@@ -25,6 +25,13 @@ function CanStart(suitablePeers, estimate) {
     this.estimate = estimate
 }
 
+// Torrent is still being loaded
+function NotLoaded() {
+}
+
+// Torrent is fully downloaded and it doesn't make sense to pay for it
+function FullyDownloaded() {
+}
 
 export {
   Stopped,
@@ -32,5 +39,7 @@ export {
   InViable,
   WalletNotReady,
   InsufficientFunds,
-  CanStart
+  CanStart,
+  NotLoaded,
+  FullyDownloaded
 }
