@@ -869,8 +869,7 @@ class UIStore {
   }
 
   @computed get
-  downloadingTorrentsViabilityOfPaidDownloading () {
-    let viabilities = new Map()
+  torrentsViabilityOfPaidDownloading () {
     let balance = 0
     let walletStarted = false
     const walletStore = this.applicationStore.walletStore
@@ -880,15 +879,11 @@ class UIStore {
       walletStarted = walletStore.state === Wallet.STATE.STARTED
     }
 
-    this.torrentStoresArray.forEach(function (torrent) {
-      if (!torrent.isDownloading) return
+    return new Map(this.torrentStoresArray.map(function (torrent) {
+      const viability = computeViabilityOfPaidDownloadingTorrent(torrent.state, walletStarted, balance, torrent.viabilityOfPaidDownloadInSwarm)
 
-      let viability = computeViabilityOfPaidDownloadingTorrent(torrent.state, walletStarted, balance, torrent.viabilityOfPaidDownloadInSwarm)
-
-      viabilities.set(torrent.infoHash, viability)
-    })
-
-    return viabilities
+      return [torrent.infoHash, viability]
+    }))
   }
 
   @action.bound
