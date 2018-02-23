@@ -13,7 +13,7 @@ export const FAUCET_TOPUP_LIMIT = 25000
 export const AUTO_UPDATE_BASE_URL ='https://download.joystream.co:7070/update/'
 export const BLOCKEXPLORER_QUERY_STRING_BASE = 'https://live.blockcypher.com/btc-testnet/tx/'
 
-const TORRENTS_PATH = path.join(__dirname, '..', 'assets', 'torrents')
+const TORRENTS_PATH = path.join(__dirname, 'assets', 'torrents')
 
 function makeFullTorrentPath (fileName) {
   return path.join(TORRENTS_PATH, fileName)
