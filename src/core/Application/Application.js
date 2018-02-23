@@ -959,7 +959,7 @@ class Application extends EventEmitter {
   }
 
   addExampleTorrents () {
-    assert(this.state === Application.STATE.STARTED)
+    assert(this.state === Application.STATE.STARTING || this.state === Application.STATE.STARTED )
 
     this.onboardingTorrents.forEach((torrentFileName) => {
 
