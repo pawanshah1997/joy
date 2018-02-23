@@ -698,8 +698,12 @@ class UIStore {
   setCurrentPhase(currentPhase) {
     this.currentPhase = currentPhase
   }
-
-  stop() {
+  
+  /**
+   * Closes the application, but firrst enables possible
+   * onboarding flow if its currently enabled.
+   */
+  handleCloseApplicationAttempt() {
 
     /**
      * If onboarding is enabled, then display shutdown message - if its not already
@@ -729,9 +733,16 @@ class UIStore {
      * this renderes process about successful stopping, which which we don't block.
      */
     else {
-      this._application.stop()
+      this.closeApplication()
     }
 
+  }
+  
+  /**
+   * Directly initiates application stoppage.
+   */
+  closeApplication() {
+    this._application.stop()
   }
 
   @action.bound

@@ -224,7 +224,7 @@ function beforeWindowUnload(e) {
 
   } else if(application.state === Application.STATE.STARTED) {
 
-    rootUIStore.stop()
+    rootUIStore.handleCloseApplicationAttempt()
 
     // BLOCK SHUTDOWN
     e.returnValue = false
