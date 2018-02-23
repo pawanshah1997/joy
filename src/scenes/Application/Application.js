@@ -172,8 +172,8 @@ const StartedApp = observer((props) => {
     <div style={styles.root}>
 
       { /* Onboarding scenes */ }
-      <WelcomeScreen onBoardingStore={props.UIStore.onBoardingStore} />
-      <DepartureScreen onBoardingStore={props.UIStore.onBoardingStore} />
+      <WelcomeScreen onBoardingStore={props.UIStore.onboardingStore} />
+      <DepartureScreen onBoardingStore={props.UIStore.onboardingStore} />
       
       <ApplicationStatusBar startingTorrentCheckingProgressPercentage={props.UIStore.torrentsFullyLoadedPercentage}
                             show=
