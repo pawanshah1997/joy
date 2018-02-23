@@ -17,6 +17,7 @@ import ApplicationHeader from './components/ApplicationHeader'
 import ApplicationStatusBar from './components/ApplicationStatusBar'
 
 // Our scenes
+import IdleScene from '../Idle'
 import NotStartedScene from '../NotStarted'
 import LoadingScene from '../Loading'
 import TerminatingScene from '../Terminating'
@@ -76,30 +77,13 @@ const AppView = observer((props) => {
   switch (props.UIStore.currentPhase) {
     
     case UIStore.PHASE.Idle:
-      elm = <NotStartedScene />
+      elm = <IdleScene />
       break
-     
-    case UIStore.PHASE.Loading:
-      elm =
-        <LoadingScene
-          show
-          loadingState={0}
-        />
-      break
-    
+
     case UIStore.PHASE.Alive:
       elm =
         <StartedApp
           UIStore={props.UIStore}
-        />
-      break
-    
-    case UIStore.PHASE.Terminating:
-      elm =
-        <TerminatingScene
-          show
-          terminatingState={0}
-          terminatingTorrentsProgressValue={0}
         />
       break
     
