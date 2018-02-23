@@ -7,14 +7,14 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 
 import FullScreenContainer from '../../../components/FullScreenContainer'
-import {OnboardingStore} from '../../../core'
+import OnboardingStore from '../Stores'
 import WelcomeScreenContent from './WelcomeScreenContent'
 
 const WelcomeScreen = observer((props) => {
     
     return (
         props.onBoardingStore &&
-        props.onBoardingStore.state === OnboardingStore.State.WelcomeScreen
+        props.onBoardingStore.state === OnboardingStore.STATE.WelcomeScreen
             ?
         <FullScreenContainer>
             <WelcomeScreenContent onboardingStore={props.onBoardingStore} />

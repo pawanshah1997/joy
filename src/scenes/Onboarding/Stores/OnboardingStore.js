@@ -76,7 +76,7 @@ class OnboardingStore {
   shutDownMessageAccepted () {
     if (this.state === OnboardingStore.STATE.DepartureScreen) {
       this.setState(OnboardingStore.STATE.Silent)
-      this._uiStore.appStore.stop()
+      this._uiStore.closeApplication()
     }
   }
 }

@@ -1,28 +1,73 @@
+
+// babel-polyfill for generator (async/await)
+import 'babel-polyfill'
+
 import OnboardingStore from '../../../src/scenes/Onboarding/Stores/'
+import UIStore from '../../../src/scenes/UIStore'
+import {MockApplication} from '../../core/Mocks'
+import Application from '../../../src/core/Application'
 
 var assert = require('chai').assert
 
-const createInitialValues = () => {
-  return [
-    { // UIStore
-      applicationStore: {
-        walletStore: {}
-      }
-    },
-    OnboardingStore.STATE.WelcomeScreen
-  ]
-}
 
 describe('OnboardingStore', function () {
-  let onboardingStore, initialValues
-
-  beforeEach(function () {
-    initialValues = createInitialValues()
-    onboardingStore = new OnboardingStore(...initialValues)
-  })
-
+  
+  let mockedApplication = new MockApplication(Application.STATE.STARTING, ['t1', 't2'], true)
+  let uiStore = new UIStore(mockedApplication)
+  let onboardingStore
+  
   it('constructor initializes observables', function () {
-    assert.equal(onboardingStore.state, initialValues[1])
+    
+    onboardingStore = new OnboardingStore(uiStore, OnboardingStore.STATE.WelcomeScreen)
+    
+    assert.equal(onboardingStore.state, OnboardingStore.STATE.WelcomeScreen)
+  })
+  
+  /**
+   * We should really test skipping adding example torrents
+   * also
+   */
+  
+  it('adds example torrents', function() {
+    
+    onboardingStore.acceptAddingExampleTorrents()
+    
+    assert.equal(onboardingStore.state, OnboardingStore.STATE.BalanceExplanation)
+    assert.isTrue(mockedApplication.addExampleTorrents.calledOnce)
+    
+  })
+  
+  it('accepts balance explanation', function() {
+    
+    onboardingStore.balanceExplanationAccepted()
+    
+    assert.equal(onboardingStore.state, OnboardingStore.STATE.DisabledFeaturesExplanation)
+    
+  })
+  
+  it('accepts disabled features explanation', function() {
+  
+    onboardingStore.disabledFeaturesExplanationAccepted()
+    
+    assert.equal(onboardingStore.state, OnboardingStore.STATE.Silent)
+  })
+  
+  it('displays shutdown message', function() {
+    
+    onboardingStore.displayShutdownMessage()
+    
+    assert.equal(onboardingStore.state, OnboardingStore.STATE.DepartureScreen)
+  
+  })
+  
+  it('accepts shutdown message', function() {
+    
+    onboardingStore.shutDownMessageAccepted()
+    
+    assert.equal(onboardingStore.state, OnboardingStore.STATE.Silent)
+    assert.isTrue(mockedApplication.stop.calledOnce)
+    
+  
   })
 
 })

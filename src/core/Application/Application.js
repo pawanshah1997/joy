@@ -466,15 +466,21 @@ class Application extends EventEmitter {
             assert(encodedTorrentSettings)
 
             this._torrentDatabase.save('torrents', infoHash, encodedTorrentSettings)
-              .then(() => {})
-              .catch(() => {
-                console.log('Failed to save torrent to torrent storage: ' + encodedTorrentSettings)
+              .then(() => {
+                debug('Torrent stored in database: ' + torrent.name)
+              })
+              .catch((err) => {
+                debug('Failed to store torrent in database: ', encodedTorrentSettings)
+              })
+              .finally(() => {
+
+                // remove from map
+                this.torrents.delete(infoHash)
+
+                onTorrentTerminated.bind(this)()
+
               })
     
-            // remove from map
-            this.torrents.delete(infoHash)
-            
-            onTorrentTerminated.bind(this)()
           })
           
           // otherwise, if its loading
@@ -959,7 +965,7 @@ class Application extends EventEmitter {
   }
 
   addExampleTorrents () {
-    assert(this.state === Application.STATE.STARTED)
+    assert(this.state === Application.STATE.STARTING || this.state === Application.STATE.STARTED )
 
     this.onboardingTorrents.forEach((torrentFileName) => {
 

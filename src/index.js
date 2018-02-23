@@ -1,4 +1,28 @@
 
+var debug = require('debug')('main-renderer')
+
+var t0 = performance.now()
+debug('Starting to load index.js after:' + t0)
+
+import ReactDOM from "react-dom"
+import IdleScene from './scenes/Idle'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+
+/**
+ * Emergency rendering of loader interface!
+ * This is done before any other loading is attempted,
+ * as the rest of the loading below will depend on loading a while
+ * tree of dependencies which is very slow to load.
+ */
+
+ReactDOM.render(
+  <MuiThemeProvider>
+    <IdleScene/>
+  </MuiThemeProvider>
+  ,
+  document.getElementById('root')
+)
+
 // babel-polyfill for generator (async/await)
 import 'babel-polyfill'
 
@@ -24,7 +48,7 @@ import React from 'react'
 import Application from './core/Application'
 
 import { EXAMPLE_TORRENTS } from './constants'
-import ReactDOM from "react-dom"
+
 
 import UIStore from './scenes'
 import assert from 'assert'
@@ -53,7 +77,7 @@ application.on('started', () => {
   // window context menu.
   ipcRenderer.on('openPreferences', () => {
 
-    if(application.state === App.STATE.STARTED)
+    if(application.state === Application.STATE.STARTED)
       shell.openItem(application.applicationSettings.filePath())
   })
 
@@ -185,7 +209,7 @@ function beforeWindowUnload(e) {
    * when main process says application.quit. We must handle both case.
    */
 
-  if(application.state === App.STATE.STARTING || application.state === App.STATE.STOPPING) {
+  if(application.state === Application.STATE.STARTING || application.state === Application.STATE.STOPPING) {
 
     /**
      * We prevent stopping of any kind while starting up, for now, and obviously when stopping!
@@ -196,12 +220,16 @@ function beforeWindowUnload(e) {
     // BLOCK SHUTDOWN
     e.returnValue = false
 
-  } else if(application.state === App.STATE.STARTED) {
+    debug('Blocking shutdown since application is still starting or stopping.')
 
-    rootUIStore.stop()
+  } else if(application.state === Application.STATE.STARTED) {
+
+    rootUIStore.handleCloseApplicationAttempt()
 
     // BLOCK SHUTDOWN
     e.returnValue = false
+
+    debug('Blocking shutdown and starting application shut down.')
 
   } else {
 
@@ -210,10 +238,9 @@ function beforeWindowUnload(e) {
      * closing of window, which we do by not doing anything.
      */
 
-    assert(application.state === App.STATE.STOPPED)
+    assert(application.state === Application.STATE.STOPPED)
 
-    console.log('Allowing closing of window')
-
+    debug('Allowing renderer|window to close.')
   }
 
 }

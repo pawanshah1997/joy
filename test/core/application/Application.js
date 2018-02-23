@@ -313,6 +313,9 @@ describe('Application', function() {
     })
     
     it('stop', function(done) {
+
+      // Adjust timeout, starting the app takes time
+      this.timeout(5000)
       
       let stoppingEventEmitted = false
       application.on('stopping', () => {

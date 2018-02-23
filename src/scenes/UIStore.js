@@ -66,16 +66,11 @@ class UIStore {
    */
   static PHASE = {
 
+    // Idling between starting and stopping
     Idle: 0,
 
-    // UI is loading, user cannot do anything
-    Loading: 1,
-
     // UI is alive and running
-    Alive: 2,
-
-    // UI is terminating, user cannot do anything
-    Terminating: 3
+    Alive: 1,
   }
 
   /**
@@ -713,8 +708,12 @@ class UIStore {
   setCurrentPhase(currentPhase) {
     this.currentPhase = currentPhase
   }
-
-  stop() {
+  
+  /**
+   * Closes the application, but firrst enables possible
+   * onboarding flow if its currently enabled.
+   */
+  handleCloseApplicationAttempt() {
 
     /**
      * If onboarding is enabled, then display shutdown message - if its not already
@@ -744,9 +743,16 @@ class UIStore {
      * this renderes process about successful stopping, which which we don't block.
      */
     else {
-      this._application.stop()
+      this.closeApplication()
     }
 
+  }
+  
+  /**
+   * Directly initiates application stoppage.
+   */
+  closeApplication() {
+    this._application.stop()
   }
 
   @action.bound
@@ -934,7 +940,7 @@ function appStateToUIStorePhase(state) {
       break
 
     case Application.STATE.STOPPING:
-      phase = UIStore.PHASE.Terminating
+      phase = UIStore.PHASE.Idle
       break
 
     default:
