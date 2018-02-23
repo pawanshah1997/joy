@@ -62,16 +62,11 @@ class UIStore {
    */
   static PHASE = {
 
+    // Idling between starting and stopping
     Idle: 0,
 
-    // UI is loading, user cannot do anything
-    Loading: 1,
-
     // UI is alive and running
-    Alive: 2,
-
-    // UI is terminating, user cannot do anything
-    Terminating: 3
+    Alive: 1,
   }
 
   /**
@@ -848,7 +843,7 @@ function appStateToUIStorePhase(state) {
       break
 
     case Application.STATE.STOPPING:
-      phase = UIStore.PHASE.Terminating
+      phase = UIStore.PHASE.Idle
       break
 
     default:
