@@ -5,6 +5,7 @@ import {shell} from 'electron'
 // Core
 import Application from '../core/Application'
 import Wallet from '../core/Wallet'
+import bcoin from 'bcoin'
 
 import * as constants from '../constants'
 

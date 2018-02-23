@@ -31,13 +31,13 @@ import 'babel-polyfill'
 process.env.BCOIN_NO_NATIVE = '1'
 
 // Disable workers which are not available in electron
-require('bcoin').set({ useWorkers: false })
+const bcoin = require('bcoin')
 
 import config from './config'
 
 // Set primary network in Bcoin (oyh vey, what a singlton horrible pattern)
-bcoin.set({ network :  config.network})
-
+bcoin.set({network: config.network})
+bcoin.set({useWorkers: false})
 
 import {ipcRenderer, webFrame, shell} from 'electron'
 import os from 'os'
