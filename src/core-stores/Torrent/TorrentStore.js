@@ -241,7 +241,8 @@ class TorrentStore {
 
     @computed get
     isTerminating() {
-        return this.state.startsWith('Terminating')
+      return this.state.startsWith('StoppingExtension') ||
+        this.state.startsWith('GeneratingResumeData')
     }
 
     @computed get canChangeBuyerTerms () {
