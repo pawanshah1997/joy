@@ -16,8 +16,7 @@ const bcoin = require('bcoin')
 * @emits getting-wallet
 * @emits getting_balance
 * @emits connecting-to-network
-* @emits getting-new-transactions
-* @emits scanning-new-transactions-for-payments
+* @emits scanningNewTransactionsForPaymentsProgressPercentage({Number})
 * @emits started
 * @emits stopping
 * @emits catastrophic-error
@@ -59,16 +58,6 @@ class Wallet extends EventEmitter {
     CONNECTING_TO_NETWORK: 4,
 
     /**
-     * Recover recent transactions from wallet.
-     */
-    GETTING_NEW_TRANSACTIONS: 5,
-
-    /**
-     * Process new transactions for paymentsInTransactionWithTXID.
-     */
-    SCANNING_NEW_TRANSACTIONS_FOR_PAYMENTS : 6,
-
-    /**
      * Ready to do all core functions, including stopping.
      */
     STARTED : 7,
@@ -92,6 +81,13 @@ class Wallet extends EventEmitter {
    * {STATE} State of the wallet
    */
   state
+
+  /**
+   * {Number} Represents percentage progress in scanning
+   * new transactions for payments during start of wallet. Be ware that the wallet
+   * will however start before this process completes.
+   */
+  scanningNewTransactionsForPaymentsProgressPercentage
 
   /**
    * {Number} Total (Confirmed + Unconfirmed) wallet balance (satoshis)
@@ -141,6 +137,7 @@ class Wallet extends EventEmitter {
 
     // Set public properties
     this.state = Wallet.STATE.STOPPED
+    this.scanningNewTransactionsForPaymentsProgressPercentage = 0
     this.totalBalance = 0
     this.confirmedBalance = 0
     this.receiveAddress = null
@@ -338,45 +335,50 @@ class Wallet extends EventEmitter {
     /// Initiate synchronization
 
     this._spvNode.startSync()
+    
+    ///
+    this._scanNewTransactionsForPayments()
 
+    /// Mark as started
+    this._changeState(Wallet.STATE.STARTED)
+
+    return Wallet.STATE.STARTED
+  }
+
+  async _scanNewTransactionsForPayments() {
+    
     /// Getting new transactions
-
-    this._changeState(Wallet.STATE.GETTING_NEW_TRANSACTIONS)
-
+    
     let transactionHistory = await this._wallet.getHistory()
 
-    // Make sure that we were not interrupted to be stopped,
-    // if so we are done.
-    if(this.state !== Wallet.STATE.GETTING_NEW_TRANSACTIONS) {
-      assert(this.state === Wallet.STATE.STOPPED)
+    // Stop processing if wallet is stopping
+    if(this.state === Wallet.STATE.STOPPING || this.state === Wallet.STATE.STOPPED)
       return
-    }
 
     /// Scan new transactions for new paymentsInTransactionWithTXID
-
-    this._changeState(Wallet.STATE.SCANNING_NEW_TRANSACTIONS_FOR_PAYMENTS)
-
+    
+    let numberOfTransactionsProcessed = 0
     for(var i = 0; i < transactionHistory.length;i++) {
 
       let txRecord = transactionHistory[i]
 
       // Get transaction details
       let txDetails = await this._wallet.getDetails(txRecord.hash)
-
-      // Make sure that we were not interrupted to be stopped,
-      // if so we are done.
-      if(this.state !== Wallet.STATE.SCANNING_NEW_TRANSACTIONS_FOR_PAYMENTS) {
-        assert(this.state === Wallet.STATE.STOPPED)
+  
+      // Stop processing if wallet is stopping
+      if(this.state === Wallet.STATE.STOPPING || this.state === Wallet.STATE.STOPPED)
         return
-      }
-
+      
       this._processTxRecord(txRecord, txDetails)
+        .then(() => {
+  
+          numberOfTransactionsProcessed++
+          
+          let processingPercentage = 100*numberOfTransactionsProcessed/transactionHistory.length
+  
+          this._setScanningNewTransactionsForPaymentsProgressPercentage(processingPercentage)
+        })
     }
-
-    /// Mark as started
-    this._changeState(Wallet.STATE.STARTED)
-
-    return Wallet.STATE.STARTED
   }
 
   _spvNodeError(err) {
@@ -720,6 +722,11 @@ class Wallet extends EventEmitter {
     return paymentsInTx
 
   }
+  
+  _setScanningNewTransactionsForPaymentsProgressPercentage(scanningNewTransactionsForPaymentsProgressPercentage) {
+    this.scanningNewTransactionsForPaymentsProgressPercentage = scanningNewTransactionsForPaymentsProgressPercentage
+    this.emit('scanningNewTransactionsForPaymentsProgressPercentage', scanningNewTransactionsForPaymentsProgressPercentage)
+  }
 
   _setTotalBalance(balance) {
     this.totalBalance = balance
@@ -768,12 +775,6 @@ function stateToString(state) {
       break
     case Wallet.STATE.CONNECTING_TO_NETWORK:
       str = 'connecting-to-network'
-      break
-    case Wallet.STATE.GETTING_NEW_TRANSACTIONS:
-      str = 'getting-new-transactions'
-      break
-    case Wallet.STATE.SCANNING_NEW_TRANSACTIONS_FOR_PAYMENTS:
-      str = 'scanning-new-transactions-for-payments'
       break
     case Wallet.STATE.STARTED:
       str = 'started'
