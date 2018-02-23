@@ -220,6 +220,7 @@ function beforeWindowUnload(e) {
     // BLOCK SHUTDOWN
     e.returnValue = false
 
+    debug('Blocking shutdown since application is still starting or stopping.')
 
   } else if(application.state === Application.STATE.STARTED) {
 
@@ -227,6 +228,8 @@ function beforeWindowUnload(e) {
 
     // BLOCK SHUTDOWN
     e.returnValue = false
+
+    debug('Blocking shutdown and starting application shut down.')
 
   } else {
 
@@ -237,8 +240,7 @@ function beforeWindowUnload(e) {
 
     assert(application.state === Application.STATE.STOPPED)
 
-    console.log('Allowing closing of window')
-
+    debug('Allowing renderer|window to close.')
   }
 
 }
