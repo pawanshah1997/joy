@@ -14,8 +14,22 @@ const createInitialValues = () => {
   ]
 }
 
+function initStoreWithOneTorrent (store, infoHash) {
+  const map = new Map()
+
+  const torrentStore = new TorrentStore({
+    infoHash: infoHash,
+    state: 'Active.DownloadIncomplete'
+  })
+
+  map.set(infoHash, new TorrentTableRowStore(torrentStore))
+
+  store.setRowStorefromTorrentInfoHash(map)
+}
+
 describe('DownloadingStore', function () {
   let downloadingStore, initialValues
+  const infoHash1 = 'infoHash-1'
 
   beforeEach(function () {
     initialValues = createInitialValues()
@@ -28,13 +42,6 @@ describe('DownloadingStore', function () {
   })
 
   describe('addTorrentStore', function () {
-    const infoHash1 = 'infoHash-1'
-    beforeEach(function () {
-      downloadingStore.setRowStorefromTorrentInfoHash(new Map([
-        [infoHash1, {infoHash: infoHash1}]
-      ]))
-    })
-
     it('adds new torrent row store to map', function () {
       const newTorrentStore = new TorrentStore({ infoHash: 'infohash-2', state: 'Active.DownloadIncomplete' })
 
@@ -53,6 +60,7 @@ describe('DownloadingStore', function () {
     })
 
     it('throws if duplicate infoHash', function () {
+      initStoreWithOneTorrent(downloadingStore, infoHash1)
       const duplicateTorrentStore = {infoHash: infoHash1}
 
       assert.throws(function () {
@@ -62,14 +70,8 @@ describe('DownloadingStore', function () {
   })
 
   describe('removeTorrentStore', function () {
-    const infoHash1 = 'infoHash-1'
-    beforeEach(function () {
-      downloadingStore.setRowStorefromTorrentInfoHash(new Map([
-        [infoHash1, {infoHash: infoHash1}]
-      ]))
-    })
-
     it('removes store from map', function () {
+      initStoreWithOneTorrent(downloadingStore, infoHash1)
       assert(downloadingStore.rowStorefromTorrentInfoHash.has(infoHash1))
       downloadingStore.removeTorrentStore(infoHash1)
       assert(!downloadingStore.rowStorefromTorrentInfoHash.has(infoHash1))
