@@ -48,7 +48,7 @@ import React from 'react'
 import Application from './core/Application'
 
 import { EXAMPLE_TORRENTS } from './constants'
-import ReactDOM from "react-dom"
+
 
 import UIStore from './scenes'
 import assert from 'assert'
