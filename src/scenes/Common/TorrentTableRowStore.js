@@ -100,7 +100,7 @@ class TorrentTableRowStore {
   playMedia(/*fileIndex = 0*/) {
     if (this.playableMediaList.length) {
       let firstPlayableFileIndex = this.playableMediaList[0]
-      this._uiStore.playMedia(this.torrentStore, firstPlayableFileIndex)
+      this._uiStore.playMedia(this.torrentStore.infoHash, firstPlayableFileIndex)
     }
   }
 

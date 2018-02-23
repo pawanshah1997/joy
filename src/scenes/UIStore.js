@@ -765,21 +765,36 @@ class UIStore {
   }
 
   @action.bound
-  playMedia(torrentStore, fileIndex) {
+  playMedia(infoHash, fileIndex) {
+    const torrent = this._application.torrents.get(infoHash)
 
-    // state guard?
+    if (!torrent) {
+      throw new Error('playMedia: torrent not in session')
+    }
 
-    assert(this._application.torrents.has(torrentStore.infoHash))
+    const filteredTorrentStores = this.torrentStoresArray.filter(store => store.infoHash === infoHash)
 
-    const torrent = this._application.torrents.get(torrentStore.infoHash)
+    if (filteredTorrentStores.length !== 1) {
+      throw new Error('playMedia: No torrent store found for torrent')
+    }
 
-    // Create store for player
-    const mediaSourceType = torrentStore.isFullyDownloaded ? MediaPlayerStore.MEDIA_SOURCE_TYPE.DISK : MediaPlayerStore.MEDIA_SOURCE_TYPE.STREAMING_TORRENT
+    const torrentStore = filteredTorrentStores[0]
+
+    assert(torrentStore.infoHash === infoHash)
+
+    if (torrent.state.startsWith('Loading')) {
+      throw new Error('playMedia: torrent still loading')
+    }
+
+    const fullyDownloaded = torrent.state.startsWith('Active.FinishedDownloading')
+
+    const mediaSourceType = fullyDownloaded ? MediaPlayerStore.MEDIA_SOURCE_TYPE.DISK : MediaPlayerStore.MEDIA_SOURCE_TYPE.STREAMING_TORRENT
     const loadedSecondsRequiredForPlayback = 10
     let autoPlay = true
 
-    const file = torrent.createStreamFactory(fileIndex)
+    var file = torrent.createStreamFactory(fileIndex)
 
+    // Create store for player
     const store = new MediaPlayerStore(
       mediaSourceType,
       torrentStore,
