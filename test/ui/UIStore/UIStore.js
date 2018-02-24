@@ -26,9 +26,7 @@ describe('UIStore', function() {
   })
   
   it('can be started', function() {
-    
-    mockApplication.updateState(Application.STATE.STARTING)
-    
+    // Later
   })
   
   it('handle wallet started', function() {
