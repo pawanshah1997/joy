@@ -296,7 +296,7 @@ class UIStore {
       }))
 
     } else if(resource === Application.RESOURCE.WALLET) {
-
+      
       /**
        * Create and setup wallet store
        */
@@ -321,7 +321,7 @@ class UIStore {
       this.applicationStore.setWalletStore(walletStore)
 
       // Hook into events
-      wallet.on('stateChanged', this._onWalletStateChanged)
+      wallet.on('state', this._onWalletStateChanged)
       wallet.on('totalBalanceChanged', this._onWalletTotalBalanceChanged)
       wallet.on('confirmedBalanceChanged', this._onWalletConfirmedBalanceChanged)
       wallet.on('receiveAddressChanged', this._onWalletReceiveAddressChanged)
@@ -352,7 +352,7 @@ class UIStore {
         '',
         launchExternalTxViewer
       )
-
+      
     }
 
   })
