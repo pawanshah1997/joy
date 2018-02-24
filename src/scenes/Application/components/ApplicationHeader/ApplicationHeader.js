@@ -156,8 +156,6 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
   
       <div style={style.spacer} />
   
-      <div style={style.seperator} />
-  
       <WalletPanel
         applicationNavigationStore={applicationNavigationStore}
         
