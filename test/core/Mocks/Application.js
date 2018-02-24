@@ -43,7 +43,7 @@ class MockApplication extends EventEmitter {
    */
   torrents
   
-  constructor(state, onboardingTorrents, onboardingIsEnabled) {
+  constructor(state, onboardingTorrents, onboardingIsEnabled, opts = {}) {
     super()
     
     this.state = state
@@ -52,24 +52,17 @@ class MockApplication extends EventEmitter {
     this.onboardingTorrents = onboardingTorrents
     this.onboardingIsEnabled = onboardingIsEnabled
     this.torrents = new Map()
+    
+    this.start = opts.start ? opts.start.bind(this) : sinon.spy()
+    this.stop = opts.stop ? opts.stop.bind(this) : sinon.spy()
+    this.addTorrent = opts.addTorrent ? opts.addTorrent.bind(this) : sinon.spy
+    this.removeTorrent = opts.removeTorrent ? opts.removeTorrent.bind(this) : sinon.spy()
+    this.addExampleTorrents = opts.addExampleTorrents ? opts.addExampleTorrents.bind(this) : sinon.spy()
   }
   
-  /**
-   * Public routines
-   */
-  
-  start = sinon.spy()
-  stop = sinon.spy()
-  addTorrent = sinon.spy()
-  removeTorrent = sinon.spy()
-  addExampleTorrents = sinon.spy()
-  
-  resetAllSpies() {
-    start.reset()
-    stop.reset()
-    addTorrent.reset()
-    removeTorrent.reset()
-    addExampleTorrents.reset()
+  setState(state) {
+    this.state = state
+    this.emit('state', state)
   }
 }
 
