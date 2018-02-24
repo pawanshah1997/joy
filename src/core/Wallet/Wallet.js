@@ -60,7 +60,7 @@ class Wallet extends EventEmitter {
     /**
      * Ready to do all core functions, including stopping.
      */
-    STARTED : 7,
+    STARTED : 5,
 
     /**
      * Stopping wallet
@@ -68,13 +68,13 @@ class Wallet extends EventEmitter {
      * as during starting, as its not so important to keep
      * track of stopping process,
      */
-    STOPPING : 8,
+    STOPPING : 6,
 
     /**
      * Some catastrophic error occured, from which one cannot recover.
      * It is described in error property. No actions are valid at this point.
      */
-    CATASTROPHIC_ERROR : 9
+    CATASTROPHIC_ERROR : 7
   }
 
   /**
