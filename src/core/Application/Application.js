@@ -205,7 +205,7 @@ class Application extends EventEmitter {
    */
 
   start(config, appDirectory, onStarted = () => {} ) {
-    
+
     debug('starting')
 
     // Make sure we can start
@@ -287,7 +287,7 @@ class Application extends EventEmitter {
     // Make sure some download folder actually exists, which
     // may not be the case on the first run
     let downloadFolder = this.applicationSettings.downloadFolder()
-    
+
     mkdirp(downloadFolder, null, (err) => {
 
       if(err)
@@ -344,7 +344,7 @@ class Application extends EventEmitter {
 
     db.open(torrentDatabaseFolder)
       .then((torrentDatabase) => {
-        
+
         // Hold on to torrent database
         this._torrentDatabase = torrentDatabase
 
@@ -416,19 +416,19 @@ class Application extends EventEmitter {
      * more time in this now, see here for proper redo.
      * https://github.com/JoyStream/joystream-desktop/issues/714
      */
-    
+
     if(this.torrents.size === 0)
       onAllTorrentsGone.bind(this)()
     else {
       // Add terminated handler for each torrent
       this.torrents.forEach((torrent, infoHash) => {
-        
+
         // If torrent is already stopping, then we
         if(torrent.isTerminating()) {
-  
+
           // then we just ignore it,
           debug('Ignoring initiating termination of this torrent, because its already being terminated: ' + torrent.name)
-  
+
           /**
            * and when its actually removed, we detect this through the
            * public interface. The reason we use the public interface,
@@ -437,19 +437,19 @@ class Application extends EventEmitter {
            * we are doing in `Application.removeTorrent`
            */
           this.on('torrentRemoved', (infoHashOfRemovedTorrent) => {
-            
+
             if(infoHashOfRemovedTorrent === infoHash)
               onTorrentTerminated.bind(this)()
           })
-          
+
         } else {
-  
+
           let encodedTorrentSettings
-  
+
           torrent.once('Terminated', () => {
-    
+
             assert(this.state === Application.STATE.STOPPING)
-    
+
             /**
              * Remove the torrent from the session
              *
@@ -458,11 +458,11 @@ class Application extends EventEmitter {
              * addTorrent scenario
              */
             this._joystreamNodeSession.removeTorrent(infoHash, (err) => {
-      
+
               assert(!err)
-      
+
             })
-            
+
             assert(encodedTorrentSettings)
 
             this._torrentDatabase.save('torrents', infoHash, encodedTorrentSettings)
@@ -480,88 +480,88 @@ class Application extends EventEmitter {
                 onTorrentTerminated.bind(this)()
 
               })
-    
+
           })
-          
+
           // otherwise, if its loading
           if(torrent.state.startsWith('Loading')) {
-            
+
             debug('Torrent is being loaded, hence we wait until its done before we initiate termination: ' + torrent.name)
-    
+
             // then we first wait for it to finish loading
             // before asking it to terminate
             torrent.once('loaded', () => {
-  
+
               terminateLoadedTorrent(torrent)
             })
-    
+
           } else {
-            
+
             // otherwise if its not just loading,
             // then its active - which is the most frequent scenario,
             // and we can ask it it terminate immediately
             terminateLoadedTorrent(torrent)
 
           }
-          
+
           function terminateLoadedTorrent(torrent) {
-  
+
             encodedTorrentSettings = encodeTorrentSettings(torrent)
-  
+
             assert(torrent.state.startsWith('Active'))
-  
+
             debug('Initiating termination of torrent: ' + torrent.name)
-  
+
             torrent._terminate()
-            
+
           }
-          
+
         }
-        
+
       })
 
     }
 
     function onTorrentTerminated() {
-      
+
       // if this was the last one, then we are done
       // terminating torrents!
       if(this.torrents.size === 0)
         onAllTorrentsGone.bind(this)()
     }
-    
+
     function onAllTorrentsGone() {
-      
+
       assert(this.torrents.size === 0)
-      
+
       this._torrentDatabase.close((err) => {
-    
+
         assert(!err)
-    
+
         this._stoppedResource(Application.RESOURCE.STORED_TORRENTS, onStopped)
       })
-  
+
       /**
        * Stop Joystream node session
        */
-  
+
       this._joystreamNodeSession.pauseLibtorrent((err) => {
-    
+
         assert(!err)
-    
+
         clearInterval(this._torrentUpdateInterval)
         this._joystreamNodeSession = null
         this._torrentUpdateInterval = null
-    
+
         this._stoppedResource(Application.RESOURCE.JOYSTREAM_NODE_SESSION, onStopped)
       })
-      
+
     }
 
     /**
      * Application settings
      */
-    
+
     // Count session
     let numberOfPriorSessions = this.applicationSettings.numberOfPriorSessions()
 
@@ -591,24 +591,24 @@ class Application extends EventEmitter {
 
       this._stoppedResource(Application.RESOURCE.WALLET, onStopped)
     })
-    
+
     // Check if the wallet is not yet started, if so
     if(this.wallet.state !== Wallet.STATE.STARTED) {
-      
+
       debug('Delaying stopping wallet until it has actually started.')
-      
+
       // then it must mean its still starting
       //assert(this.wallet.state === Wallet.STATE.<lots of states here>)
-      
+
       // and we have to wait until its ready, before we try
       // to stop
       this.wallet.once('started', () => {
-        
+
         debug('Now we can finally stop wallet.')
-        
+
         this.wallet.stop()
       })
-      
+
     } else
       this.wallet.stop()
   }
@@ -723,7 +723,7 @@ class Application extends EventEmitter {
   }
 
   _onTorrentAddedToSession(settings, joystreamNodeTorrent) {
-    
+
     const infoHash = settings.infoHash
 
     // Create new torrent
@@ -740,7 +740,7 @@ class Application extends EventEmitter {
 
         assert(this.wallet.state === Wallet.STATE.STARTED)
 
-        return this.wallet.getAddress().getHash()
+        return this.wallet.receiveAddress.getHash()
       },
 
       //contractGenerator
@@ -754,15 +754,14 @@ class Application extends EventEmitter {
           outputs.push(bcoin.output.fromRaw(contractOutputs[i]))
         }
 
-        return this.wallet.send({
-          sort: false,
-          outputs: outputs,
-          rate: contractFeeRate
-        }).then((transaction) => {
-          console.log('Contract TX:', transaction.toRaw().toString('hex'))
-          console.log('Contract TX ID:', transaction.txid())
-          return transaction.toRaw()
-        })
+        const note = 'Contract to buy: ' + torrent.name
+
+        return this.wallet.createAndSendPaidDownloadingContract(outputs, contractFeeRate, note)
+          .then((transaction) => {
+            console.log('Contract TX:', transaction.toRaw().toString('hex'))
+            console.log('Contract TX ID:', transaction.txid())
+            return transaction.toRaw()
+          })
       },
 
       // broadcastRawTransaction
@@ -791,7 +790,7 @@ class Application extends EventEmitter {
     assert(!this.torrents.has(infoHash))
 
     this.torrents.set(infoHash, torrent)
-    
+
     // Tell torrent about result
     torrent._addedToSession(joystreamNodeTorrent)
 
@@ -821,16 +820,16 @@ class Application extends EventEmitter {
       onRemoved('No torrent added corresponding to given hash')
       return
     }
-    
+
     // Make sure torrent is not in the process or being
     // added or removed
     if(!torrent.state.startsWith('Active')) {
       onRemoved('Can only remove torrent when its active, not while its being added or removed.')
       return
     }
-    
+
     torrent.once('Terminated', () => {
-      
+
       /**
        * Remove the torrent from the session
        *
@@ -839,36 +838,36 @@ class Application extends EventEmitter {
        * addTorrent scenario
        */
       this._joystreamNodeSession.removeTorrent(infoHash, (err) => {
-    
+
         assert(!err)
-    
+
       })
-      
+
       // Remove the torrent from the db
       this._torrentDatabase.remove('torrents', infoHash)
         .then(() => {})
         .catch(() => { console.log('Removing torrent from database failed.')})
-  
+
       // Delete torrent from the this map,
       this.torrents.delete(infoHash)
-      
+
       // If deleteData we want to remove the folder/file
       if (deleteData) {
         let fullPath = path.join(torrent.savePath, torrent.name, path.sep)
         shell.moveItemToTrash(fullPath)
       }
-  
+
       // Emit event
       this.emit('torrentRemoved', infoHash)
-  
+
       // Tell user about success
       onRemoved(null, true)
-      
+
     })
-    
+
     // Stop torrent
     torrent._terminate()
-    
+
   }
 
   _startedResource = (resource, onStarted) => {
@@ -878,16 +877,16 @@ class Application extends EventEmitter {
 
     // add to set of started resources
     this.startedResources.add(resource)
-    
+
     // tell the world
     this.emit('resourceStarted', resource)
     this.emit('startedResources', this.startedResources)
-  
+
     // If all resources have started, then we are done!
     if(this.startedResources.size === Application.NUMBER_OF_RESOURCE_TYPES) {
-    
+
       this._setState(Application.STATE.STARTED)
-    
+
       // Make callback to user
       onStarted(null, true)
     }
@@ -903,15 +902,15 @@ class Application extends EventEmitter {
 
     // what about the fact that we never take wallet out?!
     // how can we be symmetric here in that case?
-    
+
     // tell the world
     this.emit('resourceStopped', resource)
     this.emit('startedResources', this.startedResources)
-  
+
     // If all resources have stopped, then we are done!
     if(this.startedResources.size === 0) {
       this._setState(Application.STATE.STOPPED)
-    
+
       // Make user callback
       onStopped(null, true)
     }
@@ -929,7 +928,7 @@ class Application extends EventEmitter {
   }
 
   _totalWalletBalanceChanged = (balance) => {
-  
+
     debug('new total balance: ' + balance)
 
     if(this.state === Application.STATE.STARTED) {
@@ -980,7 +979,7 @@ class Application extends EventEmitter {
             console.error('Failed to parse example torrent file from data:', torrentFileName)
             return
           }
-          
+
           // Make settings for downloading with default settings
           let settings = {
             infoHash : torrentInfo.infoHash(),
@@ -993,7 +992,7 @@ class Application extends EventEmitter {
               buyerTerms: this.applicationSettings.defaultBuyerTerms()
             }
           }
-          
+
           this.addTorrent(settings, () => {
 
           })
@@ -1071,7 +1070,7 @@ function encodeTorrentSettings(torrent) {
 // TODO: Move this into Torrent class as a static member method
 function createStartingDownloadSettings(torrentInfo, savePath, buyerTerms) {
   const infoHash = torrentInfo.infoHash()
-  
+
   return
 }
 

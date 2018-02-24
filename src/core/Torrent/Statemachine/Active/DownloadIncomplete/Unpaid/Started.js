@@ -115,8 +115,8 @@ var Started = new BaseMachine({
                       contractFeeRate = sellerTerms.minContractFeePerKb
 
                   // Generate keys for buyer side of contract
-                  var buyerContractSk = client._generateContractPrivateKey()
-                  var buyerFinalPkHash = client._generatePublicKeyHash()
+                  var buyerContractSk = client._privateKeyGenerator()
+                  var buyerFinalPkHash = client._publicKeyHashGenerator()
 
                   // Add entry for seller in download information map
                   downloadInfoMap.set(status.pid, {
@@ -145,9 +145,11 @@ var Started = new BaseMachine({
               // Request construction and financing of the contract transaction
               client._contractGenerator(contractOutputs, contractFeeRate)
                 .then((tx) => {
+                  console.log('signing contract success')
                   client._submitInput('makeSignedContractResult', null, tx)
                 })
                 .catch((err) => {
+                  console.log('signing contract failed', err)
                   client._submitInput('makeSignedContractResult', err)
                 })
 

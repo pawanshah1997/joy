@@ -75,24 +75,24 @@ class Torrent extends EventEmitter {
    * {TorrentInfo}
    */
   torrentInfo
-  
+
   /**
    * {Number} Progress on torrent, referring to either progress
    * during checking resume data while starting, or download progress
    * otherwise.
    */
   progress
-  
+
   /**
    * {Number} Number of bytes downloaded so far
    */
   downloadedSize
-  
+
   /**
    * {Number} Bytes per second download rate
    */
   downloadSpeed
-  
+
   /**
    * {Number} Bytes per second upload rate
    */
@@ -104,12 +104,12 @@ class Torrent extends EventEmitter {
    * we should put information on each peer.
    */
   numberOfSeeders
-  
+
   /**
    * {Number} Bytes uploaded so far
    */
   uploadedTotal
-  
+
   /**
    * {SellerTerms}
    */
@@ -137,7 +137,7 @@ class Torrent extends EventEmitter {
    * NB: Only one allowed at a time
    */
   fileSegmentStreamFactory
-  
+
   constructor(settings, privateKeyGenerator, publicKeyHashGenerator, contractGenerator, broadcastRawTransaction) {
 
     super()
@@ -155,28 +155,28 @@ class Torrent extends EventEmitter {
     this.uploadSpeed = 0
     this.numberOfSeeders = 0
     this.uploadedTotal = 0
-    
+
     this.peers = new Map()
     this.viabilityOfPaidDownloadInSwarm = new ViabilityOfPaidDownloadingSwarm.NoJoyStreamPeerConnections()
-    
+
     // Check that compatibility in deepInitialState and {buyerTerms, sellerTerms},
     // and store terms on client
     if(isDownloading(settings.deepInitialState)) {
-    
+
       if(settings.extensionSettings.buyerTerms)
         this.buyerTerms = settings.extensionSettings.buyerTerms
       else
         throw Error('DownloadIncomplete state requires buyer terms')
-    
+
     } else if(isUploading(settings.deepInitialState)) {
-    
+
       if(settings.extensionSettings.sellerTerms)
         this.sellerTerms = settings.extensionSettings.sellerTerms
       else
         throw Error('Uploading state requires seller terms')
-    
+
     }
-    
+
     this._joystreamNodeTorrent = null
     this.fileSegmentStreamFactory = null
 
@@ -204,9 +204,9 @@ class Torrent extends EventEmitter {
       this.emit('state', stateString)
       this.emit(stateString, data)
     })
-    
+
   }
-  
+
   start() {
     this._submitInput('start')
   }
@@ -227,14 +227,13 @@ class Torrent extends EventEmitter {
     this._submitInput('missingBuyerTermsProvided', buyerTerms)
   }
 
-  startPaidDownload(peerSorter, fn) {
-
+  startPaidDownload(cb = () => {}) {
     /**
      * API HACK
      * https://github.com/JoyStream/joystream-desktop/issues/665
      */
 
-    this._submitInput('startPaidDownload', peerSorter)
+    this._submitInput('startPaidDownload', cb)
   }
 
   beginUpload(sellerTerms){
@@ -295,7 +294,7 @@ class Torrent extends EventEmitter {
   deepInitialState() {
     return deepInitialStateFromActiveState(this.state)
   }
-  
+
   isTerminating() {
     return this.state.startsWith('StoppingExtension') ||
       this.state.startsWith('GeneratingResumeData')
@@ -341,39 +340,39 @@ class Torrent extends EventEmitter {
     this.torrentInfo = torrentInfo
     this.emit('torrentInfo', torrentInfo)
   }
-  
+
   _setProgress(progress) {
     this.progress = progress
     this.emit('progress', progress)
   }
-  
+
   _setDownloadedSize(downloadedSize) {
     this.downloadedSize = downloadedSize
     this.emit('downloadedSize', downloadedSize)
   }
-  
+
   _setDownloadSpeed(downloadSpeed) {
     this.downloadSpeed = downloadSpeed
     this.emit('downloadSpeed', downloadSpeed)
   }
-  
+
   _setUploadedTotal(uploadedTotal) {
     this.uploadedTotal = uploadedTotal
     this.emit('uploadedTotal', uploadedTotal)
   }
-  
+
   _setUploadSpeed(uploadSpeed) {
     this.uploadSpeed = uploadSpeed
     this.emit('uploadSpeed', uploadSpeed)
   }
-  
+
   _setNumberOfSeeders(numberOfSeeders) {
     this.numberOfSeeders = numberOfSeeders
     this.emit('numberOfSeeders', numberOfSeeders)
   }
 
   _setJoystreamNodeTorrentStatus(status) {
-  
+
     this._setProgress(status.progress)
     this._setDownloadedSize(status.totalDone)
     this._setDownloadSpeed(status.downloadRate)

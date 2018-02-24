@@ -247,8 +247,8 @@ describe('Torrent state machine', function () {
 
           assert(!startDownloadCallback.called)
 
-          assert(client._generateContractPrivateKey.called)
-          assert(client._generatePublicKeyHash.called)
+          assert(client._privateKeyGenerator.called)
+          assert(client._publicKeyHashGenerator.called)
           assert(client._contractGenerator.called)
 
           assert.equal(Torrent.compositeState(client), 'Active.DownloadIncomplete.Unpaid.Started.SigningContract')
@@ -458,11 +458,11 @@ function MockClient(fix) {
       this.viabilityOfPaidDownloadInSwarm = viability
     })
 
-    this._generateContractPrivateKey = sinon.spy(function () {
+    this._privateKeyGenerator = sinon.spy(function () {
       return [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1]
     })
 
-    this._generatePublicKeyHash = sinon.spy(function () {
+    this._publicKeyHashGenerator = sinon.spy(function () {
       return new Buffer(20)
     })
 
