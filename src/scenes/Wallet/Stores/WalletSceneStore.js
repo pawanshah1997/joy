@@ -82,7 +82,7 @@ class WalletSceneStore {
       throw new Error('Dialog already visible')
 
     // Create store for receive dialog
-    let store = new ReceiveDialogStore(this)
+    let store = new ReceiveDialogStore(this, this._walletStore)
 
     this.setVisibleDialog(store)
   }
