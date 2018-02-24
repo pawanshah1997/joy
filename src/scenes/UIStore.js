@@ -307,7 +307,7 @@ class UIStore {
       // Create walletStore
       assert(!this.applicationStore.walletStore)
 
-      this.applicationStore.walletStore = new WalletStore(
+      let walletStore = new WalletStore(
         wallet.state,
         wallet.totalBalance,
         wallet.confirmedBalance,
@@ -317,6 +317,8 @@ class UIStore {
         [],
         wallet.pay.bind(wallet)
       )
+  
+      this.applicationStore.setWalletStore(walletStore)
 
       // Hook into events
       wallet.on('stateChanged', this._onWalletStateChanged)
