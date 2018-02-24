@@ -38,9 +38,15 @@ var Torrent = new BaseMachine({
 
               client._generateResumeDataOnTermination = generateResumeData
 
-              Common.stopExtension(client)
-
-              this.transition(client, 'StoppingExtension')
+              // only stop extension if torrent is in a state where it would be started
+              // NB: A safer way to do this would be to implement a 'terminate' handler in each child state
+              // accordingly
+              if (Torrent.compositeState(client).endsWith('.Started')) {
+                Common.stopExtension(client)
+                this.transition(client, 'StoppingExtension')
+              } else {
+                this.transition(client, 'Terminated')
+              }
             },
 
             processPeerPluginStatuses: function (client, statuses) {
