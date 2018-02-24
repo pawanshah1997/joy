@@ -304,8 +304,8 @@ class PaymentRow extends Component {
 
         <div style={styles.dateField}>
           <div style={styles.dateContainer}>
-            <div style={styles.month}>{toMonthString(date.getMonth())}</div>
-            <div style={styles.day}>{date.getDate()}</div>
+            <div style={styles.month}>{date ? toMonthString(date.getMonth()) : null}</div>
+            <div style={styles.day}>{date ? date.getDate() : null}</div>
           </div>
         </div>
 
