@@ -42,11 +42,11 @@ class TorrentTableRowStore {
   }
 
   remove() {
-    this._applicationStore.remove(this.torrentStore.infoHash, false)
+    this._applicationStore.removeTorrent(this.torrentStore.infoHash, false, () => {})
   }
 
   removeAndDeleteData() {
-    this._applicationStore.remove(this.torrentStore.infoHash, true)
+    this._applicationStore.removeTorrent(this.torrentStore.infoHash, true, () => {})
   }
 
   openFolder() {
