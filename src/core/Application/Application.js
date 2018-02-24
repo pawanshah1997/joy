@@ -182,7 +182,8 @@ class Application extends EventEmitter {
 
 
     this._enableOnboardingIfFirstRun = enableOnboardingIfFirstRun
-    this._walletTopUpOptions = walletTopUpOptions
+    // Disable wallet topUp if not specified
+    this._walletTopUpOptions = walletTopUpOptions || new WalletTopUpOptions(true, 20000)
     this._torrentDatabase = null
 
     // setInterval reference for polling joystream-node session for
