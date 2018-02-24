@@ -61,7 +61,7 @@ class WalletSceneStore {
 
     // Create dialog store
 
-    let cryptoToFiatExchangeRate = parseFloat(this.priceFeedStore.cryptoToUsdExchangeRate)
+    let cryptoToFiatExchangeRate = parseFloat(this._priceFeedStore.cryptoToUsdExchangeRate)
     let paymentFailureErrorMessage = ''
     let minimumPaymentAmount = 0 // pass in dust limit
 
