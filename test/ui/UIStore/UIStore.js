@@ -4,7 +4,7 @@ import 'babel-polyfill'
 
 import Application from '../../../src/core/Application'
 import UIStore from '../../../src/scenes/UIStore'
-import MockApplication from './MockApplication'
+import {MockApplication} from '../../core/Mocks'
 var expect = require('chai').expect
 
 describe('UIStore', function() {
@@ -13,7 +13,7 @@ describe('UIStore', function() {
   
   it('is constructible', function () {
     
-    mockApplication = new MockApplication(Application.STATE.STOPPED)
+    mockApplication = new MockApplication(Application.STATE.STOPPED, [], true)
     uiStore = new UIStore(mockApplication)
     
     expect(uiStore.currentPhase).to.be.equal(UIStore.PHASE.Idle)
