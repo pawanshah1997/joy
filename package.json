@@ -58,7 +58,7 @@
     "xvfb-maybe": "^0.2.1"
   },
   "dependencies": {
-    "react-hot-loader": "^4.0.0-beta.6",
+    "react-hot-loader": "^3.0.0-beta.6",
     "babel-polyfill": "^6.23.0",
     "bcoin": "1.0.0-beta.12",
     "bitcoin-convert": "^1.0.4",
