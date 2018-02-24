@@ -2,6 +2,7 @@
 import { observable, action } from 'mobx'
 import {computed} from 'mobx/lib/mobx'
 import {indexesOfPlayableFiles} from './utils'
+import {shell} from 'electron'
 
 /**
  * Model for row in downloading table
