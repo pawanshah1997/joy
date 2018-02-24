@@ -206,7 +206,10 @@ class ApplicationStore {
     // Hold on to user callback
     this._pendingRemoveTorrentCallsMap.set(infoHash, onTorrentRemoved)
 
-    this._torrentRemover(infoHash, deleteData, this.onTorrentRemoved)
+    this._torrentRemover(infoHash, deleteData, (err) => {
+      // Don't do anything here.. application will emit 'torrentRemoved', which is handled by UIStore
+      // which will in turn call this.onTorrentRemoved()
+    })
   }
 
   @action.bound
