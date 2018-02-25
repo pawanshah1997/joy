@@ -7,6 +7,7 @@ import TorrentStatus from './TorrentStatus'
 import TorrentHandle from './TorrentHandle'
 import Torrent from './Torrent'
 import MockApplication from './Application'
+import MockWallet from './Wallet'
 
 // export all mocks
 export {
@@ -18,5 +19,6 @@ export {
   TorrentInfo,
   TorrentStatus,
   FileStorage,
-  MockApplication
+  MockApplication,
+  MockWallet
 }

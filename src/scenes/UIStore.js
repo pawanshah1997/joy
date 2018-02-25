@@ -296,7 +296,7 @@ class UIStore {
       }))
 
     } else if(resource === Application.RESOURCE.WALLET) {
-
+      
       /**
        * Create and setup wallet store
        */
@@ -307,7 +307,7 @@ class UIStore {
       // Create walletStore
       assert(!this.applicationStore.walletStore)
 
-      this.applicationStore.walletStore = new WalletStore(
+      let walletStore = new WalletStore(
         wallet.state,
         wallet.totalBalance,
         wallet.confirmedBalance,
@@ -317,9 +317,11 @@ class UIStore {
         [],
         wallet.pay.bind(wallet)
       )
+  
+      this.applicationStore.setWalletStore(walletStore)
 
       // Hook into events
-      wallet.on('stateChanged', this._onWalletStateChanged)
+      wallet.on('state', this._onWalletStateChanged)
       wallet.on('totalBalanceChanged', this._onWalletTotalBalanceChanged)
       wallet.on('confirmedBalanceChanged', this._onWalletConfirmedBalanceChanged)
       wallet.on('receiveAddressChanged', this._onWalletReceiveAddressChanged)
@@ -350,7 +352,7 @@ class UIStore {
         '',
         launchExternalTxViewer
       )
-
+      
     }
 
   })

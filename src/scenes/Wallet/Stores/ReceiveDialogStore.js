@@ -16,8 +16,9 @@ class ReceiveDialogStore {
    * Constructor
    * @param {WalletSceneStore} walletSceneStore -
    */
-  constructor(walletSceneStore, showAddressAsQRCode) {
+  constructor(walletSceneStore, walletStore, showAddressAsQRCode) {
     this._walletSceneStore = walletSceneStore
+    this._walletStore = walletStore
 
     this.setShowAddressAsQRCode(showAddressAsQRCode)
   }
@@ -42,7 +43,7 @@ class ReceiveDialogStore {
    */
   @computed get
   receiveAddress() {
-    return this._walletSceneStore.walletStore.receiveAddress.toString()
+    return this._walletStore.receiveAddress.toString()
   }
 
   @action.bound
