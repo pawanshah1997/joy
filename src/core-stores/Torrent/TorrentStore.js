@@ -1,46 +1,47 @@
 import { observable, action, computed } from 'mobx'
+import Torrent from '../../core/Torrent'
 
 class TorrentStore {
 
     @observable infoHash
     @observable name
     @observable state
-    
+
     @observable totalSize
 
     /**
      * {String} Path where torrent data is saved and or read from
      */
     @observable savePath
-  
+
     /**
      * {SellerTerms} Terms when selling
      */
     @observable sellerTerms
-  
+
   /**
    * {Number} Total number of pieces sold by us as a seller this
    * session
    */
   @observable numberOfPiecesSoldAsSeller
-  
+
   /**
    * {Number} Total revenue so far from spending, does not include
    * tx fees for closing channel (they are deducted).
    */
   @observable totalRevenueFromPiecesAsSeller
-  
+
     /**
      * {BuyerTerms} Terms when buying
      */
     @observable buyerTerms
-  
+
     /**
      * {Number} The total amount (sats) sent as payments so far,
      * does not include tx fees used to open and close channel.
      */
     @observable totalSpendingOnPiecesAsBuyer
-    
+
     /**
      * {Number} Current progress of torrent processing. While downloading,
      * this refers to completion rate, while checking resume
@@ -56,7 +57,7 @@ class TorrentStore {
     @observable downloadedSize
     @observable downloadSpeed
     @observable uploadSpeed
-  
+
     /**
      * {Number} Number of peers classified as seeders (by libtorrent)
      */
@@ -123,7 +124,7 @@ class TorrentStore {
       this.setTotalRevenueFromPiecesAsSeller(totalRevenueFromPiecesAsSeller)
       this.setBuyerTerms(buyerTerms)
       this.setTotalSpendingOnPiecesAsBuyer(totalSpendingOnPiecesAsBuyer)
-      
+
       this.peerStores = new Map()
 
       this._starter = starter
@@ -207,7 +208,7 @@ class TorrentStore {
     setNumberOfPiecesSoldAsSeller (numberOfPiecesSoldAsSeller) {
         this.numberOfPiecesSoldAsSeller = numberOfPiecesSoldAsSeller
     }
-    
+
     @action.bound
     setTotalRevenueFromPiecesAsSeller(totalRevenueFromPiecesAsSeller) {
       this.totalRevenueFromPiecesAsSeller = totalRevenueFromPiecesAsSeller
@@ -241,7 +242,7 @@ class TorrentStore {
 
     @computed get
     isTerminating() {
-        return this.state.startsWith('Terminating')
+      return Torrent.isTerminating(this.state)
     }
 
     @computed get canChangeBuyerTerms () {
