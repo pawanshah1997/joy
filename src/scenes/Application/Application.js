@@ -168,6 +168,12 @@ const StartedApp = observer((props) => {
       assert(false)
   }
   
+  let onTorrentScene = (
+    props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Downloading ||
+    props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Uploading ||
+    props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Completed
+  )
+  
   return (
     <div style={styles.root}>
 
@@ -175,16 +181,12 @@ const StartedApp = observer((props) => {
       <WelcomeScreen onBoardingStore={props.UIStore.onboardingStore} />
       <DepartureScreen onBoardingStore={props.UIStore.onboardingStore} />
       
-      <ApplicationStatusBar startingTorrentCheckingProgressPercentage={props.UIStore.torrentsFullyLoadedPercentage}
+      <ApplicationStatusBar startingTorrentCheckingProgressPercentage={props.UIStore.startingTorrentCheckingProgressPercentage}
                             show=
                               {
-                                props.UIStore.torrentsBeingLoaded > 0
+                                props.UIStore.torrentsBeingLoaded.length > 0
                               &&
-                                (
-                                  props.UIStore.applicationNavigationStore.activeTab === UIStore.TAB.Downloading ||
-                                  props.UIStore.applicationNavigationStore.activeTab === UIStore.TAB.Uploading ||
-                                  props.UIStore.applicationNavigationStore.activeTab === UIStore.TAB.Completed
-                                )
+                                onTorrentScene
                               }
       />
       
