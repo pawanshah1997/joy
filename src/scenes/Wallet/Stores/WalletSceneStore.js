@@ -61,7 +61,7 @@ class WalletSceneStore {
 
     // Create dialog store
 
-    let cryptoToFiatExchangeRate = parseFloat(this.priceFeedStore.cryptoToUsdExchangeRate)
+    let cryptoToFiatExchangeRate = parseFloat(this._priceFeedStore.cryptoToUsdExchangeRate)
     let paymentFailureErrorMessage = ''
     let minimumPaymentAmount = 0 // pass in dust limit
 
@@ -82,7 +82,7 @@ class WalletSceneStore {
       throw new Error('Dialog already visible')
 
     // Create store for receive dialog
-    let store = new ReceiveDialogStore(this)
+    let store = new ReceiveDialogStore(this, this._walletStore)
 
     this.setVisibleDialog(store)
   }

@@ -301,8 +301,6 @@ describe('Application', function() {
       
       // Add to session
       application.addTorrent(settings, (err, torrent) => {
-      
-        console.log('do we get here')
         
         expect(err).to.be.null
   

@@ -296,8 +296,11 @@ class Torrent extends EventEmitter {
   }
 
   isTerminating() {
-    return this.state.startsWith('StoppingExtension') ||
-      this.state.startsWith('GeneratingResumeData')
+    return Torrent.isTerminating(this.state)
+  }
+
+  static isTerminating (state) {
+    return state.startsWith('StoppingExtension') || state.startsWith('GeneratingResumeData')
   }
 
   _addedToSession(torrent) {
@@ -394,6 +397,5 @@ class Torrent extends EventEmitter {
   }
 
 }
-
 
 export default Torrent

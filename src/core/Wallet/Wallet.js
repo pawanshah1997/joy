@@ -10,7 +10,7 @@ const bcoin = require('bcoin')
 
 /**
 * Wallet
-* @emits stateChanged(Wallet.STATE) wallet state changed
+* @emits state(Wallet.STATE) wallet state changed
 * @emits stopped
 * @emits opening-spv-node
 * @emits getting-wallet
@@ -60,7 +60,7 @@ class Wallet extends EventEmitter {
     /**
      * Ready to do all core functions, including stopping.
      */
-    STARTED : 7,
+    STARTED : 5,
 
     /**
      * Stopping wallet
@@ -68,13 +68,13 @@ class Wallet extends EventEmitter {
      * as during starting, as its not so important to keep
      * track of stopping process,
      */
-    STOPPING : 8,
+    STOPPING : 6,
 
     /**
      * Some catastrophic error occured, from which one cannot recover.
      * It is described in error property. No actions are valid at this point.
      */
-    CATASTROPHIC_ERROR : 9
+    CATASTROPHIC_ERROR : 7
   }
 
   /**
@@ -194,7 +194,7 @@ class Wallet extends EventEmitter {
 
     /// Open SPV Node
 
-    this._changeState(Wallet.STATE.OPENING_SPV_NODE)
+    this._setState(Wallet.STATE.OPENING_SPV_NODE)
 
     try {
 
@@ -214,7 +214,7 @@ class Wallet extends EventEmitter {
     } catch(err) {
 
       this.catastrophicErrorMessage = 'Could not open SPVNode: ' + err
-      this._changeState(Wallet.STATE.CATASTROPHIC_ERROR)
+      this._setState(Wallet.STATE.CATASTROPHIC_ERROR)
 
       return Wallet.STATE.CATASTROPHIC_ERROR
     }
@@ -227,7 +227,7 @@ class Wallet extends EventEmitter {
 
     /// Get wallet
 
-    this._changeState(Wallet.STATE.GETTING_WALLET)
+    this._setState(Wallet.STATE.GETTING_WALLET)
 
     try {
 
@@ -243,7 +243,7 @@ class Wallet extends EventEmitter {
 
     } catch(err) {
       this.catastrophicErrorMessage = 'Could not get wallet: ' + err
-      this._changeState(Wallet.STATE.CATASTROPHIC_ERROR)
+      this._setState(Wallet.STATE.CATASTROPHIC_ERROR)
 
       return Wallet.STATE.CATASTROPHIC_ERROR
     }
@@ -285,7 +285,7 @@ class Wallet extends EventEmitter {
 
     /// Get balance
 
-    this._changeState(Wallet.STATE.GETTING_BALANCE)
+    this._setState(Wallet.STATE.GETTING_BALANCE)
 
     let balance
 
@@ -301,7 +301,7 @@ class Wallet extends EventEmitter {
 
     } catch(err) {
       this.catastrophicErrorMessage = 'Could not get balance: ' + err
-      this._changeState(Wallet.STATE.CATASTROPHIC_ERROR)
+      this._setState(Wallet.STATE.CATASTROPHIC_ERROR)
 
       return Wallet.STATE.CATASTROPHIC_ERROR
     }
@@ -311,7 +311,7 @@ class Wallet extends EventEmitter {
 
     /// Connect to peer network
 
-    this._changeState(Wallet.STATE.CONNECTING_TO_NETWORK)
+    this._setState(Wallet.STATE.CONNECTING_TO_NETWORK)
 
     try {
 
@@ -327,7 +327,7 @@ class Wallet extends EventEmitter {
 
     } catch(err) {
       this.catastrophicErrorMessage = 'Could not connect to network: ' + err
-      this._changeState(Wallet.STATE.CATASTROPHIC_ERROR)
+      this._setState(Wallet.STATE.CATASTROPHIC_ERROR)
 
       return Wallet.STATE.CATASTROPHIC_ERROR
     }
@@ -340,7 +340,7 @@ class Wallet extends EventEmitter {
     this._scanNewTransactionsForPayments()
 
     /// Mark as started
-    this._changeState(Wallet.STATE.STARTED)
+    this._setState(Wallet.STATE.STARTED)
 
     return Wallet.STATE.STARTED
   }
@@ -416,7 +416,7 @@ class Wallet extends EventEmitter {
 
     /// Stopping
 
-    this._changeState(Wallet.STATE.STOPPING)
+    this._setState(Wallet.STATE.STOPPING)
 
     try {
 
@@ -441,7 +441,7 @@ class Wallet extends EventEmitter {
     } catch(err) {
 
       this.catastrophicErrorMessage = 'Could stop wallet: ' + err
-      this._changeState(Wallet.STATE.CATASTROPHIC_ERROR)
+      this._setState(Wallet.STATE.CATASTROPHIC_ERROR)
 
       return Wallet.STATE.CATASTROPHIC_ERROR
 
@@ -449,7 +449,7 @@ class Wallet extends EventEmitter {
 
     /// Mark as stopped
 
-    this._changeState(Wallet.STATE.STOPPED)
+    this._setState(Wallet.STATE.STOPPED)
 
     return Wallet.STATE.STOPPED
   }
@@ -565,18 +565,7 @@ class Wallet extends EventEmitter {
 
     return this._spvNode.broadcast(tx)
   }
-
-  _changeState(state) {
-
-    this.state = state
-    this.emit('stateChanged', this.state)
-    this.emit(stateToString(this.state))
-
-    // Some helpful logging in case there was a serious error
-    if(this.state === Wallet.STATE.CATASTROPHIC_ERROR)
-      console.log(this.catastrophicErrorMessage)
-  }
-
+  
   /**
    * Process
    * @param {TX} tx
@@ -758,6 +747,17 @@ class Wallet extends EventEmitter {
 
     return paymentsInTx
 
+  }
+  
+  _setState(state) {
+    
+    this.state = state
+    this.emit('state', this.state)
+    this.emit(stateToString(this.state))
+    
+    // Some helpful logging in case there was a serious error
+    if(this.state === Wallet.STATE.CATASTROPHIC_ERROR)
+      console.log(this.catastrophicErrorMessage)
   }
 
   _setScanningNewTransactionsForPaymentsProgressPercentage(scanningNewTransactionsForPaymentsProgressPercentage) {

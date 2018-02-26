@@ -31,7 +31,7 @@ class ApplicationStore {
   /**
    * @propety {WalletStore} Store for wallet
    */
-  walletStore
+  @observable walletStore
 
   /**
    * @propety {PriceFeedStore}
@@ -115,6 +115,11 @@ class ApplicationStore {
   @action.bound
   setOnboardingIsEnabled(onboardingIsEnabled) {
     this.onboardingIsEnabled = onboardingIsEnabled
+  }
+  
+  @action.bound
+  setWalletStore(walletStore) {
+    this.walletStore = walletStore
   }
 
   @action.bound

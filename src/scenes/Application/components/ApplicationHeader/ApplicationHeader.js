@@ -94,13 +94,7 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
   
         <WalletButton
           selected={activeTab === ApplicationNavigationStore.TAB.Wallet}
-          onClick={() => {
-            
-            if(applicationNavigationStore.walletTabEnabled) {
-              applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Wallet)
-            }
-            
-          }}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Wallet) }}
           style={style.button}
           {...buttonColorProps}
         />
@@ -155,8 +149,6 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
       </ButtonGroup>
   
       <div style={style.spacer} />
-  
-      <div style={style.seperator} />
   
       <WalletPanel
         applicationNavigationStore={applicationNavigationStore}
