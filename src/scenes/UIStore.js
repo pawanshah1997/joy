@@ -468,7 +468,7 @@ class UIStore {
     }))
 
     torrent.on('progress', action((progress) => {
-      torrentStore.setProgress(progress)
+      torrentStore.setProgress(progress * 100)
     }))
 
     torrent.on('downloadedSize', action((downloadedSize) => {
