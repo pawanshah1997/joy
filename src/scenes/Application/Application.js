@@ -27,7 +27,7 @@ import Completed from '../Completed'
 import Community from '../Community'
 import VideoPlayerScene from '../VideoPlayer'
 import Wallet from '../Wallet'
-import { WelcomeScreen, DepartureScreen } from '../OnBoarding'
+import { WelcomeScreen, DepartureScreen } from '../Onboarding'
 
 function getStyles (props) {
   return {
