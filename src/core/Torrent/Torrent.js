@@ -227,14 +227,13 @@ class Torrent extends EventEmitter {
     this._submitInput('missingBuyerTermsProvided', buyerTerms)
   }
 
-  startPaidDownload(peerSorter, fn) {
-
+  startPaidDownload(cb = () => {}) {
     /**
      * API HACK
      * https://github.com/JoyStream/joystream-desktop/issues/665
      */
 
-    this._submitInput('startPaidDownload', peerSorter)
+    this._submitInput('startPaidDownload', cb)
   }
 
   beginUpload(sellerTerms){

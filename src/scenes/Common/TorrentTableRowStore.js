@@ -2,6 +2,7 @@
 import { observable, action } from 'mobx'
 import {computed} from 'mobx/lib/mobx'
 import {indexesOfPlayableFiles} from './utils'
+import {shell} from 'electron'
 
 /**
  * Model for row in downloading table
@@ -42,11 +43,11 @@ class TorrentTableRowStore {
   }
 
   remove() {
-    this._applicationStore.remove(this.torrentStore.infoHash, false)
+    this._applicationStore.removeTorrent(this.torrentStore.infoHash, false, () => {})
   }
 
   removeAndDeleteData() {
-    this._applicationStore.remove(this.torrentStore.infoHash, true)
+    this._applicationStore.removeTorrent(this.torrentStore.infoHash, true, () => {})
   }
 
   openFolder() {

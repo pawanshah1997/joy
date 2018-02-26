@@ -165,13 +165,13 @@ class Wallet extends EventEmitter {
     /// Hook into various SPVNode/Chain/Pool events
     /// NB: notice that we are emitting these unconditionally, we dont
     /// guard them with our own state, no clear need as of yet.
-    
+
     // Attach the walletdb plugin
     this._spvNode.use(bcoin.walletplugin)
-  
+
     // Disable http/rpc - to avoid any port conflict issues. Also more secure option
     this._spvNode.http = null
-  
+
     // Ask for the mempool after syncing is done
     overrideBcoinPoolHandleTxInv(this._spvNode.pool)
 
@@ -335,7 +335,7 @@ class Wallet extends EventEmitter {
     /// Initiate synchronization
 
     this._spvNode.startSync()
-    
+
     ///
     this._scanNewTransactionsForPayments()
 
@@ -346,9 +346,9 @@ class Wallet extends EventEmitter {
   }
 
   async _scanNewTransactionsForPayments() {
-    
+
     /// Getting new transactions
-    
+
     let transactionHistory = await this._wallet.getHistory()
 
     // Stop processing if wallet is stopping
@@ -356,7 +356,7 @@ class Wallet extends EventEmitter {
       return
 
     /// Scan new transactions for new paymentsInTransactionWithTXID
-    
+
     let numberOfTransactionsProcessed = 0
     for(var i = 0; i < transactionHistory.length;i++) {
 
@@ -364,18 +364,18 @@ class Wallet extends EventEmitter {
 
       // Get transaction details
       let txDetails = await this._wallet.getDetails(txRecord.hash)
-  
+
       // Stop processing if wallet is stopping
       if(this.state === Wallet.STATE.STOPPING || this.state === Wallet.STATE.STOPPED)
         return
-      
+
       this._processTxRecord(txRecord, txDetails)
         .then(() => {
-  
+
           numberOfTransactionsProcessed++
-          
+
           let processingPercentage = 100*numberOfTransactionsProcessed/transactionHistory.length
-  
+
           this._setScanningNewTransactionsForPaymentsProgressPercentage(processingPercentage)
         })
     }
@@ -455,6 +455,43 @@ class Wallet extends EventEmitter {
   }
 
   /**
+   * Create and send a contract transaction
+   * @param {Array.<bcoin.output>} outputs - contract commitment outputs
+   * @param {Number} satsPrkBFee - number of satoshis per kB.
+   * @param {String} note - note to be attached to the contract payment
+   * @return {Promise} - Returns {@link bcoin.tx}
+   */
+  async createAndSendPaidDownloadingContract (outputs, satsPrkBFee, note) {
+    // Check that we are indeed started
+    if(this.state !== Wallet.STATE.STARTED)
+      throw new Error('Cannot pay when wallet is not started.')
+
+    // Do validation that bcoin has hidden as assert, much easier+cleaner
+    // to guard here than wait for assert dump
+    if(!bcoin.util.isNumber(satsPrkBFee))
+      throw new Error('satsPrkBFee is not a valid number')
+
+    const tx = await this._wallet.send({
+      sort: false,
+      outputs: outputs,
+      rate: satsPrkBFee
+    })
+
+    // Recheck wallet state
+    if(this.state !== Wallet.STATE.STARTED) {
+      throw new Error('createAndSendPaidDownloadingContract call interrupted by wallet state changing.')
+    }
+
+    // // Process a transaction
+    // let payments = await this._processTx(tx)
+    //
+    // // There should be exactly one payment
+    // assert(payments.length === 1)
+
+    return tx
+  }
+
+  /**
    * Make a payment
    * @param {Hash} pubKeyHash - for destination
    * @param {Number} amount - number of satoshis
@@ -467,7 +504,7 @@ class Wallet extends EventEmitter {
     // Check that we are indeed started
     if(this.state !== Wallet.STATE.STARTED)
       throw new Error('Cannot pay when wallet is not started.')
-    
+
     // Do validation that bcoin has hidden as assert, much easier+cleaner
     // to guard here than wait for assert dump
     if(!bcoin.util.isNumber(satsPrkBFee))
@@ -686,7 +723,7 @@ class Wallet extends EventEmitter {
 
         // otherwise, lets refresh relevant payment properties
         paymentsInTx = this.paymentsInTransactionWithTXID.get(details.hash)
-        
+
         assert(paymentsInTx)
         assert(paymentsInTx.length > 0)
 
@@ -722,7 +759,7 @@ class Wallet extends EventEmitter {
     if(this.state === Wallet.STATE.CATASTROPHIC_ERROR)
       console.log(this.catastrophicErrorMessage)
   }
-  
+
   _setScanningNewTransactionsForPaymentsProgressPercentage(scanningNewTransactionsForPaymentsProgressPercentage) {
     this.scanningNewTransactionsForPaymentsProgressPercentage = scanningNewTransactionsForPaymentsProgressPercentage
     this.emit('scanningNewTransactionsForPaymentsProgressPercentage', scanningNewTransactionsForPaymentsProgressPercentage)
@@ -795,29 +832,29 @@ function stateToString(state) {
 function overrideBcoinPoolHandleTxInv (pool) {
   // bcoin's "co-routine" library
   var co = bcoin.co
-  
+
   // We are choosing to only override the instance method rather than the prototype
   pool.handleTXInv = co(function * handleTXInv (peer, hashes) {
-    
+
     // Make sure we only do this for spvnodes
     assert(pool.options.spv)
-    
+
     // Override bcoin pool normal behaviour in spv mode => Allow handling of incoming tx to mempool during syncing
     // This allows us to immedetialy start using unconfirmed balances and reflect it in the wallet
     // The consequence is that if the tx is mined into a block we will not learn about it until after
     // syncing completes.
-    
+
     // As far as I can tell this does not lower the security of the spvnode, because
     // the validation performed on the incoming tx is no different than if an spvchain
     // is fully synced. (extensive validation is done by the mempool, spvnode doesn't have an instance of a mempool)
-    
+
     assert(hashes.length > 0)
-    
+
     // bcoin's implementation
     // if (this.syncing && !this.chain.synced) {
     //    return
     // }
-    
+
     // Queues a `getdata` request to be sent. Checks tx existence before requesting.
     pool.ensureTX(peer, hashes)
   })

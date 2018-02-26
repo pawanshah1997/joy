@@ -111,7 +111,6 @@ describe('Application Store', function () {
       assert(remover.called)
       assert.equal(remover.getCall(0).args[0], infoHash)
       assert.equal(remover.getCall(0).args[1], deleteData)
-      assert.equal(remover.getCall(0).args[2], applicationStore.onTorrentRemoved)
     })
 
     describe('onNewTorrentStore', function () {
