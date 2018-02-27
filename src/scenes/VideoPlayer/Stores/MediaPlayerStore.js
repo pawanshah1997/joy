@@ -226,9 +226,14 @@ class MediaPlayerStore {
     isWaiting() {
         this.setMostRecentEventName('waiting')
 
-        //this.setVideoIsPlaying(false)
-
-        this.setShowTorrentStreamProgress(true && this.mediaSourceType === MEDIA_SOURCE_TYPE.STREAMING_TORRENT)
+        // When video stops because it needs to buffer the next frame, this generally happens
+        // when we don't have a complete torrent.
+        // We will only ever show the stream progress if we have an incomplete download.
+        // If we have a complete download and this event occurs users may be confused to see
+        // The stream progress bar, and possibly a start paid download button.
+        if (this.mediaSourceType === MEDIA_SOURCE_TYPE.STREAMING_TORRENT && this.torrent.isDownloading) {
+          this.setShowTorrentStreamProgress(true)
+        }
     }
 
     @action.bound
@@ -249,9 +254,7 @@ class MediaPlayerStore {
     isPlaying() {
         this.setMostRecentEventName('playing')
 
-        //this.setVideoIsPlaying(true)
-
-        this.setShowTorrentStreamProgress(false && this.mediaSourceType === MEDIA_SOURCE_TYPE.STREAMING_TORRENT)
+        this.setShowTorrentStreamProgress(false)
     }
 
     @action.bound
