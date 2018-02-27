@@ -65,7 +65,7 @@ var injectTapEventPlugin = require('react-tap-event-plugin')
 injectTapEventPlugin()
 
 // Create app
-const application = new Application(EXAMPLE_TORRENTS, process.env.FORCE_ONBOARDING || isDev, true)
+const application = new Application(EXAMPLE_TORRENTS, process.env.FORCE_ONBOARDING, true)
 
 /// Hook into major state changes in app
 

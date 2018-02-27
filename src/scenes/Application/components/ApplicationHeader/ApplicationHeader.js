@@ -12,7 +12,7 @@ import {
   CommunityButton,
   LivestreamButton,
   NewButton,
-  PublicButton
+  PublishButton
 } from './Buttons'
 import { OnboardingStore } from '../../../../core'
 import ExplainerTip, { Section, SectionSpacer } from '../../../Onboarding/ExplainerTip'
@@ -107,23 +107,23 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
         />
         
         <LivestreamButton
-          onClick={() => { console.log('click: hello 3') }}
+          selected={activeTab === ApplicationNavigationStore.TAB.Livestream}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Livestream)}}
           style={style.button}
-          disabled
           {...buttonColorProps}
         />
   
         <NewButton
-          onClick={() => { console.log('click: hello 4') }}
+          selected={activeTab === ApplicationNavigationStore.TAB.New}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.New)}}
           style={style.button}
-          disabled
           {...buttonColorProps}
         />
   
-        <PublicButton
-          onClick={() => { console.log('click: hello 5') }}
+        <PublishButton
+          selected={activeTab === ApplicationNavigationStore.TAB.Publish}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Publish)}}
           style={style.button}
-          disabled
           {...buttonColorProps}
         />
   

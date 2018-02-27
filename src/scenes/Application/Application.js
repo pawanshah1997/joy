@@ -27,7 +27,12 @@ import Completed from '../Completed'
 import Community from '../Community'
 import VideoPlayerScene from '../VideoPlayer'
 import Wallet from '../Wallet'
+
 import { WelcomeScreen, DepartureScreen } from '../Onboarding'
+import Livestream from '../Livestream'
+import New from '../New'
+import Publish from '../Publish'
+
 
 function getStyles (props) {
   return {
@@ -163,10 +168,31 @@ const StartedApp = observer((props) => {
           backgroundColor={UI_CONSTANTS.primaryColor}
         />
       break
-    
+
+    case ApplicationNavigationStore.TAB.Livestream:
+
+      elm = <Livestream />
+      break
+
+    case ApplicationNavigationStore.TAB.New:
+
+      elm = <New />
+      break
+
+    case ApplicationNavigationStore.TAB.Publish:
+
+      elm = <Publish />
+      break
+
     default:
-      assert(false)
+      assert(false, 'Not covering ApplicationNavigationStore.TAB cases')
   }
+  
+  let onTorrentScene = (
+    props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Downloading ||
+    props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Uploading ||
+    props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Completed
+  )
   
   return (
     <div style={styles.root}>
@@ -175,16 +201,12 @@ const StartedApp = observer((props) => {
       <WelcomeScreen onBoardingStore={props.UIStore.onboardingStore} />
       <DepartureScreen onBoardingStore={props.UIStore.onboardingStore} />
       
-      <ApplicationStatusBar startingTorrentCheckingProgressPercentage={props.UIStore.torrentsFullyLoadedPercentage}
+      <ApplicationStatusBar startingTorrentCheckingProgressPercentage={props.UIStore.startingTorrentCheckingProgressPercentage}
                             show=
                               {
-                                props.UIStore.torrentsBeingLoaded > 0
+                                props.UIStore.torrentsBeingLoaded.length > 0
                               &&
-                                (
-                                  props.UIStore.applicationNavigationStore.activeTab === UIStore.TAB.Downloading ||
-                                  props.UIStore.applicationNavigationStore.activeTab === UIStore.TAB.Uploading ||
-                                  props.UIStore.applicationNavigationStore.activeTab === UIStore.TAB.Completed
-                                )
+                                onTorrentScene
                               }
       />
       
