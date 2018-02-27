@@ -3,6 +3,7 @@
  */
 
 import {observable, action, runInAction, computed, autorun} from 'mobx'
+const {clipboard} = require('electron')
 
 class ReceiveDialogStore {
 
@@ -35,7 +36,7 @@ class ReceiveDialogStore {
 
   @action.bound
   copyToClipBoard() {
-    console.log('copy this to clipboard')
+    clipboard.writeText(this.receiveAddress)
   }
 
   /**

@@ -51,7 +51,7 @@ const StringForm = (props) => {
   return (
     <div style={styles.root}>
 
-      <div style={styles.addressContainer}>
+      <div style={styles.addressContainer} onClick={props.onCopyToClipBoard}>
 
         <span style={styles.addressField}>
           {props.address}
