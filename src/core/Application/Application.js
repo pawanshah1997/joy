@@ -1035,7 +1035,7 @@ async function exchangeRateFetcher() {
 
   let v = await coinmarketcap.tickerByAsset('bitcoin')
 
-  return v.price_usd
+  return parseFloat(v.price_usd)
 
 }
 // TODO: move this to be a method on the Torrent class and introduce a
