@@ -12,7 +12,7 @@ import {
   CommunityButton,
   LivestreamButton,
   NewButton,
-  PublicButton
+  PublishButton
 } from './Buttons'
 import { OnboardingStore } from '../../../../core'
 import ExplainerTip, { Section, SectionSpacer } from '../../../Onboarding/ExplainerTip'
@@ -120,8 +120,8 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
           {...buttonColorProps}
         />
   
-        <PublicButton
           onClick={() => { console.log('click: hello 5') }}
+        <PublishButton
           style={style.button}
           disabled
           {...buttonColorProps}

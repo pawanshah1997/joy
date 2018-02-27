@@ -91,7 +91,7 @@ const NewButton = (props) => {
     )
 }
 
-const PublicButton = (props) => {
+const PublishButton = (props) => {
 
     return (
         <Button title="Publish" {...props}
@@ -113,5 +113,5 @@ export {
     CommunityButton,
     LivestreamButton,
     NewButton,
-    PublicButton
+    PublishButton
 }
