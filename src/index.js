@@ -39,7 +39,7 @@ import config from './config'
 bcoin.set({ network :  config.network})
 
 
-import {ipcRenderer, webFrame} from 'electron'
+import {ipcRenderer, webFrame, shell} from 'electron'
 import os from 'os'
 import path from 'path'
 import isDev from 'electron-compile'
