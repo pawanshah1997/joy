@@ -32,9 +32,6 @@
     <div id="root">
     </div>
 
-    <!-- Show all the logs in the Developper tool console -->
-    <script type="application/javascript">localStorage.debug = 'application:*, application'</script>
-
     <!-- No longer used - remove eventually (double check Doorbell doesn't need jQuery)
     <script>window.$ = window.jQuery = require('jquery')</script>
     <script>window.Tether = require('tether')</script>
@@ -45,6 +42,9 @@
     <!-- Main applictaion in React
          imported instead of added inline to avoid polluting global namespace. -->
     <script type='application/javascript'>
+       // What logs to show in dev console
+       localStorage.debug = 'application, main-renderer'
+
        // perhaps expose useful commands/functions from Application class?
        window.joystream = require('./index.js')
 
