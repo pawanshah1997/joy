@@ -14,7 +14,7 @@ import {
   NewButton,
   PublishButton
 } from './Buttons'
-import { OnboardingStore } from '../../../../core'
+import OnboardingStore from '../../../Onboarding/Stores'
 import ExplainerTip, { Section, SectionSpacer } from '../../../Onboarding/ExplainerTip'
 import UIStore from '../../../UIStore'
 import ApplicationNavigationStore from '../../Stores'
@@ -44,9 +44,9 @@ function getStyle (props) {
 }
 
 const ApplicationHeader = inject('UIStore')(observer((props) => {
-  
+
   var style = getStyle(props)
-  
+
   var buttonColorProps = {
     rootColors : {
       normal : props.baseColor,
@@ -61,29 +61,29 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
     },
     notificationColor : props.notificationColor
   }
-  
+
   let applicationNavigationStore = props.UIStore.applicationNavigationStore
   let activeTab = applicationNavigationStore.activeTab
-  
+
   return (
     <Header style={style.root}>
-      
+
       <ButtonGroup separatorColor={props.separatorColor}>
-  
+
         <DowloadButton
           selected={activeTab === ApplicationNavigationStore.TAB.Downloading}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Downloading) }}
           style={style.button}
           {...buttonColorProps}
         />
-  
+
         <UploadButton
           selected={activeTab === ApplicationNavigationStore.TAB.Uploading}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Uploading) }}
           style={style.button}
           {...buttonColorProps}
         />
-  
+
         <FinishedButton
           selected={activeTab === ApplicationNavigationStore.TAB.Completed}
           notificationCount={applicationNavigationStore.numberCompletedInBackground}
@@ -91,45 +91,45 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
           style={style.button}
           {...buttonColorProps}
         />
-  
+
         <WalletButton
           selected={activeTab === ApplicationNavigationStore.TAB.Wallet}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Wallet) }}
           style={style.button}
           {...buttonColorProps}
         />
-        
+
         <CommunityButton
           selected={activeTab === ApplicationNavigationStore.TAB.Community}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Community) }}
           style={style.button}
           {...buttonColorProps}
         />
-        
+
         <LivestreamButton
           selected={activeTab === ApplicationNavigationStore.TAB.Livestream}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Livestream)}}
           style={style.button}
           {...buttonColorProps}
         />
-  
+
         <NewButton
           selected={activeTab === ApplicationNavigationStore.TAB.New}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.New)}}
           style={style.button}
           {...buttonColorProps}
         />
-  
+
         <PublishButton
           selected={activeTab === ApplicationNavigationStore.TAB.Publish}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Publish)}}
           style={style.button}
           {...buttonColorProps}
         />
-  
+
         {
-          props.UIStore.onBoardingStore &&
-          props.UIStore.onBoardingStore.state === OnboardingStore.State.DisabledFeaturesExplanation
+          props.UIStore.onboardingStore &&
+          props.UIStore.onboardingStore.state === OnboardingStore.STATE.DisabledFeaturesExplanation
           ?
             <ExplainerTip
             title='To be enabled'
@@ -139,27 +139,27 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
             circleLeft={-240}
             zIndex={2}
             buttonTitle='Ok'
-            buttonClick={() => { props.UIStore.onBoardingStore.disabledFeaturesExplanationAccepted() }} >
-            The wallet, live, new and publish tabs are disabled for now, they will be enabled as we roll out these features. Stay tuned for updates !
+            buttonClick={() => { props.UIStore.onboardingStore.disabledFeaturesExplanationAccepted() }} >
+            The live, new and publish tabs are disabled for now, they will be enabled as we roll out these features. Stay tuned for updates !
             </ExplainerTip>
           :
             null
         }
-        
+
       </ButtonGroup>
-  
+
       <div style={style.spacer} />
-  
+
       <WalletPanel
         applicationNavigationStore={applicationNavigationStore}
-        
+
         backgroundColor={props.baseColor}
         balanceColor={props.balanceColor}
         subtitleColor={props.faceColor}>
-        
+
         {
-            props.UIStore.onBoardingStore &&
-            props.UIStore.onBoardingStore.state === OnboardingStore.State.BalanceExplanation
+            props.UIStore.onboardingStore &&
+            props.UIStore.onboardingStore.state === OnboardingStore.STATE.BalanceExplanation
           ?
             <ExplainerTip
               title='Your wallet'
@@ -169,7 +169,7 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
               circleLeft={-85}
               zIndex={2}
               buttonTitle='Ok'
-              buttonClick={() => { props.UIStore.onBoardingStore.balanceExplanationAccepted() }} >
+              buttonClick={() => { props.UIStore.onboardingStore.balanceExplanationAccepted() }} >
               <div style={{ width: '400px' }}>
                 <Section title='Testnet coins'
                          text={
@@ -182,10 +182,10 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
             null
         }
       </WalletPanel>
-      
+
     </Header>
   )
-  
+
 }))
 
 ApplicationHeader.propTypes = {
