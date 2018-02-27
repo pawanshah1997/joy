@@ -28,6 +28,9 @@ import Community from '../Community'
 import VideoPlayerScene from '../VideoPlayer'
 import Wallet from '../Wallet'
 import { WelcomeScreen, DepartureScreen } from '../OnBoarding'
+import Livestream from '../Livestream'
+import New from '../New'
+import Publish from '../Publish'
 
 function getStyles (props) {
   return {
@@ -163,9 +166,24 @@ const StartedApp = observer((props) => {
           backgroundColor={UI_CONSTANTS.primaryColor}
         />
       break
-    
+
+    case ApplicationNavigationStore.TAB.Livestream:
+
+      elm = <Livestream />
+      break
+
+    case ApplicationNavigationStore.TAB.New:
+
+      elm = <New />
+      break
+
+    case ApplicationNavigationStore.TAB.Publish:
+
+      elm = <Publish />
+      break
+
     default:
-      assert(false)
+      assert(false, 'Not covering ApplicationNavigationStore.TAB cases')
   }
   
   let onTorrentScene = (

@@ -12,7 +12,10 @@ class ApplicationNavigationStore {
     Uploading: 1,
     Completed: 2,
     Wallet: 3,
-    Community: 4
+    Community: 4,
+    Livestream: 5,
+    New: 6,
+    Publish: 7
   }
   
   /**
@@ -99,6 +102,12 @@ class ApplicationNavigationStore {
       case ApplicationNavigationStore.TAB.Wallet:
         break
       case ApplicationNavigationStore.TAB.Community:
+        break
+      case ApplicationNavigationStore.TAB.Livestream:
+        break
+      case ApplicationNavigationStore.TAB.New:
+        break
+      case ApplicationNavigationStore.TAB.Publish:
         break
       default:
         assert(false) // Invalid scene passed
