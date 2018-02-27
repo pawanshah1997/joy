@@ -994,8 +994,8 @@ class Application extends EventEmitter {
             }
           }
 
-          this.addTorrent(settings, () => {
-
+          this._addTorrent(settings, (err) => {
+            if (err) console.log('Failed to add example torrent', err)
           })
         })
     })

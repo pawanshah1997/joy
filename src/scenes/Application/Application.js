@@ -27,8 +27,8 @@ import Completed from '../Completed'
 import Community from '../Community'
 import VideoPlayerScene from '../VideoPlayer'
 import Wallet from '../Wallet'
-
 import { WelcomeScreen, DepartureScreen } from '../Onboarding'
+import OnBoardingStore from '../Onboarding/Stores'
 import Livestream from '../Livestream'
 import New from '../New'
 import Publish from '../Publish'
@@ -187,41 +187,53 @@ const StartedApp = observer((props) => {
     default:
       assert(false, 'Not covering ApplicationNavigationStore.TAB cases')
   }
-  
+
   let onTorrentScene = (
     props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Downloading ||
     props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Uploading ||
     props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Completed
   )
-  
+
+  const displayMainScenes =
+   !props.UIStore.onboardingStore || (props.UIStore.onboardingStore &&
+   OnBoardingStore.STATE.WelcomeScreen !== props.UIStore.onboardingStore.state &&
+   OnBoardingStore.STATE.DepartureScreen !== props.UIStore.onboardingStore.state)
+
   return (
     <div style={styles.root}>
 
       { /* Onboarding scenes */ }
       <WelcomeScreen onBoardingStore={props.UIStore.onboardingStore} />
       <DepartureScreen onBoardingStore={props.UIStore.onboardingStore} />
-      
-      <ApplicationStatusBar startingTorrentCheckingProgressPercentage={props.UIStore.startingTorrentCheckingProgressPercentage}
+
+      { displayMainScenes ?
+        <ApplicationStatusBar startingTorrentCheckingProgressPercentage={props.UIStore.startingTorrentCheckingProgressPercentage}
                             show=
                               {
                                 props.UIStore.torrentsBeingLoaded.length > 0
                               &&
                                 onTorrentScene
                               }
-      />
-      
-      <VideoPlayerScene activeMediaPlayerStore={props.UIStore.mediaPlayerStore} />
-  
-      <div style={styles.applicationHeaderContainer}>
-        <ApplicationHeader
-          UIStore={props.UIStore}
-          height={'90px'}
-          accentColor={UI_CONSTANTS.primaryColor} />
-        {elm}
-      </div>
+        />
+        : null
+      }
+
+      { displayMainScenes ? <VideoPlayerScene activeMediaPlayerStore={props.UIStore.mediaPlayerStore} /> : null }
+
+      { displayMainScenes ?
+        <div style={styles.applicationHeaderContainer}>
+          <ApplicationHeader
+            UIStore={props.UIStore}
+            height={'90px'}
+            accentColor={UI_CONSTANTS.primaryColor} />
+          {elm}
+        </div>
+        : null
+      }
+
     </div>
   )
-  
+
 })
 
 export default Application
