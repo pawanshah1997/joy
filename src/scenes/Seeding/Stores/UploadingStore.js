@@ -239,7 +239,7 @@ class UploadingStore {
     this.setState(UploadingStore.STATE.UserPickingSavePath)
   }
 
-  startUpload () {
+  startUpload (savePath) {
 
     if(this.state !== UploadingStore.STATE.UserPickingSavePath)
       throw Error('Can only start when user is picking save path')
@@ -256,7 +256,7 @@ class UploadingStore {
       metadata : torrentInfo,
       resumeData : null,
       name: torrentInfo.name(),
-      savePath: this._uiStore.applicationStore.applicationSettings.downloadFolder(),
+      savePath: savePath,
       deepInitialState: DeepInitialState.UPLOADING.STARTED,
       extensionSettings : {
         sellerTerms: this._uiStore.applicationStore.applicationSettings.defaultSellerTerms()
