@@ -7,7 +7,6 @@ import Toolbar, {
     RemoveAndDeleteSection,
     RemoveSection,
     StartUploadingSection} from '../../../components/Toolbar'
-import TorrentTableRowStore from "../../Common/TorrentTableRowStore";
 
 const TorrentToolbar = (props) => {
   
