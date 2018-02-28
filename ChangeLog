@@ -1,3 +1,24 @@
+0.5.5 release - March 1st 2018
+
+  * Wallet UI added
+  * Faster startup time
+  * Updated Electron from v1.6.14 to v1.6.15 (security updates)
+  * Fixed shutdown procedure to ensure all torrents are presisted to databse
+  * Fixed broken departure screen from community scene when onboarding
+  * Fixed running post update/install tasks on Windows and Mac OS
+  * Fixed broken scrolling for long list of torrents
+  * Fixed torrents without metadata were not getting persisted
+  * Removed broken magnet link support (will be fixed in future release)
+  * Added describtion of disabled tabs (New/Live/Publish)
+  * Removed unused javascript libraries: jQuery, bootstrap.js
+  * Major code refactor
+
+0.5.4 release - February 3rd 2018
+
+  * Major protocol upgrade for faster paid download speeds
+  * Paid downloads can be restarted after all sellers disconnect
+  * Fixes stalled paid downloads
+
 0.5.3 release - Tuesday November 28th 2017
 
   * Force adding of example torrents during on-boarding
