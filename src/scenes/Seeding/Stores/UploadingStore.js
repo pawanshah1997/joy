@@ -2,6 +2,9 @@ import { observable, action, computed } from 'mobx'
 import { TorrentInfo } from 'joystream-node'
 import { remote } from 'electron'
 import TorrentTableRowStore from "../../Common/TorrentTableRowStore";
+import fs from 'fs'
+import assert from 'assert'
+import DeepInitialState from '../../../core/Torrent/Statemachine/DeepInitialState'
 
 /**
  * User interface store for uploading scene
