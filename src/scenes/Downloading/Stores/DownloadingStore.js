@@ -3,6 +3,7 @@ import { TorrentInfo } from 'joystream-node'
 import TorrentTableRowStore from '../../Common/TorrentTableRowStore'
 import { remote } from 'electron'
 import DeepInitialState from '../../../core/Torrent/Statemachine/DeepInitialState'
+import fs from 'fs'
 
 /**
  * User interface store for downloading scene
@@ -116,7 +117,7 @@ class DownloadingStore {
 
   @computed get
   canAddTorrent() {
-    this.state === DownloadingStore.STATE.InitState
+    return this.state === DownloadingStore.STATE.InitState
   }
 
   startDownloadWithTorrentFileFromFilePicker () {
@@ -194,6 +195,12 @@ class DownloadingStore {
       this.setState(DownloadingStore.STATE.TorrentFileWasInvalid)
       return
     }
+  
+    // Check that torrent has not already been added
+    if(this._uiStore.applicationStore.torrentStores.has(torrentInfo.infoHash())) {
+      this.setState(DownloadingStore.STATE.TorrentAlreadyAdded)
+      return
+    }
 
     // Make downloading settings
     let settings = {
@@ -207,7 +214,7 @@ class DownloadingStore {
         buyerTerms: this._uiStore.applicationStore.applicationSettings.defaultBuyerTerms()
       }
     }
-
+    
     /// Try to add torrent
     this.setState(DownloadingStore.STATE.TorrentBeingAdded)
 

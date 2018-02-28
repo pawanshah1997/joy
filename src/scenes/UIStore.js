@@ -455,18 +455,26 @@ class UIStore {
        */
 
       // Tell uploading store, which may need to know
-      if(this.uploadingStore)
-        this.uploadingStore.torrentFinishedDownloading(torrent.infoHash)
+      if(this.uploadingStore &&
+        this.uploadingStore.state === UploadingStore.STATE.AddingTorrent &&
+        this.uploadingStore.infoHashOfTorrentSelected === torrent.infoHash)
+        this.uploadingStore.torrentFinishedDownloading()
 
     }))
 
-    // When torrent is found to not be a complete download
-    torrent.once('Active.DownloadIncomplete', action(() => {
-
-      // Tell uploading store, which may need to know
-      if(this.uploadingStore)
-        this.uploadingStore.torrentDownloadIncomplete(torrent.infoHash)
+    // Detect when torrent is ready to start doing paid downloading, which is *always*
+    // the case when a torrent was added for uploading, but had an incomplete download from before.
+    
+    torrent.once('Active.DownloadIncomplete.Unpaid.Started.ReadyForStartPaidDownloadAttempt', action(() => {
+  
+      // Hence we must check whether this torrent is one such torrent,
+      // by checking what is currently going on on the uploading store
+      if(this.uploadingStore &&
+        this.uploadingStore.state === UploadingStore.STATE.AddingTorrent &&
+        this.uploadingStore.infoHashOfTorrentSelected === torrent.infoHash)
+        this.uploadingStore.torrentDownloadIncomplete()
     }))
+
 
     torrent.on('progress', action((progress) => {
       torrentStore.setProgress(progress * 100)

@@ -14,9 +14,9 @@ const StartUploadingSection = observer((props) => {
     let className
 
     let onClick
-    if(props.torrent.canBeginUploading) {
+    if(props.canBeginPaidUploadWidthDefaultTerms) {
         className = "start-sell"
-        onClick = () => { props.torrent.beginUploading() } // terms?????
+        onClick = props.onClick
     } else {
         className = "start-sell-disabled"
         onClick = null
@@ -30,7 +30,8 @@ const StartUploadingSection = observer((props) => {
 })
 
 StartUploadingSection.propTypes = {
-    torrent : PropTypes.object.isRequired, // TorrentStore really
+  canBeginPaidUploadWidthDefaultTerms : PropTypes.bool.isRequired,
+  onClick : PropTypes.func.isRequired
 }
 
 export default StartUploadingSection

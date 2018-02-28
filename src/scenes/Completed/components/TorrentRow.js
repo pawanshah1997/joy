@@ -11,7 +11,6 @@ import {
 } from '../../../components/RowFields'
 import TorrentToolbar from './TorrentToolbar'
 import AbsolutePositionChildren from '../../../components/AbsolutePositionChildren/AbsolutePositionChildren'
-import {TorrentTableRowStore} from "../../Common";
 
 const TorrentRow = observer((props) => {
   
@@ -21,7 +20,7 @@ const TorrentRow = observer((props) => {
     <Row
       onMouseEnter={() => { props.torrentTableRowStore.setShowToolbar(true) }}
       onMouseLeave={() => { props.torrentTableRowStore.setShowToolbar(false) }}
-      style={ {backgroundColor : props.backgroundColor}}
+      backgroundColor={props.backgroundColor}
     >
       <NameField name={torrentStore.name} />
       
@@ -46,7 +45,8 @@ const TorrentRow = observer((props) => {
 })
 
 TorrentRow.propTypes = {
-  torrentTableRowStore: PropTypes.instanceOf(TorrentTableRowStore).isRequired
+  torrentTableRowStore: PropTypes.object.isRequired, // HMR breaks => PropTypes.instanceOf(TorrentTableRowStore).isRequired,
+  backgroundColor: PropTypes.string
 }
 
 export default TorrentRow

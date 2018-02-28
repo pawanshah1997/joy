@@ -81,6 +81,13 @@ class TorrentTableRowStore {
     }
   }
 
+  beginPaidUploadWithDefaultTerms() {
+
+    let defaultTerms = this._uiStore.applicationStore.applicationSettings.defaultSellerTerms()
+
+    this.torrentStore.beginUploading(defaultTerms)
+  }
+
 }
 
 export default TorrentTableRowStore

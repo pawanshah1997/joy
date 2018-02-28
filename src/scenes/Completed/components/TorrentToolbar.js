@@ -7,7 +7,6 @@ import Toolbar, {
     RemoveAndDeleteSection,
     RemoveSection,
     StartUploadingSection} from '../../../components/Toolbar'
-import TorrentTableRowStore from "../../Common/TorrentTableRowStore";
 
 const TorrentToolbar = (props) => {
   
@@ -18,7 +17,9 @@ const TorrentToolbar = (props) => {
                    play={() => { props.torrentTableRowStore.playMedia() }}
       />
       
-      <StartUploadingSection torrent={props.torrentTableRowStore.torrentStore} />
+      <StartUploadingSection canBeginPaidUploadWidthDefaultTerms={props.torrentTableRowStore.torrentStore.canBeginUploading}
+                             onClick={() => { props.torrentTableRowStore.beginPaidUploadWithDefaultTerms() }}
+      />
       
       <RemoveSection onClick={() => { props.torrentTableRowStore.remove() }} />
       
