@@ -60,7 +60,7 @@ const TorrentTable = observer((props) => {
 })
 
 TorrentTable.propTypes = {
-  uploadingStore: PropTypes.object.isRequired
+  uploadingStore: PropTypes.object.isRequired // HMR breaks instanceof test on UploadingStore
 }
 
 export default TorrentTable
