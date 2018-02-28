@@ -18,7 +18,9 @@ const TorrentToolbar = (props) => {
                    play={() => { props.torrentTableRowStore.playMedia() }}
       />
       
-      <StartUploadingSection torrent={props.torrentTableRowStore.torrentStore} />
+      <StartUploadingSection canBeginPaidUploadWidthDefaultTerms={props.torrentTableRowStore.torrentStore.canBeginUploading}
+                             onClick={() => { props.torrentTableRowStore.beginPaidUploadWithDefaultTerms() }}
+      />
       
       <RemoveSection onClick={() => { props.torrentTableRowStore.remove() }} />
       

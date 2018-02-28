@@ -323,8 +323,8 @@ class TorrentStore {
         this._paidDownloadStarter()
     }
 
-    beginUploading() {
-        this._uploadBeginner()
+    beginUploading(sellerTerms) {
+        this._uploadBeginner(sellerTerms)
     }
 
     endUploading() {
