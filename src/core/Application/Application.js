@@ -13,7 +13,7 @@ import path from 'path'
 import bcoin from 'bcoin'
 import { TorrentInfo, Session } from 'joystream-node'
 import db from '../../db'
-import * as coinmarketcap from 'coinmarketcap'
+import request from 'request'
 
 var debug = require('debug')('application')
 import {shell} from 'electron'
@@ -1031,12 +1031,29 @@ function stateToString(state) {
 
 }
 
-async function exchangeRateFetcher() {
+function exchangeRateFetcher() {
+  return new Promise(function (resolve, reject) {
+    request('https://api.coinmarketcap.com/v1/ticker/bitcoin/', function (err, response, body) {
+      if (err) return reject(err)
 
-  let v = await coinmarketcap.tickerByAsset('bitcoin')
+      const responseStatusCode = response.statusCode
 
-  return parseFloat(v.price_usd)
+      if (responseStatusCode !== 200) {
+        return reject(new Error({
+          statusCode: responseStatusCode
+        }))
+      }
 
+      // Parse the response
+      // Parsing error throws an exception which rejects the promise
+      const data = JSON.parse(body)
+
+      // We should get back an array with one object for the ticker we requested
+      const price = data[0].price_usd
+
+      resolve(parseFloat(price))
+    })
+  })
 }
 // TODO: move this to be a method on the Torrent class and introduce a
 // corresponding decoder method. These are routines for converting to and from
