@@ -3,6 +3,7 @@ import { TorrentInfo } from 'joystream-node'
 import TorrentTableRowStore from '../../Common/TorrentTableRowStore'
 import { remote } from 'electron'
 import DeepInitialState from '../../../core/Torrent/Statemachine/DeepInitialState'
+import fs from 'fs'
 
 /**
  * User interface store for downloading scene
