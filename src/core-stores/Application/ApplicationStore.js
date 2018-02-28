@@ -143,7 +143,7 @@ class ApplicationStore {
       this._pendingAddTorrentCallsMap.delete(infoHash)
 
       // make call
-      userCallback()
+      userCallback(null, torrentStore)
     }
 
   }
@@ -172,7 +172,7 @@ class ApplicationStore {
       this._pendingRemoveTorrentCallsMap.delete(infoHash)
 
       // make call
-      userCallback()
+      userCallback(null)
     }
 
   }
