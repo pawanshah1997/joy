@@ -5,7 +5,7 @@ import FileStorage from './FileStorage'
 import TorrentInfo from './TorrentInfo'
 import TorrentStatus from './TorrentStatus'
 import TorrentHandle from './TorrentHandle'
-import Torrent from './Torrent'
+import MockTorrent from './Torrent'
 import MockApplication from './Application'
 import MockWallet from './Wallet'
 
@@ -14,7 +14,7 @@ export {
   AnnouncedModeAndTerms,
   ConnectionStatus,
   PeerPluginStatus,
-  Torrent,
+  MockTorrent,
   TorrentHandle,
   TorrentInfo,
   TorrentStatus,

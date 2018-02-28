@@ -8,6 +8,7 @@ import 'babel-polyfill'
  * Isolated application store just for powering Components
  */
 
+var MockTorrent = require('../../test/core/Mocks').MockTorrent
 import Application from '../core/Application'
 import {MockApplication} from '../../test/core/Mocks'
 import UIStore from '../scenes/UIStore'
