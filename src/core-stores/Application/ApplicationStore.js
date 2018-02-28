@@ -199,7 +199,18 @@ class ApplicationStore {
     this._pendingAddTorrentCallsMap.set(settings.infoHash, onTorrentStoreAdded)
 
     // Add
-    this._torrentAdder(settings)
+    this._torrentAdder(settings, (err, torrent) => {
+  
+      /**
+       * The only reason we handle this callback is to catch when there is
+       * a possible failure. In a success scenario, we must wait for the underlying
+       * domain state manager to construct a `TorrentStore` instance and call
+       * `onNewTorrentStore`
+       */
+      
+      if(err)
+        onTorrentStoreAdded(err)
+    })
   }
 
   @action.bound
