@@ -432,6 +432,31 @@ class UIStore {
       }
       
     }))
+    
+    torrent.on('loaded', action((deepInitialState) => {
+  
+      /**
+       * When adding a torrent through the uploading flow,
+       * we need to learn whether uploading the given torrent is feasible,
+       * which depends on whether it has been fully downloaded and authenticated,
+       * which is ultimately something libtorrent will tell us about.
+       *
+       * Hence, whenever a torrent has been loaded, we check
+       * if there is such an uploading flow going for the given torrent,
+       * and notify the given scene model about the download status.
+       */
+      
+      if(this.uploadingStore &&
+        this.uploadingStore.state === UploadingStore.STATE.AddingTorrent &&
+        this.uploadingStore.infoHashOfTorrentSelected === torrent.infoHash) {
+        
+        if(torrent.state.startsWith('Active.DownloadIncomplete'))
+          this.uploadingStore.torrentDownloadIncomplete()
+        else if(torrent.state.startsWith('Active.FinishedDownloading'))
+          this.uploadingStore.torrentFinishedDownloading()
+      }
+      
+    }))
 
     torrent.on('viabilityOfPaidDownloadInSwarm', action((viabilityOfPaidDownloadInSwarm) => {
       torrentStore.setViabilityOfPaidDownloadInSwarm(viabilityOfPaidDownloadInSwarm)
@@ -463,27 +488,10 @@ class UIStore {
     // When torrent is finished, we have to count towards the navigator
     torrent.once('Active.FinishedDownloading', action(() => {
 
-
-
-      // Tell uploading store, which may need to know
-      if(this.uploadingStore &&
-        this.uploadingStore.state === UploadingStore.STATE.AddingTorrent &&
-        this.uploadingStore.infoHashOfTorrentSelected === torrent.infoHash)
-        this.uploadingStore.torrentFinishedDownloading()
-
     }))
 
-    // Detect when torrent is ready to start doing paid downloading, which is *always*
-    // the case when a torrent was added for uploading, but had an incomplete download from before.
     
     torrent.once('Active.DownloadIncomplete.Unpaid.Started.ReadyForStartPaidDownloadAttempt', action(() => {
-  
-      // Hence we must check whether this torrent is one such torrent,
-      // by checking what is currently going on on the uploading store
-      if(this.uploadingStore &&
-        this.uploadingStore.state === UploadingStore.STATE.AddingTorrent &&
-        this.uploadingStore.infoHashOfTorrentSelected === torrent.infoHash)
-        this.uploadingStore.torrentDownloadIncomplete()
     }))
 
 
