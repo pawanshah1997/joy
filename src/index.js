@@ -42,7 +42,7 @@ bcoin.set({useWorkers: false})
 import {ipcRenderer, webFrame, shell} from 'electron'
 import os from 'os'
 import path from 'path'
-import isDev from 'electron-compile'
+import isDev from 'electron-is-dev'
 import React from 'react'
 
 import Application from './core/Application'
@@ -136,7 +136,7 @@ let rootUIStore = new UIStore(application)
 // Create renderer which is bound to our resources
 
 let doHotModuleReload = isDev
-let displayMobxDevTools = isDev && true
+let displayMobxDevTools = isDev
 let loadedRenderer = renderer.bind(null, doHotModuleReload, rootUIStore, document.getElementById('root'), displayMobxDevTools)
 
 // We enable HMR only in development mode
