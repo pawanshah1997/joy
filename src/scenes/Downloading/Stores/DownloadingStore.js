@@ -195,6 +195,12 @@ class DownloadingStore {
       this.setState(DownloadingStore.STATE.TorrentFileWasInvalid)
       return
     }
+  
+    // Check that torrent has not already been added
+    if(this._uiStore.applicationStore.torrentStores.has(torrentInfo.infoHash())) {
+      this.setState(DownloadingStore.STATE.TorrentAlreadyAdded)
+      return
+    }
 
     // Make downloading settings
     let settings = {
@@ -208,7 +214,7 @@ class DownloadingStore {
         buyerTerms: this._uiStore.applicationStore.applicationSettings.defaultBuyerTerms()
       }
     }
-
+    
     /// Try to add torrent
     this.setState(DownloadingStore.STATE.TorrentBeingAdded)
 
