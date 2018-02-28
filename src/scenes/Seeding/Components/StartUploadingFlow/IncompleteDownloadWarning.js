@@ -58,7 +58,7 @@ function getStyles (props) {
 const IncompleteDownloadWarning = (props) => {
   let styles = getStyles(props)
 
-  let savePath = props.uploadingStore.torrentWithBadSavePathDuringStartUploadFlow.savePath
+  let savePath = props.uploadingStore.torrentStoreBeingAdded.savePath
 
   return (
     <InnerDialogHeading title='Missing download'>
