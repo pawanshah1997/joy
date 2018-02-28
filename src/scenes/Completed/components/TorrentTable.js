@@ -39,7 +39,7 @@ const TorrentsTable = observer((props) => {
 })
 
 TorrentsTable.propTypes = {
-  completedStore : PropTypes.instanceOf(CompletedStore).isRequired
+  completedStore : PropTypes.object.isRequired // HMR is breaks => PropTypes.instanceOf(CompletedStore).isRequired
 }
 
 export default TorrentsTable

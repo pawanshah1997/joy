@@ -53,7 +53,7 @@ const TorrentRow = observer((props) => {
 })
 
 TorrentRow.propTypes = {
-  torrentTableRowStore: PropTypes.object.isRequired,
+  torrentTableRowStore: PropTypes.object.isRequired, // HMR breaks => PropTypes.instanceOf(TorrentTableRowStore).isRequired,
   backgroundColor: PropTypes.string
 }
 
