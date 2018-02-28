@@ -414,7 +414,23 @@ class UIStore {
     /// Hook into events
 
     torrent.on('state', action((state) => {
+      
       torrentStore.setState(state)
+  
+      /**
+       * When torrent is finished, we have to count towards the navigator
+       * Bug: see here https://github.com/JoyStream/joystream-desktop/issues/764
+       */
+  
+      if(state === 'Active.FinishedDownloading.Passive') {
+    
+        assert(this.applicationNavigationStore)
+        this.applicationNavigationStore.handleTorrentCompleted()
+        
+        // In the future: Add desktop notifications!
+        
+      }
+      
     }))
 
     torrent.on('viabilityOfPaidDownloadInSwarm', action((viabilityOfPaidDownloadInSwarm) => {
@@ -447,12 +463,7 @@ class UIStore {
     // When torrent is finished, we have to count towards the navigator
     torrent.once('Active.FinishedDownloading', action(() => {
 
-      assert(this.applicationNavigationStore)
-      this.applicationNavigationStore.handleTorrentCompleted()
 
-      /**
-       * Add desktop notifications
-       */
 
       // Tell uploading store, which may need to know
       if(this.uploadingStore &&
