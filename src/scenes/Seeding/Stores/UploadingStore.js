@@ -209,16 +209,29 @@ class UploadingStore {
     assert(this._torrentInfoSelected)
 
     // Get settings
-    let settings = getStartingUploadSettings(this._torrentInfoSelected, savePath)
-
+  
+    let torrentInfo = this._torrentInfoSelected
+    
+    let settings = {
+      infoHash : torrentInfo.infoHash(),
+      metadata : torrentInfo,
+      resumeData : null,
+      name: torrentInfo.name(),
+      savePath: this._uiStore.applicationStore.applicationSettings.downloadFolder(),
+      deepInitialState: DeepInitialState.UPLOADING.STARTED,
+      extensionSettings : {
+        sellerTerms: this._uiStore.applicationStore.applicationSettings.defaultSellerTerms()
+      }
+    }
+    
     // Update state
     this.setState(UploadingStore.STATE.AddingTorrent)
 
     // Add torrent with given settings
     this._uiStore.applicationStore.addTorrent(settings, (err, torrentStore) => {
-
+      
       assert(this.state === UploadingStore.STATE.AddingTorrent)
-
+      
       if(err) {
 
         // NB: could there be some other issue here? if so, can we reliably decode it
@@ -317,26 +330,6 @@ class UploadingStore {
     this.setState(UploadingStore.STATE.InitState)
   }
 
-}
-
-function getStartingUploadSettings(torrentInfo, defaultSavePath) {
-
-  // NB: Get from settings data store of some sort
-  let terms = getStandardSellerTerms()
-
-  const infoHash = torrentInfo.infoHash()
-
-  return {
-    infoHash : infoHash,
-    metadata : torrentInfo,
-    resumeData : null,
-    name: torrentInfo.name() || infoHash,
-    savePath: defaultSavePath,
-    deepInitialState: TorrentStatemachine.DeepInitialState.UPLOADING.STARTED,
-    extensionSettings : {
-      sellerTerms: terms
-    }
-  }
 }
 
 export default UploadingStore
