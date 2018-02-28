@@ -484,17 +484,7 @@ class UIStore {
       torrentStore.setTotalSize(torrentInfo.totalSize())
       torrentStore.setTorrentFiles(torrentInfo.files())
     }))
-
-    // When torrent is finished, we have to count towards the navigator
-    torrent.once('Active.FinishedDownloading', action(() => {
-
-    }))
-
     
-    torrent.once('Active.DownloadIncomplete.Unpaid.Started.ReadyForStartPaidDownloadAttempt', action(() => {
-    }))
-
-
     torrent.on('progress', action((progress) => {
       torrentStore.setProgress(progress * 100)
     }))
