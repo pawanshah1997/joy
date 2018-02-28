@@ -92,7 +92,7 @@ class PriceFeed extends EventEmitter {
     this._exchangeRateFetcher()
       .then((newExchangeRate) => {
 
-        this.cryptoToUsdExchangeRate = newExchangeRate.price_usd
+        this.cryptoToUsdExchangeRate = newExchangeRate
 
         this.emit('tick', this.cryptoToUsdExchangeRate)
       })
