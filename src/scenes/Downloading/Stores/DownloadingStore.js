@@ -117,7 +117,7 @@ class DownloadingStore {
 
   @computed get
   canAddTorrent() {
-    this.state === DownloadingStore.STATE.InitState
+    return this.state === DownloadingStore.STATE.InitState
   }
 
   startDownloadWithTorrentFileFromFilePicker () {
