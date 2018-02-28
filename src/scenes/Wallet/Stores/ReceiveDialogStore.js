@@ -13,6 +13,12 @@ class ReceiveDialogStore {
    */
   @observable showAddressAsQRCode
 
+ /**
+  * {Bool} Wether to show a copied to clipboard alert to user
+  * or not
+  */
+  @observable displayCopiedToClipBoardAlert
+
   /**
    * Constructor
    * @param {WalletSceneStore} walletSceneStore -
@@ -20,7 +26,7 @@ class ReceiveDialogStore {
   constructor(walletSceneStore, walletStore, showAddressAsQRCode) {
     this._walletSceneStore = walletSceneStore
     this._walletStore = walletStore
-
+    this.hideCopiedToClipBoardAlert()
     this.setShowAddressAsQRCode(showAddressAsQRCode)
   }
 
@@ -32,11 +38,25 @@ class ReceiveDialogStore {
   @action.bound
   flipAddressDisplayMode = () => {
     this.setShowAddressAsQRCode(!this.showAddressAsQRCode)
+    this.hideCopiedToClipBoardAlert()
   }
 
   @action.bound
   copyToClipBoard() {
+    console.log('copied address to clipboards')
     clipboard.writeText(this.receiveAddress)
+
+    this.showCopiedToClipBoardAlert()
+  }
+
+  @action.bound
+  showCopiedToClipBoardAlert () {
+    this.displayCopiedToClipBoardAlert = true
+  }
+
+  @action.bound
+  hideCopiedToClipBoardAlert () {
+    this.displayCopiedToClipBoardAlert = false
   }
 
   /**
@@ -50,6 +70,7 @@ class ReceiveDialogStore {
   @action.bound
   close = () => {
     this._walletSceneStore.closeCurrentDialog()
+    this.hideCopiedToClipBoardAlert()
   }
 
 }

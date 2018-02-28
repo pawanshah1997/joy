@@ -26,7 +26,9 @@ const ReceiveDialog = observer((props) => {
       address : props.receiveDialogStore.receiveAddress,
       onFlipClick : props.receiveDialogStore.flipAddressDisplayMode,
       onClose : props.receiveDialogStore.close,
-      onCopyToClipBoard: props.receiveDialogStore.copyToClipBoard
+      onCopyToClipBoard: props.receiveDialogStore.copyToClipBoard,
+      displayCopiedToClipBoardAlert: props.receiveDialogStore.displayCopiedToClipBoardAlert,
+      hideCopiedToClipBoardAlert: props.receiveDialogStore.hideCopiedToClipBoardAlert
     }
 
     form =
