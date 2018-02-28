@@ -48,19 +48,36 @@ class UploadingStore {
   /**
    * {String} Path to torrent file currently part of start uploading flow,
    * and is only defined when `canStartUpload`
+   *
+   * NB: Not clear if this genuinely needs to be observable, reconsider later.
    */
   @observable torrentFilePathSelected
-
+  
+  /**
+   * @property {InfoHash} When torrent is being added, that is `state` === STATE.AddingTorrent,
+   * then this will be the hash of the given torrent
+   */
+  infoHashOfTorrentSelected
+  
+  /**
+   * {TorrentStore} When torrent is being added, that is `state` === STATE.AddingTorrent,
+   * then this will be the store for the corresponding torrent, after it has been added - but
+   * before the full torrent check has been completed, otherwise `null`.
+   */
+  @observable torrentStoreBeingAdded
+  
   constructor (uiStore) {
 
     this._uiStore = uiStore
 
     this.setRowStorefromTorrentInfoHash(new Map())
     this.setState(UploadingStore.STATE.InitState)
+    this.setTorrentStoreBeingAdded(null)
 
     // Torrent file selected in the current start uploading flow,
     // is reset when flow ends
     this._torrentInfoSelected = null
+    this.infoHashOfTorrentSelected = null
   }
   @action.bound
   addTorrentStore(torrentStore) {
@@ -91,9 +108,13 @@ class UploadingStore {
   setState (newState) {
 
     // Reset torrentinfo selected as part of flow
-    if(newState === UploadingStore.STATE.InitState)
+    if(newState === UploadingStore.STATE.InitState) {
       this._torrentInfoSelected = null
-
+      this.setTorrentFilePathSelected(null)
+      this.setTorrentStoreBeingAdded(null)
+      this.infoHashOfTorrentSelected = null
+    }
+    
     this.state = newState
   }
 
@@ -127,10 +148,15 @@ class UploadingStore {
   setTorrentFilePathSelected (torrentFile) {
     this.torrentFilePathSelected = torrentFile
   }
+  
+  @action.bound
+  setTorrentStoreBeingAdded(torrentStoreBeingAdded) {
+    this.torrentStoreBeingAdded = torrentStoreBeingAdded
+  }
 
   @computed get
   canStartUpload() {
-    this.state === UploadingStore.STATE.InitState
+    return this.state === UploadingStore.STATE.InitState
   }
 
   uploadTorrentFile () {
@@ -168,6 +194,8 @@ class UploadingStore {
     }
 
     let torrentFileName = filesPicked[0]
+    
+    this.setTorrentFilePathSelected(torrentFileName)
 
     /// Read torrent file data
     let torrentFileData
@@ -197,19 +225,27 @@ class UploadingStore {
       this.setState(UploadingStore.STATE.TorrentFileWasInvalid)
       return
     }
+  
+    // Check if this torrent has not already been added
+    if(this._uiStore.applicationStore.torrentStores.has(torrentInfo.infoHash())) {
+      this.setState(UploadingStore.STATE.TorrentAlreadyAdded)
+      return
+    }
 
-    // Hold on to torrent_info object
+    // Hold on to torrent identifiers
     this._torrentInfoSelected = torrentInfo
+    this.infoHashOfTorrentSelected = torrentInfo.infoHash()
 
     this.setState(UploadingStore.STATE.UserPickingSavePath)
   }
 
-  startUpload (savePath) {
+  startUpload () {
 
     if(this.state !== UploadingStore.STATE.UserPickingSavePath)
       throw Error('Can only start when user is picking save path')
 
-    assert(this._torrentInfoSelected)
+    assert(this._torrentInfoSelected, 'Torrent file must be selected already')
+    assert(this.infoHashOfTorrentSelected, ' Torrent infohash must be set')
 
     // Get settings
   
@@ -243,7 +279,7 @@ class UploadingStore {
         this.setState(UploadingStore.STATE.TorrentAlreadyAdded)
 
       } else {
-
+        
         // <-- is this really right? -->
 
         // We were able to add, now we must wait for calls to
@@ -251,18 +287,19 @@ class UploadingStore {
         // to learn about result. We cannot create local reactions on
         // `torrentStore`, as that violates design principle (a), and
         // also MOBX best practices about updating model in reactions.
-
+  
+        this.setTorrentStoreBeingAdded(torrentStore)
+        
       }
 
     })
   }
 
-  torrentFinishedDownloading(infoHash) {
-
+  torrentFinishedDownloading() {
+    
     // If we are currently trying to add this torrent
 
-    if(this.state === UploadingStore.STATE.AddingTorrent &&
-    infoHash === this._torrentInfoSelected.infoHash()) {
+    if(this.state === UploadingStore.STATE.AddingTorrent) {
 
       // then we are now done
       this.setState(UploadingStore.STATE.InitState)
@@ -271,11 +308,10 @@ class UploadingStore {
 
   }
 
-  torrentDownloadIncomplete(infoHash) {
-
+  torrentDownloadIncomplete() {
+    
     // If we are currently trying to add this torrent
-    if(this.state === UploadingStore.STATE.AddingTorrent &&
-      infoHash === this._torrentInfoSelected.infoHash()) {
+    if(this.state === UploadingStore.STATE.AddingTorrent ) {
 
       // then we have to inform the user about the incomplete download
       this.setState(UploadingStore.STATE.TellUserAboutIncompleteDownload)
