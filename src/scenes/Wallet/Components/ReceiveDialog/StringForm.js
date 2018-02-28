@@ -6,6 +6,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
 import Button from './Button'
+import Snackbar from 'material-ui/Snackbar'
 
 import {
   ButtonSection,
@@ -51,7 +52,7 @@ const StringForm = (props) => {
   return (
     <div style={styles.root}>
 
-      <div style={styles.addressContainer}>
+      <div style={styles.addressContainer} onClick={props.onCopyToClipBoard}>
 
         <span style={styles.addressField}>
           {props.address}
@@ -78,6 +79,10 @@ const StringForm = (props) => {
         />
 
       </ButtonSection>
+
+      { props.displayCopiedToClipBoardAlert ?
+        <Snackbar open={true} message={'Address copied to clipboard'} autoHideDuration={1000} onRequestClose={props.hideCopiedToClipBoardAlert}/> : null
+      }
 
     </div>
   )

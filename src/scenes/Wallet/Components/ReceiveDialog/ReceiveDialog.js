@@ -25,7 +25,10 @@ const ReceiveDialog = observer((props) => {
     let formProps = {
       address : props.receiveDialogStore.receiveAddress,
       onFlipClick : props.receiveDialogStore.flipAddressDisplayMode,
-      onClose : props.receiveDialogStore.close
+      onClose : props.receiveDialogStore.close,
+      onCopyToClipBoard: props.receiveDialogStore.copyToClipBoard,
+      displayCopiedToClipBoardAlert: props.receiveDialogStore.displayCopiedToClipBoardAlert,
+      hideCopiedToClipBoardAlert: props.receiveDialogStore.hideCopiedToClipBoardAlert
     }
 
     form =
@@ -37,7 +40,8 @@ const ReceiveDialog = observer((props) => {
   }
 
   return (
-    <Dialog title={null}
+    <Dialog title={'Receive'}
+            // TODO: Add a subtitle/warning not to send real bitcoin to this address
             open={visibleDialog}
             onRequestClose={onRequestClose}
             width={'600px'}
