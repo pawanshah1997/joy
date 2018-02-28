@@ -474,7 +474,7 @@ function MockClient(fix) {
 function fixtureToAddedToSessionInput (fixture) {
   return [
     'addedToSession',
-    new Mocks.Torrent(fixture)
+    new Mocks.MockJSNodeTorrent(fixture)
   ]
 }
 
