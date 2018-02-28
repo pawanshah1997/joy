@@ -19,7 +19,8 @@ function getStyles (props) {
     subtitle: {
       padding: '20px',
       marginTop: '30px',
-      width: '800px'
+      width: '900px',
+      textAlign: 'center'
     },
     progressBar: {
       marginTop: '50px',
@@ -45,7 +46,13 @@ const LoadingTorrentForUploading = observer((props) => {
         </div>
 
         <LinearProgress mode='determinate'
-          value={props.store.startingTorrentCheckingProgressPercentage}
+          value={
+            props.uploadingStore.torrentStoreBeingAdded
+              ?
+            props.uploadingStore.torrentStoreBeingAdded.progress
+              :
+              0
+          }
           style={styles.progressBar} />
 
       </div>
@@ -54,7 +61,7 @@ const LoadingTorrentForUploading = observer((props) => {
 })
 
 LoadingTorrentForUploading.propTypes = {
-  store: PropTypes.object.isRequired
+  uploadingStore: PropTypes.object.isRequired // is really `UploadingStore`, can't use instance
 }
 
 export default LoadingTorrentForUploading
