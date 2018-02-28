@@ -14,7 +14,7 @@ describe('Peer state machine', function () {
     let endpoint = "my_endpoint"
     let peerBEP10SupportStatus = "peerBEP10SupportStatus"
     let peerBitSwaprBEPSupportStatus = "peerBitSwaprBEPSupportStatus"
-    let torrent = new Mocks.Torrent({})
+    let torrent = new Mocks.MockJSNodeTorrent({})
     let peer = null
 
     let privateKeyGenerator = sinon.stub()
