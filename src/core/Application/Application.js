@@ -19,7 +19,7 @@ var debug = require('debug')('application')
 import {shell} from 'electron'
 
 const FOLDER_NAME = {
-  WALLETS: 'wallet',
+  WALLETS: 'wallets',
   DEFAULT_SAVE_PATH_BASE: 'download',
   TORRENT_DB: 'data'
 }
@@ -121,8 +121,7 @@ class Application extends EventEmitter {
   static get NUMBER_OF_RESOURCE_TYPES() { return Object.keys(Application.RESOURCE).length }
 
   static sessionNetworkFromBcoinNetwork (network) {
-    if (network === 'testnet') return 'testnet'
-    if (network === 'bitcoincashtestnet') return 'testnet_bitcoin_cash'
+    if (network === 'bitcoincash') return 'mainnet_bitcoin_cash'
 
     throw new Error('unsupported network')
   }
@@ -230,12 +229,8 @@ class Application extends EventEmitter {
      * Wallet
      */
 
-     mkdirp(FOLDER_NAME.WALLETS, null, (err) => {
-
-       if(err)
-         console.log('Failed to create wallets folder: ' + FOLDER_NAME.WALLETS + ' due to ' + err)
-
-     })
+     // Ensure base wallets directory exists
+     mkdirp.sync(FOLDER_NAME.WALLETS)
 
     // Make and hold on to path to wallet
     this._walletPath = path.join(this._appDirectory, FOLDER_NAME.WALLETS, bcoin.network.primary.type)
@@ -250,10 +245,10 @@ class Application extends EventEmitter {
 
     // Add a logger if log level is specified
     if(config.logLevel)
-      spvOptions.logger = new bcoin.logger({ level: config.logLevel })
+      spvNodeOptions.logger = new bcoin.logger({ level: config.logLevel })
 
     // Create the SPV Node
-    let spvNode = bcoin.spvnode(spvOptions)
+    let spvNode = bcoin.spvnode(spvNodeOptions)
 
     // Create and hold to wallet
     this.wallet = new Wallet(spvNode)

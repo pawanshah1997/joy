@@ -11,14 +11,16 @@ let network
 if (protocolVersion) {
   // Only newer version of joystream-node export the protocolVersion
   if (protocolVersion === 3) {
-    network = 'bitcoincashtestnet'
+    network = 'bitcoincash'
   } else {
     throw new Error('unable to determine network to use from protocolVersion', protocolVersion)
   }
 } else {
   // Older versions of joystream-node used by the app did not export
   // the protocol version and were configured to run on bitcoin testnet.
-  network = 'testnet'
+
+  // Not Supported
+  throw new Error('version of joystream-node being used is not supported')
 }
 
 // Set primary network in bcoin (oyh vey, what a singlton horrible pattern)
@@ -32,7 +34,7 @@ bcoin.set(network)
 // Application config
 var config = {
   // currently only used by bcoin logger
-  //logLevel: 'info',
+  logLevel: 'info'
 }
 
 // Environment variables override configuration settings
