@@ -1,7 +1,7 @@
 {
   "name": "joystream",
   "productName": "Joystream",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "A new BitTorrent client, with faster speeds, streaming and paid seeding.",
   "homepage": "https://joystream.co",
   "main": "src/main.js",
