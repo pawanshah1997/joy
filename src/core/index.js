@@ -2,10 +2,8 @@
  * Created by bedeho on 04/10/17.
  */
 
-import OnboardingStore from './OnboardingStore'
-import ApplicationSettings from './ApplicationSettings'
+import ApplicationSettings from './ApplicationSettings/ApplicationSettings'
 
 export {
-    OnboardingStore,
-    ApplicationSettings
+  ApplicationSettings
 }

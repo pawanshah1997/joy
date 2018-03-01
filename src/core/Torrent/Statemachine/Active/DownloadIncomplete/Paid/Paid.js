@@ -23,7 +23,9 @@ var Paid = new BaseMachine({
             /**
             stop: function(client) {
                 client.stopExtension()
-                client.stopLibtorrentTorrent()
+
+                client._joystreamNodeTorrent.handle.pause()
+
                 this.transition(client, 'Stopped')
             }
             */
@@ -34,8 +36,8 @@ var Paid = new BaseMachine({
         Stopped : {
 
             start : function (client) {
-                client.startLibtorrentTorrent()
-                client.startExtension()
+                client._joystreamNodeTorrent.handle.resume()
+                Common.startExtension(client)
                 this.transition(client, 'Started')
             }
 

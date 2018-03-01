@@ -20,7 +20,7 @@ function getStyle(props) {
             paddingRight: '14px',
             color: props.colorLeft,
             fontWeight: 'bold',
-            fontSize: '15px',
+            fontSize: '12px',
             textAlign: 'center'
         },
 
@@ -30,7 +30,7 @@ function getStyle(props) {
             //marginLeft: 14,
             //marginRight: 14+14,
             color: 'white',
-            fontSize: '15px',
+            fontSize: '18px', // 15px
             textAlign: 'center'
         }
 
@@ -84,8 +84,8 @@ SimpleLabel.propTypes = {
 }
 
 SimpleLabel.defaultProps = {
-    height : 45,
-    colorLeft : 'white', //'hsla(218, 41%, 66%, 1)'
+    height : 40,
+    colorLeft : 'rgba(255, 255, 255, 0.7)'
 }
 
 export default SimpleLabel

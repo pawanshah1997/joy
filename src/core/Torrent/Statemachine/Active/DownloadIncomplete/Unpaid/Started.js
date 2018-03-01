@@ -7,7 +7,7 @@ var Common = require('../../../Common')
 var ConnectionInnerState = require('joystream-node').ConnectionInnerState
 var commitmentToOutput = require('joystream-node').paymentChannel.commitmentToOutput
 
-var ViabilityOfPaidDownloadInSwarm = require('../../../../ViabilityOfPaidDownloadingSwarm')
+var ViabilityOfPaidDownloadInSwarm = require('../../../../ViabilityOfPaidDownloadingSwarm').default
 
 var Started = new BaseMachine({
 
@@ -21,128 +21,142 @@ var Started = new BaseMachine({
 
             _onEnter : function(client) {
 
-                // We reset swarmViability,since
-                // we have not been handling `processPeerPluginsStatuses`
-                // by calling `computeViabilityOfPaidDownloadInSwarm` in an any other state.
-                let defaultViability = new ViabilityOfPaidDownloadInSwarm.NoJoyStreamPeerConnections()
+              // We reset swarmViability,since
+              // we have not been handling `processPeerPluginsStatuses`
+              // by calling `computeViabilityOfPaidDownloadInSwarm` in an any other state.
+              let defaultViability = new ViabilityOfPaidDownloadInSwarm.NoJoyStreamPeerConnections()
 
-                client.store.setViabilityOfPaidDownloadInSwarm(defaultViability)
-                client.swarmViability = defaultViability
+              client._setViabilityOfPaidDownloadInSwarm(defaultViability)
 
             },
 
             stop : function(client) {
 
-                client.stopExtension()
-                client.stopLibtorrentTorrent()
+              Common.stopExtension(client)
 
-                this.go(client, '../Stopped')
+              // Stop libtorrent torrent
+              client._joystreamNodeTorrent.handle.pause()
+
+              this.go(client, '../Stopped')
             },
 
             updateBuyerTerms : function (client, buyerTerms) {
 
-                client.buyerTerms = buyerTerms
-                client.updateBuyerTerms(buyerTerms)
-            },
+              // Not yet implemented
 
-            processSentPayment  : function (client, alert) {
-              client.store.setBuyerSpent(alert.pid, alert.totalAmountPaid)
+              throw Error('Not yet implemented')
             },
 
             processBuyerTermsUpdated: function (client, terms) {
-                client.store.setBuyerPrice(terms)
+
+              // Not possible, since above not yet implemented
+
+              throw Error('Not yet implemented')
+            },
+
+            processSentPayment  : function (client, alert) {
+              client._handlePaymentSentAlert(alert)
             },
 
             processPeerPluginStatuses: function(client, statuses) {
 
-                // Update peer list
-                Common.processPeerPluginStatuses(client, statuses)
+              // Update peer list
+              Common.processPeerPluginStatuses(client, statuses)
 
-                // Figure out if there are suitable sellers in sufficient amount
-                let viability = computeViabilityOfPaidDownloadInSwarm(statuses, client.buyerTerms.minNumberOfSellers)
+              // Figure out if there are suitable sellers in sufficient amount
+              let viability = computeViabilityOfPaidDownloadInSwarm(statuses, client.buyerTerms.minNumberOfSellers)
 
-                // Update store
-                client.store.setViabilityOfPaidDownloadInSwarm(viability)
-
-                // Store on client, we have to keep around, since we dont keep status around
-                client.swarmViability = viability
+              // Hold on to viability for later
+              client._setViabilityOfPaidDownloadInSwarm(viability)
             },
 
-            startPaidDownload : function (client) {
+            startPaidDownload : function (client, fn) {
 
-                // Check that we can actually start
-                if(!(client.swarmViability instanceof ViabilityOfPaidDownloadInSwarm.Viable))
-                    return
+              // Check that we can actually start
+              if(!(client.viabilityOfPaidDownloadInSwarm.constructor.name === 'Viable')) {
+                  return fn(client.viabilityOfPaidDownloadInSwarm , null)
+              }
 
-                let peerComparer = function (sellerA, sellerB) {
-                    const termsA = sellerA.connection.announcedModeAndTermsFromPeer.seller.terms
-                    const termsB = sellerB.connection.announcedModeAndTermsFromPeer.seller.terms
-                    return termsA.minPrice - termsB.minPrice
-                }
+              let peerComparer = function (sellerA, sellerB) {
+                  const termsA = sellerA.connection.announcedModeAndTermsFromPeer.seller.terms
+                  const termsB = sellerB.connection.announcedModeAndTermsFromPeer.seller.terms
+                  return termsA.minPrice - termsB.minPrice
+              }
 
-                // Sort suitable sellers using `peerComparer` function
-                var sortedSellers = client.swarmViability.suitableAndJoined.sort(peerComparer)
+              // Sort suitable sellers using `peerComparer` function
+              var sortedSellers = client.viabilityOfPaidDownloadInSwarm.suitableAndJoined.sort(peerComparer)
 
-                // Pick actual sellers to use
-                var pickedSellers = sortedSellers.slice(0, client.buyerTerms.minNumberOfSellers)
+              // Pick actual sellers to use
+              var pickedSellers = sortedSellers.slice(0, client.buyerTerms.minNumberOfSellers)
 
-                // Iterate sellers to
-                // 1) Allocate value
-                // 2) Find correct contract fee
-                // 3) Construct contract output
-                var downloadInfoMap = new Map()
-                var contractOutputs = []
-                var contractFeeRate = 0
-                var index = 0
+              // Iterate sellers to
+              // 1) Allocate value
+              // 2) Find correct contract fee
+              // 3) Construct contract output
+              var downloadInfoMap = new Map()
+              var contractOutputs = []
+              var contractFeeRate = 0
+              var index = 0
 
-                for (var i in pickedSellers) {
+              for (var i in pickedSellers) {
 
-                    var status = pickedSellers[i]
+                  var status = pickedSellers[i]
 
-                    var sellerTerms = status.connection.announcedModeAndTermsFromPeer.seller.terms
+                  var sellerTerms = status.connection.announcedModeAndTermsFromPeer.seller.terms
 
-                    // Pick how much to distribute among the sellers
-                    var minimumRevenue = sellerTerms.minPrice * client.metadata.numPieces()
+                  // Pick how much to distribute among the sellers
+                  var minimumRevenue = sellerTerms.minPrice * client.torrentInfo.numPieces()
 
-                    // Set value to at least surpass dust
-                    var value = Math.max(minimumRevenue, 0)
+                  // Set value to at least surpass dust
+                  var value = Math.max(minimumRevenue, 0)
 
-                    // Update fee estimate
-                    if(sellerTerms.minContractFeePerKb > contractFeeRate)
-                        contractFeeRate = sellerTerms.minContractFeePerKb
+                  // Update fee estimate
+                  if(sellerTerms.minContractFeePerKb > contractFeeRate)
+                      contractFeeRate = sellerTerms.minContractFeePerKb
 
-                    // Generate keys for buyer side of contract
-                    var buyerContractSk = client.generateContractPrivateKey()
-                    var buyerFinalPkHash = client.generatePublicKeyHash()
+                  // Generate keys for buyer side of contract
+                  var buyerContractSk = client._privateKeyGenerator()
+                  var buyerFinalPkHash = client._publicKeyHashGenerator()
 
-                    // Add entry for seller in download information map
-                    downloadInfoMap.set(status.pid, {
-                        index: index,
-                        value: value,
-                        sellerTerms: sellerTerms,
-                        buyerContractSk: Buffer.from(buyerContractSk),
-                        buyerFinalPkHash: Buffer.from(buyerFinalPkHash)
-                    })
+                  // Add entry for seller in download information map
+                  downloadInfoMap.set(status.pid, {
+                      index: index,
+                      value: value,
+                      sellerTerms: sellerTerms,
+                      buyerContractSk: Buffer.from(buyerContractSk),
+                      buyerFinalPkHash: Buffer.from(buyerFinalPkHash)
+                  })
 
-                    // Add contract output for seller
-                    contractOutputs[index] = commitmentToOutput({
-                        value: value,
-                        locktime: sellerTerms.minLock, //in time units (multiples of 512s)
-                        payorSk: Buffer.from(buyerContractSk),
-                        payeePk: Buffer.from(status.connection.payor.sellerContractPk)
-                    })
+                  // Add contract output for seller
+                  contractOutputs[index] = commitmentToOutput({
+                      value: value,
+                      locktime: sellerTerms.minLock, //in time units (multiples of 512s)
+                      payorSk: Buffer.from(buyerContractSk),
+                      payeePk: Buffer.from(status.connection.payor.sellerContractPk)
+                  })
 
-                    index++
-                }
+                  index++
+              }
 
-                // Store download information for making actual start downloading
-                // request to client later after signing
-                client.downloadInfoMap = downloadInfoMap
+              // Store download information for making actual start downloading
+              // request to client later after signing
+              client.downloadInfoMap = downloadInfoMap
 
-                // Request construction and financing of the contract transaction
-                client.makeSignedContract(contractOutputs, contractFeeRate)
+              // Request construction and financing of the contract transaction
+              client._contractGenerator(contractOutputs, contractFeeRate)
+                .then((tx) => {
+                  console.log('signing contract success')
+                  client._submitInput('makeSignedContractResult', null, tx)
+                })
+                .catch((err) => {
+                  console.log('signing contract failed', err)
+                  client._submitInput('makeSignedContractResult', err)
+                })
 
-                this.transition(client, 'SigningContract')
+              // Hold on to user callback until lifecycle of call is completed
+              client._startPaidDownloadFn = fn
+
+              this.transition(client, 'SigningContract')
             }
 
         },
@@ -155,14 +169,19 @@ var Started = new BaseMachine({
 
                 if(err) {
 
-                    // Notify user about failure
-                    client.contractSigningFailed(err)
+                    // Tell user about failure
+                    client._startPaidDownloadFn(err)
+
+                    // Drop callback
+                    delete client._startPaidDownloadFn
 
                     this.transition(client, 'ReadyForStartPaidDownloadAttempt')
 
                 } else {
 
-                    client.startDownloading(tx, client.downloadInfoMap)
+                    client._joystreamNodeTorrent.startDownloading(tx, client.downloadInfoMap, (err, res) => {
+                      client._submitInput('paidDownloadInitiationCompleted', err, res)
+                    })
 
                     this.transition(client, 'InitiatingPaidDownload')
 
@@ -176,19 +195,26 @@ var Started = new BaseMachine({
 
             // NB: We don't handleSequence peer plugin statuses
 
-            paidDownloadInitiationCompleted : function (client, alert) {
+            paidDownloadInitiationCompleted : function (client, err, result) {
 
               // NB: Joystream alert never throw error. Need to be added in extension-cpp
-                if (alert.error) {
+                if (err) {
 
                     // Tell user about failure
-                    client.paidDownloadInitiationFailed(err)
+                    client._startPaidDownloadFn(err)
 
                     this.transition(client, 'ReadyForStartPaidDownloadAttempt')
 
                 } else {
+
+                    // Tell user about success
+                    client._startPaidDownloadFn(null)
+
                     this.go(client, '../../Paid/Started')
                 }
+
+                // Drop callback
+                delete client._startPaidDownloadFn
 
             }
         }

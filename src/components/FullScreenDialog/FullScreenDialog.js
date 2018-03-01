@@ -19,7 +19,7 @@ function getStyles(props) {
             left: '0px',
             top: '0px',
             backgroundColor: 'white',
-            zIndex: 2,
+            zIndex: 2000,
             transition: 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms'
         },
         buttonRoot : {

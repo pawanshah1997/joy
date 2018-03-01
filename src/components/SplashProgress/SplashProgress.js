@@ -81,7 +81,7 @@ function getStyles(props) {
         },
         linearProgress : {
             marginTop : '50px',
-            height : '8px',
+            height : '4px',
             borderRadius : '50px',
             backgroundColor : 'hsla(200, 21%, 31%, 1)',
             //border: '1px solid hsla(201, 22%, 70%, 1)'
@@ -116,9 +116,12 @@ const SplashProgress = (props) => {
                                 style={styles.linearProgress}
                 />
 
-                <span style={styles.progressText}>
-                    {props.progressText}
-                </span>
+              { /**
+               <span style={styles.progressText}>
+               {props.progressText}
+               </span>
+               **/
+              }
 
             </div>
 

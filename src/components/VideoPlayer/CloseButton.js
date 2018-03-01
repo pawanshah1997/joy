@@ -14,7 +14,7 @@ const CloseButton = observer((props) => {
     zIndex: 99
   }
 
-  const onClick = () => { props.torrent.close() }
+  // const onClick = () => { props.torrent.close() }
 
   return (
     <a style={closeStyle} onClick={props.onClick}></a>

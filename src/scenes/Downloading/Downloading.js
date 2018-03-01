@@ -1,8 +1,11 @@
 import React from 'react'
-import { observer } from 'mobx-react'
+import { observer, inject } from 'mobx-react'
 import PropTypes from 'prop-types'
 
-import TorrentTable from './TorrentTable'
+import DownloadingStore from './Stores'
+
+// Components
+import TorrentTable from './components/TorrentTable'
 import StartDownloadingFlow from './components/StartDownloadingFlow'
 
 import {
@@ -13,7 +16,8 @@ import {
     MaxFlexSpacer,
     TorrentCountLabel,
     CurrencyLabel,
-    BandwidthLabel
+    BandwidthLabel,
+    AddTorrentIcon
 } from './../../components/MiddleSection'
 
 function getStyles (props) {
@@ -26,61 +30,61 @@ function getStyles (props) {
   }
 }
 
-const Downloading = observer((props) => {
+const Downloading = inject('UIStore')(observer((props) => {
+  
   let styles = getStyles(props)
-
+  
   let labelColorProps = {
-    backgroundColorLeft: props.middleSectionDarkBaseColor,
-    backgroundColorRight: props.middleSectionHighlightColor
+    backgroundColorLeft : props.middleSectionDarkBaseColor,
+    backgroundColorRight : props.middleSectionHighlightColor
   }
 
   return (
     <div style={styles.root}>
-      <MiddleSection backgroundColor={props.middleSectionBaseColor}>
+
+      <MiddleSection backgroundColor={props.middleSectionBaseColor} height="120px">
 
         <Toolbar>
-          <ToolbarButton
-            title='Start downloading'
-            onClick={() => { props.downloadingStore.startDownloadWithTorrentFileFromFilePicker() }} />
+
+          <ToolbarButton title="add download"
+                         onClick={() => { props.UIStore.downloadingStore.startDownloadWithTorrentFileFromFilePicker()}}
+                         iconNode={<AddTorrentIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>}
+          />
+
         </Toolbar>
 
         <MaxFlexSpacer />
 
         <LabelContainer>
-          <TorrentCountLabel
-            count={props.torrents.length}
-            {...labelColorProps} />
 
-          <CurrencyLabel
-            labelText={'SPENDING'}
-            satoshies={props.spending}
-            {...labelColorProps} />
+          <TorrentCountLabel count={props.UIStore.downloadingStore.torrentRowStores.length}
+                             {...labelColorProps}
+          />
 
-          <BandwidthLabel
-            labelText={'DOWNLOAD SPEED'}
-            bytesPerSecond={props.downloadSpeed}
-            {...labelColorProps} />
+          <CurrencyLabel labelText={"SPENDING"}
+                         satoshies={props.UIStore.totalSpendingOnPieces}
+                         {...labelColorProps}
+          />
+
+          <BandwidthLabel labelText={'DOWNLOAD SPEED'}
+                          bytesPerSecond={props.UIStore.downloadingStore.totalDownloadSpeed}
+                          {...labelColorProps}
+          />
+
         </LabelContainer>
+
       </MiddleSection>
 
-      <TorrentTable
-        torrents={props.torrents}
-        store={props.store}
-        onStartDownloadDrop={props.downloadingStore.startDownloadWithTorrentFileFromDragAndDrop} />
+      <TorrentTable downloadingStore={props.UIStore.downloadingStore}/>
 
-      <StartDownloadingFlow downloadingStore={props.downloadingStore} />
+      <StartDownloadingFlow downloadingStore={props.UIStore.downloadingStore}/>
+
     </div>
   )
-})
+
+}))
 
 Downloading.propTypes = {
-  torrents: PropTypes.any.isRequired,
-  spending: PropTypes.number.isRequired,
-  downloadSpeed: PropTypes.number.isRequired,
-  torrentsBeingLoaded: PropTypes.array.isRequired,
-  store: PropTypes.object.isRequired,
-  downloadingStore: PropTypes.object.isRequired,
-
   middleSectionBaseColor: PropTypes.string.isRequired,
   middleSectionDarkBaseColor: PropTypes.string.isRequired,
   middleSectionHighlightColor: PropTypes.string.isRequired

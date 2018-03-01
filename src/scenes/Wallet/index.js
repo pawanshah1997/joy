@@ -1,3 +1,3 @@
-import Wallet from './Wallet'
+import WalletScene from './Components/WalletScene'
 
-export default Wallet
+export default WalletScene

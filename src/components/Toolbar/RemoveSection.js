@@ -12,17 +12,15 @@ const RemoveSection = observer((props) => {
 
     // Derive ButtonSection props
     let className = "remove"
-    let onClick = () => { props.store.removeTorrent(props.torrent.infoHash, false) }
     let tooltip = "Remove"
 
     return (
-        <ButtonSection className={className} tooltip={tooltip} onClick={onClick} />
+        <ButtonSection className={className} tooltip={tooltip} onClick={props.onClick} />
     )
 })
 
 RemoveSection.propTypes = {
-    store : PropTypes.object.isRequired,
-    torrent : PropTypes.object.isRequired
+    onClick : PropTypes.func.isRequired
 }
 
 export default RemoveSection

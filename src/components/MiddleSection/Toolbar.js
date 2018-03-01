@@ -10,12 +10,15 @@ function getStyles() {
     return {
         root : {
             position: 'relative',
-            top: '14px',
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'center',
             alignItems: 'center',
-            marginLeft: '40px'
+            marginLeft: '40px',
+            //borderBottom: '3px solid hsla(120, 39%, 47%, 1)',
+            //borderRadius: '6px',
+            overflow: 'hidden'
+            //backgroundColor: state.mouseIsOver ? 'hsl(120, 39%, 55%)' : 'hsl(120, 39%, 65%)',
         }
     }
 }

@@ -1,2 +1,2 @@
-import ApplicationSidebar from './ApplicationHeader'
-export default ApplicationSidebar
+import ApplicationHeader from './ApplicationHeader'
+export default ApplicationHeader

@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { observer } from 'mobx-react'
+import { observer, inject } from 'mobx-react'
 import { Header } from '../../../../components/Header'
 import ButtonGroup from './ButtonGroup'
 import WalletPanel from './WalletPanel'
@@ -12,13 +12,12 @@ import {
   CommunityButton,
   LivestreamButton,
   NewButton,
-  PublicButton
+  PublishButton
 } from './Buttons'
-
-import Scene from '../../../../core/Scene'
-import { OnboardingStore } from '../../../../core'
-// import {ExplainerTip} from '../../../OnBoarding'
-import ExplainerTip, { Section, SectionSpacer } from '../../../OnBoarding/ExplainerTip'
+import OnboardingStore from '../../../Onboarding/Stores'
+import ExplainerTip, { Section, SectionSpacer } from '../../../Onboarding/ExplainerTip'
+import UIStore from '../../../UIStore'
+import ApplicationNavigationStore from '../../Stores'
 
 /**
  * ApplicationHeader
@@ -44,80 +43,95 @@ function getStyle (props) {
   }
 }
 
-const ApplicationHeader = observer((props) => {
+const ApplicationHeader = inject('UIStore')(observer((props) => {
+
   var style = getStyle(props)
 
   var buttonColorProps = {
-    rootColors: {
-      normal: props.baseColor,
-      hover: props.attentionColor,
-      selected: props.accentColor
+    rootColors : {
+      normal : props.baseColor,
+      hover : props.attentionColor,
+      selected : props.accentColor
     },
-    contentColors: {
-      normal: props.faceColor,
-      hover: props.activeFaceColor,
-      selected: props.activeFaceColor,
-      disabled: props.faceColor
+    contentColors : {
+      normal : props.faceColor,
+      hover : props.activeFaceColor,
+      selected : props.activeFaceColor,
+      disabled: props.faceColor //props.separatorColor
     },
-    notificationColor: props.notificationColor
+    notificationColor : props.notificationColor
   }
+
+  let applicationNavigationStore = props.UIStore.applicationNavigationStore
+  let activeTab = applicationNavigationStore.activeTab
 
   return (
     <Header style={style.root}>
+
       <ButtonGroup separatorColor={props.separatorColor}>
 
         <DowloadButton
-          selected={props.uiStore.scene === Scene.Downloading}
-          onClick={() => { props.uiStore.setScene(Scene.Downloading) }}
+          selected={activeTab === ApplicationNavigationStore.TAB.Downloading}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Downloading) }}
           style={style.button}
-          {...buttonColorProps} />
+          {...buttonColorProps}
+        />
 
         <UploadButton
-          selected={props.uiStore.scene === Scene.Uploading}
-          onClick={() => { props.uiStore.setScene(Scene.Uploading) }}
+          selected={activeTab === ApplicationNavigationStore.TAB.Uploading}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Uploading) }}
           style={style.button}
-          {...buttonColorProps} />
+          {...buttonColorProps}
+        />
 
         <FinishedButton
-          selected={props.uiStore.scene === Scene.Completed}
-          notificationCount={props.uiStore.numberCompletedInBackground}
-          onClick={() => { props.uiStore.setScene(Scene.Completed) }}
+          selected={activeTab === ApplicationNavigationStore.TAB.Completed}
+          notificationCount={applicationNavigationStore.numberCompletedInBackground}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Completed) }}
           style={style.button}
-          {...buttonColorProps} />
-
-        <CommunityButton
-          selected={props.uiStore.scene === Scene.Community}
-          onClick={() => { props.uiStore.setScene(Scene.Community) }}
-          style={style.button}
-          {...buttonColorProps} />
+          {...buttonColorProps}
+        />
 
         <WalletButton
-          onClick={() => { console.log('click: hello 2') }}
+          selected={activeTab === ApplicationNavigationStore.TAB.Wallet}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Wallet) }}
           style={style.button}
-          disabled
-          {...buttonColorProps} />
+          {...buttonColorProps}
+        />
+
+        <CommunityButton
+          selected={activeTab === ApplicationNavigationStore.TAB.Community}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Community) }}
+          style={style.button}
+          {...buttonColorProps}
+        />
 
         <LivestreamButton
-          onClick={() => { console.log('click: hello 3') }}
+          selected={activeTab === ApplicationNavigationStore.TAB.Livestream}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Livestream)}}
           style={style.button}
-          disabled
-          {...buttonColorProps} />
+          {...buttonColorProps}
+        />
 
         <NewButton
-          onClick={() => { console.log('click: hello 4') }}
+          selected={activeTab === ApplicationNavigationStore.TAB.New}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.New)}}
           style={style.button}
-          disabled
-          {...buttonColorProps} />
+          {...buttonColorProps}
+        />
 
-        <PublicButton
-          onClick={() => { console.log('click: hello 5') }}
+        <PublishButton
+          selected={activeTab === ApplicationNavigationStore.TAB.Publish}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Publish)}}
           style={style.button}
-          disabled
-          {...buttonColorProps} />
+          {...buttonColorProps}
+        />
 
-        { props.uiStore.onBoardingStore &&
-          props.uiStore.onBoardingStore.state === OnboardingStore.State.DisabledFeaturesExplanation
-          ? <ExplainerTip
+        {
+          props.UIStore.onboardingStore &&
+          props.UIStore.onboardingStore.state === OnboardingStore.STATE.DisabledFeaturesExplanation
+          ?
+            <ExplainerTip
             title='To be enabled'
             explainerTop={60}
             explainerLeft={-430}
@@ -125,51 +139,57 @@ const ApplicationHeader = observer((props) => {
             circleLeft={-240}
             zIndex={2}
             buttonTitle='Ok'
-            buttonClick={() => { props.uiStore.onBoardingStore.disabledFeaturesExplanationAccepted() }} >
-              The wallet, live, new and publish tabs are disabled for now, they will be enabled as we roll out these features. Stay tuned for updates !
+            buttonClick={() => { props.UIStore.onboardingStore.disabledFeaturesExplanationAccepted() }} >
+            The live, new and publish tabs are disabled for now, they will be enabled as we roll out these features. Stay tuned for updates !
             </ExplainerTip>
-          : null }
+          :
+            null
+        }
 
       </ButtonGroup>
 
       <div style={style.spacer} />
 
-      <div style={style.seperator} />
-
       <WalletPanel
-        applicationStore={props.app}
+        applicationNavigationStore={applicationNavigationStore}
+
         backgroundColor={props.baseColor}
         balanceColor={props.balanceColor}
         subtitleColor={props.faceColor}>
-        { props.uiStore.onBoardingStore &&
-          props.uiStore.onBoardingStore.state === OnboardingStore.State.BalanceExplanation
-          ? <ExplainerTip
-            title='Your wallet'
-            explainerTop={30}
-            explainerLeft={-450}
-            circleTop={-10}
-            circleLeft={-85}
-            zIndex={2}
-            buttonTitle='Ok'
-            buttonClick={() => { props.uiStore.onBoardingStore.balanceExplanationAccepted() }} >
-            <div style={{ width: '400px' }}>
-              <Section title='Testnet coins'
-                text={
-                  <div>We are sending you free <span style={{ fontWeight: 'bold' }}>testnet</span> coins promptly, and your unconfirmed balance is visible here. Once you see a balance in your wallet you will be able to do paid speedups on torrents.</div>
-                } />
-              <SectionSpacer height={'20px'} />
-            </div>
-          </ExplainerTip>
-          : null }
+
+        {
+            props.UIStore.onboardingStore &&
+            props.UIStore.onboardingStore.state === OnboardingStore.STATE.BalanceExplanation
+          ?
+            <ExplainerTip
+              title='Your wallet'
+              explainerTop={30}
+              explainerLeft={-450}
+              circleTop={-10}
+              circleLeft={-85}
+              zIndex={2}
+              buttonTitle='Ok'
+              buttonClick={() => { props.UIStore.onboardingStore.balanceExplanationAccepted() }} >
+              <div style={{ width: '400px' }}>
+                <Section title='Testnet coins'
+                         text={
+                           <div>We are sending you free <span style={{ fontWeight: 'bold' }}>testnet</span> coins promptly, and your unconfirmed balance is visible here. Once you see a balance in your wallet you will be able to do paid speedups on torrents.</div>
+                         } />
+                <SectionSpacer height={'20px'} />
+              </div>
+            </ExplainerTip>
+          :
+            null
+        }
       </WalletPanel>
+
     </Header>
   )
-})
+
+}))
 
 ApplicationHeader.propTypes = {
   height: PropTypes.string.isRequired,
-  app: PropTypes.object.isRequired,
-  uiStore: PropTypes.object.isRequired,
   baseColor: PropTypes.string,
   attentionColor: PropTypes.string,
   accentColor: PropTypes.string.isRequired,
@@ -179,14 +199,13 @@ ApplicationHeader.propTypes = {
 }
 
 ApplicationHeader.defaultProps = {
-  // colors
-  baseColor: '#1c262b',
-  attentionColor: '#1c262b', // '#7d8b91',
-  notificationColor: '#c9302c', // '#c52578',
-  balanceColor: 'white',
-  faceColor: '#7d8b91',
-  activeFaceColor: 'white',
-  separatorColor: '#242f35'
+  baseColor : '#1c262b',
+  attentionColor : '#1c262b', // '#7d8b91',
+  notificationColor : '#c9302c', //'#c52578',
+  balanceColor : 'white',
+  faceColor : '#7d8b91',
+  activeFaceColor : 'white',
+  separatorColor : '#242f35'
 }
 
 export default ApplicationHeader

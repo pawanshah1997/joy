@@ -22,10 +22,12 @@ var Unpaid = new BaseMachine({
         Stopped : {
 
             start : function (client) {
-              
-                client.startLibtorrentTorrent()
-                client.startExtension()
-                this.go(client, 'Started/ReadyForStartPaidDownloadAttempt')
+
+              client._joystreamNodeTorrent.handle.resume()
+
+              Common.startExtension(client)
+
+              this.go(client, 'Started/ReadyForStartPaidDownloadAttempt')
             }
 
         }

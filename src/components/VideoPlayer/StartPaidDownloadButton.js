@@ -6,34 +6,33 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Provider, observer, inject } from 'mobx-react'
 
-import ViabilityOfPaidDownloadingTorrent from '../../core/Torrent/ViabilityOfPaidDownloadingTorrent'
-import ViabilityOfPaidDownloadingSwarm from '../../core/Torrent/ViabilityOfPaidDownloadingSwarm'
-
 function getColors(props, state) {
 
-    if (props.torrent.viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart) {
+  if (props.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart') {
+      if (state.hover) {
+          return {
+              foreground : 'rgba(92, 254, 92, 0.7)',
+              background : 'rgba(92, 254, 92, 0.4)'
+          }
+      } else {
+          return {
+              foreground : 'rgba(92, 184, 92, 0.7)',
+              background : 'rgba(92, 184, 92, 0.3)'
+          }
+      }
 
-        if (state.hover)
-            return {
-                foreground : 'rgba(92, 254, 92, 0.7)',
-                background : 'rgba(92, 254, 92, 0.4)'
-            }
-        else
-            return {
-                foreground : 'rgba(92, 184, 92, 0.7)',
-                background : 'rgba(92, 184, 92, 0.3)'
-            }
+  } else if (props.viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted') {
+      return {
+          foreground : 'hsla(180, 1%, 80%, 0.6)',
+          background : 'hsla(180, 1%, 80%, 0.4)'
+      }
+  }
 
-    } else if (props.torrent.viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.AlreadyStarted) {
-        return {
-            foreground : 'hsla(180, 1%, 80%, 0.6)',
-            background : 'hsla(180, 1%, 80%, 0.4)'
-        }
-    } else
-        return {
-            foreground : 'rgba(240, 173, 78, 1)',
-            background : 'rgba(240, 173, 78, 0.4)'
-        }
+  // not viable or torrent is already downloaded
+  return {
+      foreground : 'rgba(240, 173, 78, 1)',
+      background : 'rgba(240, 173, 78, 0.4)'
+  }
 
 }
 
@@ -89,33 +88,37 @@ function getText(viabilityOfPaidDownloadingTorrent) {
     let text = null
     let subText = null
 
-    if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.AlreadyStarted)
+    if(viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted')
         text = "Paying for speedup"
-    else if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart)
+    else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart')
         text = "Pay for speedup"
     else {
 
         text = "Paid speedup unavailable"
 
-        if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.InsufficientFunds)
+        if(viabilityOfPaidDownloadingTorrent.constructor.name === 'InsufficientFunds')
             subText = "Insufficient funds"
-        else if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.Stopped)
+        else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'Stopped')
             subText = "Download stopped"
-        else if(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.InViable) {
+        else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'InViable') {
 
-            if(viabilityOfPaidDownloadingTorrent.swarmViability instanceof ViabilityOfPaidDownloadingSwarm.NoJoyStreamPeerConnections)
+            if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'NoJoyStreamPeerConnections')
                 subText = "No JoyStream peers available"
-            else if(viabilityOfPaidDownloadingTorrent.swarmViability instanceof ViabilityOfPaidDownloadingSwarm.NoSellersAmongJoyStreamPeers)
+            else if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'NoSellersAmongJoyStreamPeers')
                 subText = "No sellers among JoyStream peers"
-            else if(viabilityOfPaidDownloadingTorrent.swarmViability instanceof ViabilityOfPaidDownloadingSwarm.InSufficientNumberOfSellersInvited)
+            else if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'InSufficientNumberOfSellersInvited')
                 subText = "Insufficient number of sellers invited"
-            else if(viabilityOfPaidDownloadingTorrent.swarmViability instanceof ViabilityOfPaidDownloadingSwarm.InSufficientNumberOfSellersHaveJoined)
+            else if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'InSufficientNumberOfSellersHaveJoined')
                 subText = "Insufficient number of sellers have joined"
-            else if(viabilityOfPaidDownloadingTorrent.swarmViability instanceof ViabilityOfPaidDownloadingSwarm.Viable)
+            else if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'Viable')
                 assert(false) // <== not possible
-
-        } else
+        } else if (viabilityOfPaidDownloadingTorrent.constructor.name === 'NotLoaded') {
+            assert(false, 'Media Player should not have been started for a that is torrent still loading')
+        } else if (viabilityOfPaidDownloadingTorrent.constructor.name === 'FullyDownloaded') {
+            assert(false, 'Media Player should not show start paid download button for a fully downloaded torrent')
+        } else {
             assert(false) // <== not possible
+        }
     }
 
     return {
@@ -156,7 +159,7 @@ class StartPaidDownloadButton extends Component {
 
         console.log('handleClick')
 
-        if(this.props.torrent.viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart)
+        if(this.props.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart')
             this.props.torrent.startPaidDownload()
 
     }
@@ -164,7 +167,7 @@ class StartPaidDownloadButton extends Component {
     render() {
 
         let styles = getStyles(this.props, this.state)
-        let texts = getText(this.props.torrent.viabilityOfPaidDownloadingTorrent)
+        let texts = getText(this.props.viabilityOfPaidDownloadingTorrent)
 
         return (
             <div style={styles.root}

@@ -1,3 +1,6 @@
+/**
+ * Gives promise interface for level-up instance.
+ */
 class LevelPromiseInterface {
   constructor (db) {
     this.db = db

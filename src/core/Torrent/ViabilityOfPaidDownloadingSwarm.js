@@ -52,7 +52,7 @@ function Viable(suitableAndJoined, estimate) {
     this.estimate = estimate
 }
 
-module.exports = {
+export default {
     NoJoyStreamPeerConnections,
     NoSellersAmongJoyStreamPeers,
     InSufficientNumberOfSellersInvited,

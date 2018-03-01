@@ -1,6 +1,6 @@
 var request = require('request')
 
-const joystreamFaucet = 'http://45.79.102.125:7099/withdraw/'
+export const TESTNET_FAUCET_URL = "http://45.79.102.125:7099/withdraw/"
 
 /**
   * Makes a request to testnet faucet to get some free coins
@@ -11,7 +11,7 @@ function getCoins (address, callback = () => {}) {
     address: address
   }
 
-  request({url: joystreamFaucet, qs: query}, (err, response, body) => {
+  request({url: TESTNET_FAUCET_URL, qs: query}, (err, response, body) => {
     if (err) {
       // network error
       callback(err.message)
@@ -34,6 +34,4 @@ function getCoins (address, callback = () => {}) {
   })
 }
 
-module.exports = {
-  getCoins: getCoins
-}
+export default getCoins

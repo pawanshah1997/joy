@@ -9,20 +9,30 @@ import Toolbar, {
     StartUploadingSection} from '../../../components/Toolbar'
 
 const TorrentToolbar = (props) => {
+  
   return (
     <Toolbar>
-      <PlaySection torrent={props.torrent} />
-      <StartUploadingSection torrent={props.torrent} />
-      <RemoveSection torrent={props.torrent} store={props.store} />
-      <RemoveAndDeleteSection torrent={props.torrent} store={props.store} />
-      <OpenFolderSection torrent={props.torrent} />
+      
+      <PlaySection canPlay={props.torrentTableRowStore.canPlayMedia}
+                   play={() => { props.torrentTableRowStore.playMedia() }}
+      />
+      
+      <StartUploadingSection canBeginPaidUploadWidthDefaultTerms={props.torrentTableRowStore.torrentStore.canBeginUploading}
+                             onClick={() => { props.torrentTableRowStore.beginPaidUploadWithDefaultTerms() }}
+      />
+      
+      <RemoveSection onClick={() => { props.torrentTableRowStore.remove() }} />
+      
+      <RemoveAndDeleteSection onClick={() => { props.torrentTableRowStore.removeAndDeleteData() }} />
+      
+      <OpenFolderSection onClick={() => { props.torrentTableRowStore.openFolder() }} />
+      
     </Toolbar>
   )
 }
 
 TorrentToolbar.propTypes = {
-  torrent: PropTypes.object.isRequired,
-  store: PropTypes.object.isRequired
+  torrentTableRowStore: PropTypes.object.isRequired // HMR breaks PropTypes.instanceOf(TorrentTableRowStore)
 }
 
 export default TorrentToolbar
