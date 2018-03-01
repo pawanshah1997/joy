@@ -1049,7 +1049,7 @@ function stateToString(state) {
 
 function exchangeRateFetcher() {
   return new Promise(function (resolve, reject) {
-    request('https://api.coinmarketcap.com/v1/ticker/bitcoin/', function (err, response, body) {
+    request('https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/', function (err, response, body) {
       if (err) return reject(err)
 
       const responseStatusCode = response.statusCode
