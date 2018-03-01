@@ -229,8 +229,8 @@ class Application extends EventEmitter {
      * Wallet
      */
 
-     // Ensure base wallets directory exists
-     mkdirp.sync(FOLDER_NAME.WALLETS)
+     // // Ensure base wallets directory exists Wallet will take care of this
+     // mkdirp.sync(FOLDER_NAME.WALLETS)
 
     // Make and hold on to path to wallet
     this._walletPath = path.join(this._appDirectory, FOLDER_NAME.WALLETS, bcoin.network.primary.type)
