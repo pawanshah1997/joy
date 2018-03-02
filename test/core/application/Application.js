@@ -4,16 +4,6 @@
 // babel-polyfill for generator (async/await)
 import 'babel-polyfill'
 
-// Use of pure js bcoin library because electron doesn't compile with openssl
-// which is needed.
-process.env.BCOIN_NO_NATIVE = '1'
-
-// Disable workers which are not available in electron
-require('bcoin').set({ useWorkers: false })
-
-// Set primary network in Bcoin (oyh vey, what a singlton horrible pattern)
-bcoin.set({ network :  config.network})
-
 var expect = require('chai').expect
 import sinon from 'sinon'
 import os from 'os'
@@ -21,8 +11,8 @@ import fs from 'fs'
 import rimraf from 'rimraf'
 import path from 'path'
 
-import Application, {WalletTopUpOptions} from '../../../src/core/Application'
 import config from '../../../src/config'
+import Application, {WalletTopUpOptions} from '../../../src/core/Application'
 import DeepInitialState from '../../../src/core/Torrent/Statemachine/DeepInitialState'
 import { TorrentInfo } from 'joystream-node'
 
