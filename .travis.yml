@@ -31,23 +31,22 @@ before_install:
       rvm install ruby-2.3.3;
       rvm --default use 2.3.3;
       ruby --version;
-      brew update;
       brew upgrade openssl;
-      brew upgrade python;
-      export PATH="/usr/local/opt/python/libexec/bin:$PATH";
-      export PYTHONPATH=`brew --prefix`/lib/python2.7/site-packages:$PYTHONPATH;
+      brew install python@2;
+      export PATH="/usr/local/opt/python@2/libexec/bin:$PATH";
+      export PYTHONPATH="/usr/local/lib/python2.7/site-packages:$PYTHONPATH";
       export CPPFLAGS="-I/usr/local/opt/openssl/include";
       export LDFLAGS="-L/usr/local/opt/openssl/lib";
       python --version;
       python -c "import ssl; print ssl.OPENSSL_VERSION";
-      pip install --upgrade pip setuptools;
+      python -m pip install --upgrade --force pip setuptools;
     fi
   # Install conan
   - if [ "$TRAVIS_OS_NAME" = osx ]; then
-      pip install "conan==0.28.1";
-      pip uninstall pyopenssl;
-      pip uninstall cryptography;
-      pip install "pyopenssl>=16.0.0, <17.0.0";
+      python -m pip install "conan==0.28.1";
+      python -m pip uninstall pyopenssl;
+      python -m pip uninstall cryptography;
+      python -m pip install "pyopenssl>=16.0.0, <17.0.0";
     else
       pip install --user "conan==0.28.1";
     fi
