@@ -270,7 +270,7 @@ class Application extends EventEmitter {
      */
 
     // Hold on to price feed
-    this.priceFeed = new PriceFeed(null, exchangeRateFetcher)
+    this.priceFeed = new PriceFeed(null, exchangeRateFetcher.bind(null, bcoin.network.primary.type))
 
     this.priceFeed.on('error', this._onPriceFeedError)
 
@@ -1047,9 +1047,24 @@ function stateToString(state) {
 
 }
 
-function exchangeRateFetcher() {
+function exchangeRateFetcher(bcoinNetwork) {
   return new Promise(function (resolve, reject) {
-    request('https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/', function (err, response, body) {
+
+    // mapping from bcoin network name to coinmarketcap ticker symbol
+    const mapping = {
+      'mainnet' : 'bitcoin',
+      'testnet' : 'bitcoin',
+      'bitcoincash' : 'bitcoin-cash',
+      'bitcoincashtestnet' : 'bitcoin-cash'
+    }
+
+    const ticker = mapping[bcoinNetwork]
+
+    if (!ticker) {
+      return reject('unknown ticker for network ' + bcoinNetwork)
+    }
+
+    request('https://api.coinmarketcap.com/v1/ticker/' + ticker, function (err, response, body) {
       if (err) return reject(err)
 
       const responseStatusCode = response.statusCode
