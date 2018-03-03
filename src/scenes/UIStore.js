@@ -342,7 +342,11 @@ class UIStore {
        * endpoint, or something similar.
        * Estimate picked from: https://live.blockcypher.com/btc-testnet/
        */
-      let satsPrkBFee = 0.00239 * bcoin.protocol.consensus.COIN
+      // let satsPrkBFee = 0.00239 * bcoin.protocol.consensus.COIN
+
+      // http://statocashi.info/dashboard/db/fee-estimates?orgId=1&from=now-7d&to=now
+      // We can get away with very low 2 Sat/byte
+      let satsPrkBFee = 2048
 
       assert(!this.walletSceneStore)
       this.walletSceneStore = new WalletSceneStore(
