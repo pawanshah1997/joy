@@ -1,17 +1,38 @@
 var request = require('request')
 
-export const TESTNET_FAUCET_URL = "http://45.79.102.125:7099/withdraw/"
+const FAUCET_URLS = {
+  // Bitcoin testnet
+  'testnet': 'http://45.79.102.125:7099/withdraw/',
+  // Bitcoin Cash testnet
+  'bitcoincashtestnet': 'http://45.79.102.125:7098/withdraw/'
+}
 
 /**
   * Makes a request to testnet faucet to get some free coins
-  * @address - address to send coins to (string: base58 encoded)
+  * @address - address to send coins to (bcoin.Address)
   */
 function getCoins (address, callback = () => {}) {
+  // Determine faucet service to use from network
+  const url = FAUCET_URLS[address.network.type]
+
+  if (!url) {
+    return callback('unsupported network')
+  }
+
+  _getCoins(url, address.toString(), callback)
+}
+
+/**
+  * Makes a request to testnet faucet to get some free coins
+  * @faucetUrl - URL to joystream faucet web service (string)
+  * @address - address to send coins to (string: base58 encoded)
+  */
+function _getCoins (faucetUrl, address, callback = () => {}) {
   var query = {
     address: address
   }
 
-  request({url: TESTNET_FAUCET_URL, qs: query}, (err, response, body) => {
+  request({url: faucetUrl, qs: query}, (err, response, body) => {
     if (err) {
       // network error
       callback(err.message)

@@ -167,7 +167,7 @@ class Wallet extends EventEmitter {
     /// guard them with our own state, no clear need as of yet.
 
     // Attach the walletdb plugin
-    this._spvNode.use(bcoin.walletplugin)
+    this._spvNode.use(bcoin.wallet.plugin)
 
     // Disable http/rpc - to avoid any port conflict issues. Also more secure option
     this._spvNode.http = null
@@ -565,7 +565,7 @@ class Wallet extends EventEmitter {
 
     return this._spvNode.broadcast(tx)
   }
-  
+
   /**
    * Process
    * @param {TX} tx
@@ -748,13 +748,13 @@ class Wallet extends EventEmitter {
     return paymentsInTx
 
   }
-  
+
   _setState(state) {
-    
+
     this.state = state
     this.emit('state', this.state)
     this.emit(stateToString(this.state))
-    
+
     // Some helpful logging in case there was a serious error
     if(this.state === Wallet.STATE.CATASTROPHIC_ERROR)
       console.log(this.catastrophicErrorMessage)

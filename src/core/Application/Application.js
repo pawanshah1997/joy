@@ -19,7 +19,7 @@ var debug = require('debug')('application')
 import {shell} from 'electron'
 
 const FOLDER_NAME = {
-  WALLET: 'wallet',
+  WALLETS: 'wallets',
   DEFAULT_SAVE_PATH_BASE: 'download',
   TORRENT_DB: 'data'
 }
@@ -110,6 +110,7 @@ class Application extends EventEmitter {
    * RENAME: not resource, loading/ter milestone ?
    */
   static RESOURCE = {
+
     SETTINGS : 0,
     WALLET : 1,
     JOYSTREAM_NODE_SESSION: 2,
@@ -118,6 +119,12 @@ class Application extends EventEmitter {
   }
 
   static get NUMBER_OF_RESOURCE_TYPES() { return Object.keys(Application.RESOURCE).length }
+
+  static sessionNetworkFromBcoinNetwork (network) {
+    if (network === 'bitcoincash') return 'mainnet_bitcoin_cash'
+
+    throw new Error('unsupported network')
+  }
 
   /**
    * {Set.<RESOURCES>} The resources which are currently started
@@ -222,21 +229,26 @@ class Application extends EventEmitter {
      * Wallet
      */
 
-    // Make and hold on to path to wallet
-    this._walletPath = path.join(this._appDirectory, FOLDER_NAME.WALLET)
+     // // Ensure base wallets directory exists Wallet will take care of this
+     // mkdirp.sync(FOLDER_NAME.WALLETS)
 
-    let spvOptions = {
+    // Make and hold on to path to wallet
+    this._walletPath = path.join(this._appDirectory, FOLDER_NAME.WALLETS, bcoin.network.primary.type)
+
+    const spvNodeOptions = {
       prefix: this._walletPath,
       db: 'leveldb',
-      network: config.network
+      network: bcoin.network.primary.type,
+      // Disable workers which are not available in electron
+      workers: false
     }
 
     // Add a logger if log level is specified
     if(config.logLevel)
-      spvOptions.logger = new bcoin.logger({ level: config.logLevel })
+      spvNodeOptions.logger = new bcoin.logger({ level: config.logLevel })
 
     // Create the SPV Node
-    let spvNode = bcoin.spvnode(spvOptions)
+    let spvNode = bcoin.spvnode(spvNodeOptions)
 
     // Create and hold to wallet
     this.wallet = new Wallet(spvNode)
@@ -258,7 +270,7 @@ class Application extends EventEmitter {
      */
 
     // Hold on to price feed
-    this.priceFeed = new PriceFeed(null, exchangeRateFetcher)
+    this.priceFeed = new PriceFeed(null, exchangeRateFetcher.bind(null, bcoin.network.primary.type))
 
     this.priceFeed.on('error', this._onPriceFeedError)
 
@@ -315,7 +327,11 @@ class Application extends EventEmitter {
       // network port libtorrent session will open a listening socket on
       port: this.applicationSettings.bittorrentPort(),
       // Assisted Peer Discovery (APD)
-      assistedPeerDiscovery: this.applicationSettings.useAssistedPeerDiscovery()
+
+      assistedPeerDiscovery: this.applicationSettings.useAssistedPeerDiscovery(),
+
+      // bitcoin network configuration for payment channels
+      network: Application.sessionNetworkFromBcoinNetwork(bcoin.network.primary.type)
     }
 
     // Create & start session
@@ -937,11 +953,11 @@ class Application extends EventEmitter {
       // Beg faucet for funds if we are supposed to
       if (this._walletTopUpOptions.doTopUp && this._walletTopUpOptions.walletBalanceLowerBound > balance) {
 
-        let addressString = this._wallet.receiveAddress.toString()
+        let address = this._wallet.receiveAddress
 
-        console.log('Faucet: Requesting some testnet coins to address: ' + addressString)
+        console.log('Faucet: Requesting some testnet coins to address: ' + addressString.toString())
 
-        getCoins(addressString, function (err) {
+        getCoins(address, function (err) {
 
           if (err) {
             console.log('Faucet:', err)
@@ -1031,9 +1047,24 @@ function stateToString(state) {
 
 }
 
-function exchangeRateFetcher() {
+function exchangeRateFetcher(bcoinNetwork) {
   return new Promise(function (resolve, reject) {
-    request('https://api.coinmarketcap.com/v1/ticker/bitcoin/', function (err, response, body) {
+
+    // mapping from bcoin network name to coinmarketcap ticker symbol
+    const mapping = {
+      'mainnet' : 'bitcoin',
+      'testnet' : 'bitcoin',
+      'bitcoincash' : 'bitcoin-cash',
+      'bitcoincashtestnet' : 'bitcoin-cash'
+    }
+
+    const ticker = mapping[bcoinNetwork]
+
+    if (!ticker) {
+      return reject('unknown ticker for network ' + bcoinNetwork)
+    }
+
+    request('https://api.coinmarketcap.com/v1/ticker/' + ticker, function (err, response, body) {
       if (err) return reject(err)
 
       const responseStatusCode = response.statusCode
