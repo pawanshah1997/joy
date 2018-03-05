@@ -61,16 +61,6 @@ const application = new Application(EXAMPLE_TORRENTS, process.env.FORCE_ONBOARDI
 
 application.on('started', () => {
 
-  // Hook into open preference command, and open file
-  // path to application settings file. In the future,
-  // this will be triggered natively from page, not from
-  // window context menu.
-  ipcRenderer.on('openPreferences', () => {
-
-    if(application.state === Application.STATE.STARTED)
-      shell.openItem(application.applicationSettings.filePath())
-  })
-
   /**
    const magnet = require('magnet-uri')
    const isDev = require('electron-is-dev')
