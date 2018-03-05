@@ -54,12 +54,22 @@ var Torrent = new BaseMachine({
             },
 
             uploadStarted: function (client, alert) {
-              var peer = client.peers[alert.pid]
+              
+              let peer = client.peers.get(alert.pid)
+              
+              // Peer must exist if we received this alert
+              assert(peer)
+              
               peer.uploadStarted(alert)
             },
 
             anchorAnnounced: function (client, alert) {
-              var peer = client.peers[alert.pid]
+              
+              let peer = client.peers.get(alert.pid)
+  
+              // Peer must exist if we received this alert
+              assert(peer)
+              
               peer.anchorAnnounced(alert)
             },
 
