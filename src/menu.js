@@ -4,11 +4,6 @@ function createTemplate (win) {
     {
       label: 'Edit',
       submenu: [
-        {
-          label: 'Preferences',
-          click () { win.webContents.send('openPreferences') }
-        },
-        { type: 'separator' },
         { label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:' },
         { label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:' },
         { label: 'Select All', accelerator: 'CmdOrCtrl+A', selector: 'selectAll:' }
