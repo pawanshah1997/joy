@@ -482,11 +482,11 @@ class Wallet extends EventEmitter {
       throw new Error('createAndSendPaidDownloadingContract call interrupted by wallet state changing.')
     }
 
-    // // Process a transaction
-    // let payments = await this._processTx(tx)
-    //
-    // // There should be exactly one payment
-    // assert(payments.length === 1)
+    // Process a transaction
+    let payments = await this._processTx(tx)
+
+    // There should be exactly one payment
+    assert(payments.length === 1)
 
     return tx
   }
