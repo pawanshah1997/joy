@@ -7,22 +7,21 @@ matrix:
   include:
     - os: linux
       dist: trusty
-      sudo: false
+      # requiring sudo will trigger builds to run on a dedicated VM, which has more
+      # RAM. This is required for building boost from source successfully.
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - george-edison55-precise-backports
+          packages:
+            - cmake
+            - cmake-data
+            - rpm
+            - fakeroot
     - os: osx
       osx_image: xcode7.3
       sudo: false
-
-addons:
-  apt:
-    sources:
-      - george-edison55-precise-backports
-    packages:
-      - cmake
-      - cmake-data
-  apt:
-    packages:
-    - rpm
-    - fakeroot
 
 before_install:
     # 2016-10: Apple doesn't include openssl any more because of security
