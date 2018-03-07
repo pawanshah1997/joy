@@ -136,9 +136,8 @@ class SendDialogStore {
 
     /// Recover params from forms
 
-    // pubKeyHash from address
+    // bcoin.Address from addressString
     let address = UserProvidingRecipientAddressFormStore.validatedAddress(addressString)
-    let pubKeyHash = address.hash
 
     // amount
 
@@ -152,7 +151,7 @@ class SendDialogStore {
     // If we get this far, update form
     this.setActiveForm(SendDialogStore.FORM.ATTEMPTING_TO_SEND_PAYMENT)
 
-    this._walletStore.pay(pubKeyHash, amount, this._satsPrKbFee, note)
+    this._walletStore.pay(address, amount, this._satsPrKbFee, note)
       .then((paymentStore) => {
 
         // We should still be in the same state

@@ -46,7 +46,7 @@ class WalletStore {
   @observable paymentStores
 
   constructor(state, totalBalance, confirmedBalance, receiveAddress, blockTipHeight, synchronizedBlockHeight, paymentStores, pay) {
-    
+
     this.setState(state)
     this.setTotalBalance(totalBalance)
     this.setConfirmedBalance(confirmedBalance)
@@ -54,9 +54,9 @@ class WalletStore {
     this.setBlockTipHeight(blockTipHeight)
     this.setSynchronizedBlockHeight(synchronizedBlockHeight)
     this.paymentStores = paymentStores
-    
+
     this._pay = pay
-    
+
   }
 
   @action.bound
@@ -96,20 +96,20 @@ class WalletStore {
 
   /**
    * Make a payment
-   * @param {Hash} pubKeyHash - for destination
+   * @param {bcoin.Address} address - for destination
    * @param {Number} amount - number of satoshis
    * @param {Number} satsPrkBFee - number of satoshis per kB.
    * @param {String} note - note to be attached to the payment
    * @returns {Promise} - Returns {@link PaymentStore}
    */
   @action.bound
-  async pay(pubKeyHash, amount, satsPrkBFee, note) {
-    
+  async pay(address, amount, satsPrkBFee, note) {
+
     if(!bcoin.util.isNumber(satsPrkBFee))
       throw new Error('satsPrkBFee is not a valid number')
 
     // Pay
-    let payment = await this._pay(pubKeyHash, amount, satsPrkBFee, note)
+    let payment = await this._pay(address, amount, satsPrkBFee, note)
 
     // create PaymentStore
     let paymentStore = new PaymentStore(payment)
