@@ -22,7 +22,7 @@ function getStyle(props) {
     inputField : {
       inputStyle : {
         fontSize : '20px',
-        width : '400px'
+        width : '500px'
       },
       style : {
         flexGrow : '1'

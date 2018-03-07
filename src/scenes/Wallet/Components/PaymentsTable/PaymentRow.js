@@ -338,11 +338,11 @@ class PaymentRow extends Component {
           <div style={{display : 'flex', fontSize : '13px', color : 'rgb(129, 129, 130)'}}>
 
             <span>
-              to address
+              to
             </span>
 
             <span style={styles.toAddressValue}>
-              {(new CashAddressFormat(paymentStore.toAddress)).toString()}
+              {(new CashAddressFormat(paymentStore.toAddress)).toString().split(':')[1]}
             </span>
           </div>
 
