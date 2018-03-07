@@ -749,7 +749,7 @@ class Application extends EventEmitter {
 
       //privateKeyGenerator
       () => {
-        return bcoin.ec.generatePrivateKey()
+        return bcoin.secp256k1.generatePrivateKey()
       },
 
       //publicKeyHashGenerator
