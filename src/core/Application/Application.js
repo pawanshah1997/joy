@@ -955,7 +955,7 @@ class Application extends EventEmitter {
 
         let address = this.wallet.receiveAddress
 
-        console.log('Faucet: Requesting some testnet coins to address: ' + addressString.toString())
+        console.log('Faucet: Requesting some testnet coins to address: ' + address.toString())
 
         getCoins(address, function (err) {
 
