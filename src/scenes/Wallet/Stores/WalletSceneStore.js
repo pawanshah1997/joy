@@ -160,6 +160,13 @@ class WalletSceneStore {
       return new PaymentRowStore(paymentStore, this)
     })
   }
+  
+  @computed get
+  filteredPaymentRowStores() {
+    
+    return this.paymentRowStores
+      .sort(comparePayments)
+  }
 
   @computed get
   sortedAndFilteredPaymentRowStores() {
@@ -169,6 +176,24 @@ class WalletSceneStore {
     })
   }
 
+}
+
+/**
+ * Comparer for two payments by `date` property, ranking
+ * more recent dates first.
+ *
+ * @param p1
+ * @param p2
+ * @returns {Number} - value follows normal comparer sementics
+ */
+function comparePayments(p1, p2) {
+  
+  if(!p1.date)
+    return -1 // p1 first
+  else if(!p2.date)
+    return 1 // p2 first
+  else
+    return p2.date - p1.date // elapsed time in ms
 }
 
 export default WalletSceneStore
