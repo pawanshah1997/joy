@@ -948,7 +948,7 @@ class Application extends EventEmitter {
 
     debug('new total balance: ' + balance)
 
-    if(this.state === Application.STATE.STARTED) {
+    if(this.state === Application.STATE.STARTED || this.state === Application.STATE.STARTING) {
 
       // Beg faucet for funds if we are supposed to
       if (this._walletTopUpOptions.doTopUp && this._walletTopUpOptions.walletBalanceLowerBound > balance) {
