@@ -5,6 +5,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Provider, observer, inject } from 'mobx-react'
+import assert from 'assert'
 
 function getColors(props, state) {
 
@@ -96,7 +97,9 @@ function getText(viabilityOfPaidDownloadingTorrent) {
 
         text = "Paid speedup unavailable"
 
-        if(viabilityOfPaidDownloadingTorrent.constructor.name === 'InsufficientFunds')
+        if(viabilityOfPaidDownloadingTorrent.constructor.name === 'WalletNotReady')
+            subText = "Wallet not ready"
+        else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'InsufficientFunds')
             subText = "Insufficient funds"
         else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'Stopped')
             subText = "Download stopped"
@@ -111,9 +114,9 @@ function getText(viabilityOfPaidDownloadingTorrent) {
             else if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'InSufficientNumberOfSellersHaveJoined')
                 subText = "Insufficient number of sellers have joined"
             else if(viabilityOfPaidDownloadingTorrent.swarmViability.constructor.name === 'Viable')
-                assert(false) // <== not possible
+                assert(false, 'swarmViability is "Viable", but torrent viability was "InViable"') // <== not possible
         } else if (viabilityOfPaidDownloadingTorrent.constructor.name === 'NotLoaded') {
-            assert(false, 'Media Player should not have been started for a that is torrent still loading')
+            assert(false, 'Media Player should not have been started for a torrent that is still loading')
         } else if (viabilityOfPaidDownloadingTorrent.constructor.name === 'FullyDownloaded') {
             assert(false, 'Media Player should not show start paid download button for a fully downloaded torrent')
         } else {
