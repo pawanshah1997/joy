@@ -262,7 +262,13 @@ class Application extends EventEmitter {
       this._startedResource(Application.RESOURCE.WALLET, onStarted)
     })
 
-    this.wallet.on('totalBalanceChanged', this._totalWalletBalanceChanged)
+    this.wallet.on('totalBalanceChanged', (balance) => {
+      try {
+        this._totalWalletBalanceChanged(balance)
+      } catch (err) {
+        console.error(err)
+      }
+    })
 
     // Start wallet
     this.wallet.start()
@@ -947,7 +953,7 @@ class Application extends EventEmitter {
     this.emit('onboardingIsEnabled', onboardingIsEnabled)
   }
 
-  _totalWalletBalanceChanged = (balance) => {
+  _totalWalletBalanceChanged (balance) {
 
     debug('new total balance: ' + balance)
 

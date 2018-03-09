@@ -176,14 +176,16 @@ class Wallet extends EventEmitter {
     overrideBcoinPoolHandleTxInv(this._spvNode.pool)
 
     this._spvNode.chain.on('block', (block, entry) => {
+      try {
+        // Update height of chain
+        this._setBlockTipHeight(this._spvNode.chain.height)
 
-      // Update height of chain
-      this._setBlockTipHeight(this._spvNode.chain.height)
-
-      // Update synch
-      let synchronizedBlockHeight = this.synchronizedBlockHeight * this._spvNode.chain.getProgress()
-      this._setSynchronizedBlockHeight(synchronizedBlockHeight)
-
+        // Update synch
+        let synchronizedBlockHeight = this.synchronizedBlockHeight * this._spvNode.chain.getProgress()
+        this._setSynchronizedBlockHeight(synchronizedBlockHeight)
+      } catch (err) {
+        console.error(err)
+      }
       // _spvNode.pool.x?  what do peers report as the current tip of their longest chain?
       // it is sent in the version message when we connect to them
     })
@@ -259,28 +261,48 @@ class Wallet extends EventEmitter {
       console.log(tx)
       console.log(details)
 
-      this._newTransaction(tx, details)
+      try {
+        this._newTransaction(tx, details)
+      } catch (err) {
+        console.error(err)
+      }
     })
 
     this._wallet.on('confirmed', (tx, details) => {
-      this._transactionConfirmed(tx, details)
+      try {
+        this._transactionConfirmed(tx, details)
+      } catch (err) {
+        console.error(err)
+      }
+
     })
 
     this._wallet.on('unconfirmed', (tx, details) => {
-      this._transactionUnconfirmed(tx, details)
+      try {
+        this._transactionUnconfirmed(tx, details)
+      } catch (err) {
+        console.error(err)
+      }
     })
 
     this._wallet.on('balance', (balance) => {
-      this._setConfirmedBalance(balance.confirmed)
-      this._setTotalBalance(balance.unconfirmed)
+      try {
+        this._setConfirmedBalance(balance.confirmed)
+        this._setTotalBalance(balance.unconfirmed)
+      } catch (err) {
+        console.error(err)
+      }
     })
 
     // New receive address generated
     this._wallet.on('address', (derived) => {
+      try {
+        let receiveAddress = derived[0].getAddress()
 
-      let receiveAddress = derived[0].getAddress()
-
-      this.emit('receiveAddressChanged', receiveAddress)
+        this.emit('receiveAddressChanged', receiveAddress)
+      } catch (err) {
+        console.error(err)
+      }
     })
 
     /// Get balance
@@ -381,24 +403,8 @@ class Wallet extends EventEmitter {
     }
   }
 
-  _spvNodeError(err) {
-
-    console.log('spvNodeError: ' + err)
-
-    if (err.code !== 'EADDRINUSE')
-      return
-    else
-      console.log('seems serious')
-
-    /**
-     if (error.handled)
-     return
-
-     code marked "temp" is workaround until http listen fix is merged into bcoin release
-
-     error.handled = true
-     this.node = null // to skip call to spvnode.close() in closeSpvNode() - because asyncobject might still be locked
-     */
+  _spvNodeError (err) {
+    console.error('spvNodeError:', err)
   }
 
   /**
