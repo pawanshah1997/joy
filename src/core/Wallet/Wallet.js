@@ -642,8 +642,8 @@ class Wallet extends EventEmitter {
       }
 
     } catch(err) {
-      console.log(err)
-      debugger
+      console.error(err)
+      return
     }
 
 
@@ -654,8 +654,8 @@ class Wallet extends EventEmitter {
        txRecord = await this._wallet.txdb.getTX(details.hash)
 
     } catch(err) {
-      console.log(err)
-      debugger
+      console.error(err)
+      return
     }
 
       // Make sure we are still started
@@ -672,8 +672,8 @@ class Wallet extends EventEmitter {
     return this._processTxRecord(txRecord, details)
 
     } catch(err) {
-      console.log(err)
-      debugger
+      console.error(err)
+      return
     }
   }
 
@@ -746,8 +746,8 @@ class Wallet extends EventEmitter {
       }
 
     } catch(err) {
-      console.log(err)
-      debugger
+      console.error(err)
+      return
     }
 
 
