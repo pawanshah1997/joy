@@ -1,6 +1,9 @@
 // Use of pure js bcoin crypto library because electron doesn't compile with openssl
 // which is needed.
 process.env.BCOIN_NO_NATIVE = '1'
+// We can optionally turn off native secp256k1 implementation but since it doesn't
+// depend on openssl it should work fine
+// process.env.BCOIN_NO_SECP256K1 = '1'
 
 const bcoin = require('bcoin')
 
