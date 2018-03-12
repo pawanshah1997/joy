@@ -948,14 +948,14 @@ class Application extends EventEmitter {
 
     debug('new total balance: ' + balance)
 
-    if(this.state === Application.STATE.STARTED) {
+    if(this.state === Application.STATE.STARTED || this.state === Application.STATE.STARTING) {
 
       // Beg faucet for funds if we are supposed to
       if (this._walletTopUpOptions.doTopUp && this._walletTopUpOptions.walletBalanceLowerBound > balance) {
 
-        let address = this._wallet.receiveAddress
+        let address = this.wallet.receiveAddress
 
-        console.log('Faucet: Requesting some testnet coins to address: ' + addressString.toString())
+        console.log('Faucet: Requesting some testnet coins to address: ' + address.toString())
 
         getCoins(address, function (err) {
 
