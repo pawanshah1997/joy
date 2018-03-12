@@ -12,6 +12,7 @@ import CircularProgress from 'material-ui/CircularProgress'
 import ReactTooltip from 'react-tooltip'
 
 import { Payment } from '../../../../core/Wallet'
+import CashAddressFormat from '../../CashAddressFormat'
 
 const Field = (props) => {
 
@@ -174,7 +175,7 @@ function getStyles(props, state) {
       justifyContent : 'center'
     },
     circularProgress : {
-    
+
     },
     amountField : {
       //flex : '0 0 210px',
@@ -294,7 +295,7 @@ class PaymentRow extends Component {
     let date = this.props.paymentRowStore.date
     let paymentStore = this.props.paymentRowStore.paymentStore
 
-    let s = paymentStore.toAddress.toString()
+    let s = (new CashAddressFormat(paymentStore.toAddress)).toString()
 
     return (
       <div style={styles.root}
@@ -337,11 +338,11 @@ class PaymentRow extends Component {
           <div style={{display : 'flex', fontSize : '13px', color : 'rgb(129, 129, 130)'}}>
 
             <span>
-              to address
+              to
             </span>
 
             <span style={styles.toAddressValue}>
-              {paymentStore.toAddress.toString()}
+              {(new CashAddressFormat(paymentStore.toAddress)).toString().split(':')[1]}
             </span>
           </div>
 

@@ -5,6 +5,8 @@
 import {observable, action, runInAction, computed, autorun} from 'mobx'
 const {clipboard} = require('electron')
 
+import CashAddressFormat from '../CashAddressFormat'
+
 class ReceiveDialogStore {
 
   /**
@@ -60,11 +62,11 @@ class ReceiveDialogStore {
   }
 
   /**
-   * {String} Receive address encoded as Base58Check encoded string
+   * {String} Receive address encoded as Bitcoin Cash CashAddress encoded string
    */
   @computed get
-  receiveAddress() {
-    return this._walletStore.receiveAddress.toString()
+  receiveAddress () {
+    return (new CashAddressFormat(this._walletStore.receiveAddress)).toString()
   }
 
   @action.bound

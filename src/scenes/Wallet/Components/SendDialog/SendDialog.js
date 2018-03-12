@@ -80,7 +80,7 @@ const SendDialog = observer((props) => {
     <Dialog title={title}
             open={visibleSendDialog}
             onRequestClose={onRequestClose}
-            width="600px"
+            width="650px"
     >
       {form}
     </Dialog>
