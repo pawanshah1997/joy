@@ -7,6 +7,7 @@ import {observable, action, computed} from 'mobx'
 import PaymentStore from './PaymentStore'
 
 import bcoin from 'bcoin'
+import assert from 'assert'
 
 class WalletStore {
 
@@ -45,8 +46,14 @@ class WalletStore {
    */
   @observable paymentStores
 
+  /**
+   * {Map.<PaymnetId>} Map of PaymnetStore promise resolvers
+   */
+  _pendingPaymnetStoreResolvers
+
+
   constructor(state, totalBalance, confirmedBalance, receiveAddress, blockTipHeight, synchronizedBlockHeight, paymentStores, pay) {
-    
+
     this.setState(state)
     this.setTotalBalance(totalBalance)
     this.setConfirmedBalance(confirmedBalance)
@@ -54,14 +61,32 @@ class WalletStore {
     this.setBlockTipHeight(blockTipHeight)
     this.setSynchronizedBlockHeight(synchronizedBlockHeight)
     this.paymentStores = paymentStores
-    
+
     this._pay = pay
-    
+    this._pendingPaymnetStoreResolvers = new Map()
   }
 
   @action.bound
-  _addPaymentStore(paymentStore) {
+  addPaymentStore (paymentStore) {
     this.paymentStores.push(paymentStore)
+
+    // resolve pending promises
+    const paymentId = paymentStore.txId + ':' + paymentStore.outputIndex
+    const resolver = this._pendingPaymnetStoreResolvers.get(paymentId)
+
+    if (resolver) {
+      this._pendingPaymnetStoreResolvers.delete(paymentId)
+      resolver(paymentStore)
+    }
+  }
+
+
+  _waitForPaymentStore (payment) {
+    const paymentId = payment.txId + ':' + payment.outputIndex
+
+    return new Promise((resolve) => {
+      this._pendingPaymnetStoreResolvers.set(paymentId, resolve)
+    })
   }
 
   @action.bound
@@ -104,20 +129,28 @@ class WalletStore {
    */
   @action.bound
   async pay(pubKeyHash, amount, satsPrkBFee, note) {
-    
+
     if(!bcoin.util.isNumber(satsPrkBFee))
       throw new Error('satsPrkBFee is not a valid number')
 
     // Pay
     let payment = await this._pay(pubKeyHash, amount, satsPrkBFee, note)
 
-    // create PaymentStore
-    let paymentStore = new PaymentStore(payment)
+    // By the time we get here the a paymentStore may have been created and pushed to this.paymentStores,
+    // return it if found.
+    let paymentStore
 
-    // add
-    this._addPaymentStore(paymentStore)
+    this.paymentStores.map(function (store) {
+      if (store.txId === payment.txId && store.outputIndex === payment.outputIndex) {
+        assert(!paymentStore)
+        paymentStore = store
+      }
+    })
 
-    return paymentStore
+    if (paymentStore) return paymentStore
+
+    // Returns a promise which will be resolved when the payment store is created
+    return this._waitForPaymentStore(payment)
   }
 
 }
