@@ -11,7 +11,7 @@ export const REDDIT_URL = "http://reddit.com/r/JoyStream"
 export const FAUCET_TOPUP_LIMIT = 25000
 
 export const AUTO_UPDATE_BASE_URL ='https://download.joystream.co:7070/update/'
-export const BLOCKEXPLORER_QUERY_STRING_BASE = 'https://live.blockcypher.com/btc-testnet/tx/'
+export const BLOCKEXPLORER_QUERY_STRING_BASE = 'https://bch.btc.com/'
 
 const TORRENTS_PATH = path.join(__dirname, 'assets', 'torrents')
 
