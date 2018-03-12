@@ -1,3 +1,12 @@
+0.5.7 hotfix release - March 12th 2018
+
+  * Bug Fix - Sometimes playing media before wallet is ready causes assert failure
+  * Bug Fix - Wallet topup feature was not working
+
+0.5.6 hotfix release - March 5th 2018
+
+  * Hotfix - bug starting paid upload (improper access of Map)
+
 0.5.5 release - March 1st 2018
 
   * Wallet UI added
