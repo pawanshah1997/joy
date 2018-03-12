@@ -38,7 +38,7 @@ const PaymentsTable = observer((props) => {
   return (
     <div style={styles.root}>
       <Header walletSceneStore={props.walletSceneStore}/>
-      <PaymentsTableBody paymentRowStores={props.walletSceneStore.sortedAndFilteredPaymentRowStores}/>
+      <PaymentsTableBody paymentRowStores={props.walletSceneStore.filteredPaymentRowStores}/>
       <div style={styles.spacer}></div>
     </div>
   )
