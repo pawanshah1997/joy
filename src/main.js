@@ -5,6 +5,7 @@ const isDev = require('electron-is-dev')
 const updater = require('./updater')
 const protocol = require('./protocol')
 const assert = require('assert')
+const Migration = require('./migration')
 
 import {createTemplate} from './menu'
 import {enableLiveReload} from 'electron-compile'
@@ -12,6 +13,10 @@ import {enableLiveReload} from 'electron-compile'
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win = null
+
+// Prevent main window from being created by 'activate' event
+// Will be set to true after migration tasks are completed
+let preventMainWindowCreationOnActivate = true
 
 function showMainWindow () {
   if (win == null) return
@@ -76,12 +81,12 @@ function main () {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  app.on('ready', createMainWindow)
+  app.on('ready', onAppReady)
 
   app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (win === null) {
+      if (win === null && !preventMainWindowCreationOnActivate) {
         createMainWindow()
       }
   })
@@ -143,6 +148,23 @@ function main () {
     })
 
   }
+}
+
+function onAppReady () {
+  // Do migrations ... before opening main window
+  let migration = Migration.run()
+
+  migration.then(function () {
+    preventMainWindowCreationOnActivate = false
+    createMainWindow()
+  })
+
+  migration.catch(function (err) {
+    require('electron').dialog.showErrorBox(
+      'JoyStream - Error',
+      'Error encountered while migrating the application data to a new version. More Info: ' + err.message)
+    process.exit(-1)
+  })
 }
 
 function createMainWindow () {

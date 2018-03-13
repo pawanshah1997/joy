@@ -211,6 +211,18 @@ class Application extends EventEmitter {
     this._joystreamNodeSession = null
   }
 
+  static walletPath (appDirectory) {
+    return path.join(appDirectory, FOLDER_NAME.WALLETS, bcoin.network.primary.type)
+  }
+
+  static torrentDatabasePath (appDirectory) {
+    return path.join(appDirectory, FOLDER_NAME.TORRENT_DB)
+  }
+
+  static createApplicationSettings () {
+    return new ApplicationSettings()
+  }
+
   /**
    * Start application
    * Presumes that the application directory ('appDirectory')
@@ -246,7 +258,7 @@ class Application extends EventEmitter {
      // mkdirp.sync(FOLDER_NAME.WALLETS)
 
     // Make and hold on to path to wallet
-    this._walletPath = path.join(this._appDirectory, FOLDER_NAME.WALLETS, bcoin.network.primary.type)
+    this._walletPath = Application.walletPath(this._appDirectory)
 
     const spvNodeOptions = {
       prefix: this._walletPath,
@@ -299,7 +311,7 @@ class Application extends EventEmitter {
      */
 
     // Create application settings
-    this.applicationSettings = new ApplicationSettings()
+    this.applicationSettings = Application.createApplicationSettings()
 
     // Open settings (is synchronous), with given default values,
     // these are set on the first run
@@ -374,7 +386,7 @@ class Application extends EventEmitter {
      */
 
     // Torrent database folder
-    const torrentDatabaseFolder = path.join(this._appDirectory, FOLDER_NAME.TORRENT_DB)
+    const torrentDatabaseFolder = Application.torrentDatabasePath(this._appDirectory)
 
     db.open(torrentDatabaseFolder)
       .catch((err) => {
