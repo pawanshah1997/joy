@@ -17,6 +17,7 @@ import db from '../../db'
 import request from 'request'
 import magnet from 'magnet-uri'
 import StreamServer from '../StreamServer/StreamServer'
+import {satoshiPerMbToSatoshiPerPiece} from '../../common/'
 
 var debug = require('debug')('application')
 import {shell} from 'electron'
@@ -697,6 +698,14 @@ class Application extends EventEmitter {
     this.streamServer.stop()
   }
 
+  defaultBuyerTerms (pieceLength) {
+    let defaultTerms = this.applicationSettings.defaultBuyerTerms()
+    let convertedTerms = {...defaultTerms}
+
+    convertedTerms.maxPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.maxPrice, pieceLength)
+
+    return convertedTerms
+  }
   /**
    * Add torrent with given settings
    *
@@ -861,7 +870,7 @@ class Application extends EventEmitter {
     torrent.on('Loading.WaitingForMissingBuyerTerms', (data) => {
 
       // NB: Replace by querying application settings later!
-      let terms = this.applicationSettings.defaultBuyerTerms()
+      let terms = this.defaultBuyerTerms(torrent.torrentInfo.pieceLength())
 
       // change name
       torrent.provideMissingBuyerTerms(terms)
@@ -1059,7 +1068,7 @@ class Application extends EventEmitter {
         savePath: this.applicationSettings.downloadFolder(),
         deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
         extensionSettings : {
-          buyerTerms: this.applicationSettings.defaultBuyerTerms()
+          buyerTerms: this.defaultBuyerTerms(torrentInfo.pieceLength())
         }
       }
 
@@ -1206,13 +1215,6 @@ function encodeTorrentSettings(torrent) {
 
   return encoded
 
-}
-
-// TODO: Move this into Torrent class as a static member method
-function createStartingDownloadSettings(torrentInfo, savePath, buyerTerms) {
-  const infoHash = torrentInfo.infoHash()
-
-  return
 }
 
 

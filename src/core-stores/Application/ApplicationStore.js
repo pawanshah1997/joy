@@ -1,4 +1,5 @@
 import { observable, action, computed} from 'mobx'
+import {satoshiPerMbToSatoshiPerPiece} from '../../common/'
 
 class ApplicationStore {
 
@@ -116,7 +117,7 @@ class ApplicationStore {
   setOnboardingIsEnabled(onboardingIsEnabled) {
     this.onboardingIsEnabled = onboardingIsEnabled
   }
-  
+
   @action.bound
   setWalletStore(walletStore) {
     this.walletStore = walletStore
@@ -200,14 +201,14 @@ class ApplicationStore {
 
     // Add
     this._torrentAdder(settings, (err, torrent) => {
-  
+
       /**
        * The only reason we handle this callback is to catch when there is
        * a possible failure. In a success scenario, we must wait for the underlying
        * domain state manager to construct a `TorrentStore` instance and call
        * `onNewTorrentStore`
        */
-      
+
       if(err)
         onTorrentStoreAdded(err)
     })
@@ -238,6 +239,29 @@ class ApplicationStore {
     this._stopper()
   }
 
+  /**
+   * Converts application default settings to protocol settings
+   */
+  defaultBuyerTerms(pieceLength) {
+    let defaultTerms = this.applicationSettings.defaultBuyerTerms()
+    let convertedTerms = {...defaultTerms}
+
+    convertedTerms.maxPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.maxPrice, pieceLength)
+
+    return convertedTerms
+  }
+
+  /**
+   * Converts application default settings to protocol settings
+   */
+  defaultSellerTerms(pieceLength) {
+    let defaultTerms = this.applicationSettings.defaultSellerTerms()
+    let convertedTerms = {...defaultTerms}
+
+    convertedTerms.minPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.minPrice, pieceLength)
+
+    return convertedTerms
+  }
 }
 
 export default ApplicationStore

@@ -5,6 +5,19 @@
 import btcConvert from 'bitcoin-convert'
 import bytes from 'bytes'
 import humanizeDuration from 'humanize-duration'
+import assert from 'assert'
+
+function satoshiPerMbToSatoshiPerPiece (satoshiPerMb, pieceLengthBytes) {
+  assert (pieceLengthBytes > 0)
+  assert (satoshiPerMb > 0)
+
+  const pieceSizeMB = pieceLengthBytes / (1024 * 1024)
+
+  const piecePriceSatoshi = satoshiPerMb * pieceSizeMB
+
+  // Round down to nearest integer value
+  return Math.ceil(piecePriceSatoshi)
+}
 
 /**
 const BitcoinUnit = {
@@ -97,10 +110,10 @@ function getCompactBitcoinUnits(satoshis) {
 
     if(typeof satoshis !== 'number' || satoshis < 0)
       throw new Error('Invalid parameters passed: ' + satoshis)
-    
+
     let value = 0
     let unit = null
-    
+
     switch (Math.ceil(Math.log(satoshis + 1) / Math.LN10)) {
         case 1:
         case 2:
@@ -136,7 +149,7 @@ function getCompactBitcoinUnits(satoshis) {
             unit = 'BCH'
             break
     }
-    
+
     return {
         value : value,
         unit : unit
@@ -315,5 +328,6 @@ export {
     getCompactBitcoinUnitsString,
     convenientBytes,
     convenientHumanizeDuration,
-    standardHumanizeDurationOptions
+    standardHumanizeDurationOptions,
+    satoshiPerMbToSatoshiPerPiece
 }

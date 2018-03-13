@@ -222,7 +222,7 @@ class DownloadingStore {
       savePath: this._uiStore.applicationStore.applicationSettings.downloadFolder(),
       deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
       extensionSettings : {
-        buyerTerms: this._uiStore.applicationStore.applicationSettings.defaultBuyerTerms()
+        buyerTerms: this._uiStore.applicationStore.defaultBuyerTerms(torrentInfo.pieceLength())
       }
     }
 

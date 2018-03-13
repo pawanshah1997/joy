@@ -71,8 +71,11 @@ class UploadingStore {
    */
   @observable torrentStoreBeingAdded
 
+<<<<<<< HEAD
   @observable latFilePickingMethodUsed
 
+=======
+>>>>>>> convert application default terms
   constructor (uiStore) {
 
     this._uiStore = uiStore
@@ -209,12 +212,15 @@ class UploadingStore {
 
     let torrentFileName = filesPicked[0]
 
+<<<<<<< HEAD
     this._uploadTorrentFile(torrentFileName)
 
   }
 
   _uploadTorrentFile (torrentFileName) {
 
+=======
+>>>>>>> convert application default terms
     this.setTorrentFilePathSelected(torrentFileName)
 
     /// Read torrent file data
@@ -279,7 +285,7 @@ class UploadingStore {
       savePath: savePath,
       deepInitialState: DeepInitialState.UPLOADING.STARTED,
       extensionSettings : {
-        sellerTerms: this._uiStore.applicationStore.applicationSettings.defaultSellerTerms()
+        sellerTerms: this._uiStore.applicationStore.defaultSellerTerms(torrentInfo.pieceLength())
       }
     }
 
