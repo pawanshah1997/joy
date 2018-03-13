@@ -83,7 +83,7 @@ class TorrentTableRowStore {
 
   beginPaidUploadWithDefaultTerms() {
 
-    let defaultTerms = this._uiStore.applicationStore.defaultSellerTerms(this.torrentStore.pieceLength)
+    let defaultTerms = this._uiStore.applicationStore.defaultSellerTerms(this.torrentStore.pieceLength, this.torrentStore.numberOfPieces)
 
     this.torrentStore.beginUploading(defaultTerms)
   }

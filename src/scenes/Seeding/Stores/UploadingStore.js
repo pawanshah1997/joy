@@ -285,7 +285,7 @@ class UploadingStore {
       savePath: savePath,
       deepInitialState: DeepInitialState.UPLOADING.STARTED,
       extensionSettings : {
-        sellerTerms: this._uiStore.applicationStore.defaultSellerTerms(torrentInfo.pieceLength())
+        sellerTerms: this._uiStore.applicationStore.defaultSellerTerms(torrentInfo.pieceLength(), torrentInfo.numPieces())
       }
     }
 

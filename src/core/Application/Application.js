@@ -698,14 +698,17 @@ class Application extends EventEmitter {
     this.streamServer.stop()
   }
 
-  defaultBuyerTerms (pieceLength) {
+  defaultBuyerTerms (pieceLength, numPieces) {
     let defaultTerms = this.applicationSettings.defaultBuyerTerms()
     let convertedTerms = {...defaultTerms}
 
     convertedTerms.maxPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.maxPrice, pieceLength)
 
+    convertedTerms.maxPrice = Math.ceil(Math.max(convertedTerms.maxPrice, 547 / numPieces))
+
     return convertedTerms
   }
+
   /**
    * Add torrent with given settings
    *
@@ -870,7 +873,7 @@ class Application extends EventEmitter {
     torrent.on('Loading.WaitingForMissingBuyerTerms', (data) => {
 
       // NB: Replace by querying application settings later!
-      let terms = this.defaultBuyerTerms(torrent.torrentInfo.pieceLength())
+      let terms = this.defaultBuyerTerms(torrent.torrentInfo.pieceLength(), torrent.torrentInfo.numPieces())
 
       // change name
       torrent.provideMissingBuyerTerms(terms)
@@ -1068,7 +1071,7 @@ class Application extends EventEmitter {
         savePath: this.applicationSettings.downloadFolder(),
         deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
         extensionSettings : {
-          buyerTerms: this.defaultBuyerTerms(torrentInfo.pieceLength())
+          buyerTerms: this.defaultBuyerTerms(torrentInfo.pieceLength(), torrentInfo.numPieces())
         }
       }
 

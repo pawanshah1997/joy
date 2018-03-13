@@ -242,11 +242,13 @@ class ApplicationStore {
   /**
    * Converts application default settings to protocol settings
    */
-  defaultBuyerTerms(pieceLength) {
+  defaultBuyerTerms(pieceLength, numPieces) {
     let defaultTerms = this.applicationSettings.defaultBuyerTerms()
     let convertedTerms = {...defaultTerms}
 
     convertedTerms.maxPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.maxPrice, pieceLength)
+
+    convertedTerms.maxPrice = Math.ceil(Math.max(convertedTerms.maxPrice, 547 / numPieces))
 
     return convertedTerms
   }
@@ -254,11 +256,13 @@ class ApplicationStore {
   /**
    * Converts application default settings to protocol settings
    */
-  defaultSellerTerms(pieceLength) {
+  defaultSellerTerms(pieceLength, numPieces) {
     let defaultTerms = this.applicationSettings.defaultSellerTerms()
     let convertedTerms = {...defaultTerms}
 
     convertedTerms.minPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.minPrice, pieceLength)
+
+    convertedTerms.minPrice = Math.ceil(Math.max(convertedTerms.minPrice, 547 / numPieces))
 
     return convertedTerms
   }

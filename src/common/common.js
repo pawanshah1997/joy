@@ -15,7 +15,7 @@ function satoshiPerMbToSatoshiPerPiece (satoshiPerMb, pieceLengthBytes) {
 
   const piecePriceSatoshi = satoshiPerMb * pieceSizeMB
 
-  // Round down to nearest integer value
+  // Round up to nearest integer value
   return Math.ceil(piecePriceSatoshi)
 }
 

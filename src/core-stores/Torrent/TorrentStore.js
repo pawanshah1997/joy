@@ -89,12 +89,15 @@ class TorrentStore {
      */
     @observable pieceLength
 
+    @observable numberOfPieces
+
     constructor ({infoHash,
                  name,
                  savePath,
                  state,
                  totalSize,
                  pieceLength,
+                 numberOfPieces,
                  progress,
                  viabilityOfPaidDownloadInSwarm,
                  downloadedSize,
@@ -119,6 +122,7 @@ class TorrentStore {
       this.setState(state)
       this.setTotalSize(totalSize)
       this.setPieceLength(pieceLength)
+      this.setNumberOfPieces(numberOfPieces)
       this.setProgress(progress)
       this.setViabilityOfPaidDownloadInSwarm(viabilityOfPaidDownloadInSwarm)
       this.setDownloadedSize(downloadedSize)
@@ -169,6 +173,11 @@ class TorrentStore {
     @action.bound
     setPieceLength (pieceLength) {
       this.pieceLength = pieceLength
+    }
+
+    @action.bound
+    setNumberOfPieces (numPieces) {
+      this.numberOfPieces = numPieces
     }
 
     @action.bound
