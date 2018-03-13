@@ -5,7 +5,7 @@
 const Payment = require('./Payment').default
 const EventEmitter = require('events')
 const assert = require('assert')
-
+const safeBcoinEventHandlerShim = require('./safeEventHandler')
 const bcoin = require('bcoin')
 
 /**
@@ -175,20 +175,17 @@ class Wallet extends EventEmitter {
     // Ask for the mempool after syncing is done
     overrideBcoinPoolHandleTxInv(this._spvNode.pool)
 
-    this._spvNode.chain.on('block', (block, entry) => {
-      try {
-        // Update height of chain
-        this._setBlockTipHeight(this._spvNode.chain.height)
+    this._spvNode.chain.on('block', safeBcoinEventHandlerShim((block, entry) => {
+      // Update height of chain
+      this._setBlockTipHeight(this._spvNode.chain.height)
 
-        // Update synch
-        let synchronizedBlockHeight = this.synchronizedBlockHeight * this._spvNode.chain.getProgress()
-        this._setSynchronizedBlockHeight(synchronizedBlockHeight)
-      } catch (err) {
-        console.error(err)
-      }
+      // Update synch
+      let synchronizedBlockHeight = this.synchronizedBlockHeight * this._spvNode.chain.getProgress()
+      this._setSynchronizedBlockHeight(synchronizedBlockHeight)
+
       // _spvNode.pool.x?  what do peers report as the current tip of their longest chain?
       // it is sent in the version message when we connect to them
-    })
+    }), 'spvnode.chain.block')
 
     this._spvNode.on('error', (err) => {
       this._spvNodeError(err)
@@ -255,55 +252,35 @@ class Wallet extends EventEmitter {
 
     // Setup
 
-    this._wallet.on('tx', (tx, details) => {
+    this._wallet.on('tx', safeBcoinEventHandlerShim((tx, details) => {
 
       console.log('tx')
       console.log(tx)
       console.log(details)
 
-      try {
-        this._newTransaction(tx, details)
-      } catch (err) {
-        console.error(err)
-      }
-    })
+      this._newTransaction(tx, details)
 
-    this._wallet.on('confirmed', (tx, details) => {
-      try {
-        this._transactionConfirmed(tx, details)
-      } catch (err) {
-        console.error(err)
-      }
+    }), 'wallet.tx')
 
-    })
+    this._wallet.on('confirmed', safeBcoinEventHandlerShim((tx, details) => {
+      this._transactionConfirmed(tx, details)
+    }), 'wallet.confirmed')
 
-    this._wallet.on('unconfirmed', (tx, details) => {
-      try {
-        this._transactionUnconfirmed(tx, details)
-      } catch (err) {
-        console.error(err)
-      }
-    })
+    this._wallet.on('unconfirmed', safeBcoinEventHandlerShim((tx, details) => {
+      this._transactionUnconfirmed(tx, details)
+    }), 'wallet.unconfirmed')
 
-    this._wallet.on('balance', (balance) => {
-      try {
-        this._setConfirmedBalance(balance.confirmed)
-        this._setTotalBalance(balance.unconfirmed)
-      } catch (err) {
-        console.error(err)
-      }
-    })
+    this._wallet.on('balance', safeBcoinEventHandlerShim((balance) => {
+      this._setConfirmedBalance(balance.confirmed)
+      this._setTotalBalance(balance.unconfirmed)
+    }), 'wallet.balance')
 
     // New receive address generated
-    this._wallet.on('address', (derived) => {
-      try {
+    this._wallet.on('address', safeBcoinEventHandlerShim((derived) => {
         let receiveAddress = derived[0].getAddress()
 
         this.emit('receiveAddressChanged', receiveAddress)
-      } catch (err) {
-        console.error(err)
-      }
-    })
+    }), 'wallet.address')
 
     /// Get balance
 
