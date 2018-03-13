@@ -377,9 +377,15 @@ class Application extends EventEmitter {
     const torrentDatabaseFolder = path.join(this._appDirectory, FOLDER_NAME.TORRENT_DB)
 
     db.open(torrentDatabaseFolder)
+      .catch((err) => {
+        console.log(err)
+      })
       .then((torrentDatabase) => {
+        if(!torrentDatabase) {
+          console.log('Will not load torrents from database. Database failed to open.')
+          return []
+        }
 
-        // Hold on to torrent database
         this._torrentDatabase = torrentDatabase
 
         // Should we skip loading any existing torrents
@@ -389,9 +395,8 @@ class Application extends EventEmitter {
           return this._torrentDatabase.getAll('torrents')
 
       }).catch((err) => {
-
-        console.log('Could not open torrent database: ' + err)
-
+        console.log('Error loading torrents from database: ' + err)
+        return []
       })
       .then((savedTorrents) => {
 
@@ -399,13 +404,19 @@ class Application extends EventEmitter {
 
         if(numberOfSavedTorrentsYetToFullyLoad === 0)
           this._startedResource(Application.RESOURCE.STORED_TORRENTS, onStarted)
-        else
+        else {
           // Add all saved torrents to session with saved settings
           savedTorrents.forEach((savedTorrent) => {
 
             // Need to convert data from db into a torrentInfo
             // NB: https://github.com/JoyStream/joystream-desktop/issues/668
-            savedTorrent.metadata = new TorrentInfo(Buffer.from(savedTorrent.metadata, 'base64'))
+            if (savedTorrent.metadata) {
+              savedTorrent.metadata = new TorrentInfo(Buffer.from(savedTorrent.metadata, 'base64'))
+            }
+
+            if (savedTorrent.resumeData) {
+              savedTorrent.resumeData = Buffer.from(savedTorrent.resumeData, 'base64')
+            }
 
             // add to session
             this._addTorrent(savedTorrent, (err, torrent) => {
@@ -424,10 +435,9 @@ class Application extends EventEmitter {
               })
 
             })
-
           })
-
-    })
+        }
+      })
 
     // const streamServerHost = this.applicationSettings.streamServerHost()
     // const streamServerPort = this.applicationSettings.streamServerPort()
@@ -743,7 +753,7 @@ class Application extends EventEmitter {
     // joystream-node decoder doesn't correctly check if resumeData propery is undefined, it only checks
     // if the key on the params object exists so we need to conditionally set it here.
     if (settings.resumeData)
-      params.resumeData = Buffer.from(settings.resumeData, 'base64')
+      params.resumeData = settings.resumeData
 
     // set param flags - auto_managed/paused
     params.flags = {
