@@ -111,7 +111,7 @@ application.on('stopped', () => {
 window.onbeforeunload = beforeWindowUnload
 
 // Create model of view, with some reasonable defaults
-let rootUIStore = new UIStore(application)
+let rootUIStore = new UIStore(application, process.env.FORCE_TERMS_SCREEN)
 
 // Create renderer which is bound to our resources
 

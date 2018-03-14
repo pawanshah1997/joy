@@ -65,7 +65,9 @@ const DEFAULT_APPLIATION_SETTINGS = {
     maxNumberOfSellers: 5,
     minContractFeePerKb: 2000,
     settlementFee: 2000
-  }
+  },
+
+  termsAccepted : false
 }
 
 /**
@@ -294,8 +296,11 @@ class Application extends EventEmitter {
       DEFAULT_APPLIATION_SETTINGS.useAssistedPeerDiscovery,
       DEFAULT_APPLIATION_SETTINGS.bittorrentPort,
       DEFAULT_APPLIATION_SETTINGS.buyerTerms,
-      DEFAULT_APPLIATION_SETTINGS.sellerTerms
+      DEFAULT_APPLIATION_SETTINGS.sellerTerms,
+      DEFAULT_APPLIATION_SETTINGS.termsAccepted
       )
+
+    this._startedResource(Application.RESOURCE.SETTINGS, onStarted)
 
     // Make sure some download folder actually exists, which
     // may not be the case on the first run
@@ -315,8 +320,6 @@ class Application extends EventEmitter {
       this._enableOnboardingIfFirstRun &&
       !this.applicationSettings.numberOfPriorSessions())
       this._setOnboardingIsEnabled(true)
-
-    this._startedResource(Application.RESOURCE.SETTINGS, onStarted)
 
     /**
      * Create Joystream node session

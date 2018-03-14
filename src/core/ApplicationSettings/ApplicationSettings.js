@@ -12,6 +12,7 @@ const USE_ASSISTED_PEER_DISCOVERY = 'useAssistedPeerDiscovery'
 const BITTORRENT_PORT = 'bittorrentPort'
 const DEFAULT_BUYER_TERMS = 'defaultBuyerTerms'
 const DEFAULT_SELLER_TERMS = 'defaultSellerTerms'
+const TERMS_ACCEPTED = 'termsAccepted'
 
 /**
  * ApplicationSettings.
@@ -56,8 +57,9 @@ class ApplicationSettings extends EventEmitter {
    * @param downloadFolder
    * @param useAssistedPeerDiscovery
    * @param bittorrentPort
+   * @param termsAccepted {Boolean} - whether user has accepted the terms
    */
-  open(numberOfPriorSessions, downloadFolder, useAssistedPeerDiscovery, bittorrentPort, defaultBuyerTerms, defaultSellerTerms) {
+  open(numberOfPriorSessions, downloadFolder, useAssistedPeerDiscovery, bittorrentPort, defaultBuyerTerms, defaultSellerTerms, termsAccepted) {
     
     if(this.state !== ApplicationSettings.STATE.CLOSED)
       throw Error('Can only open when closed')
@@ -73,6 +75,7 @@ class ApplicationSettings extends EventEmitter {
     defaults[BITTORRENT_PORT] = bittorrentPort
     defaults[DEFAULT_BUYER_TERMS] = defaultBuyerTerms
     defaults[DEFAULT_SELLER_TERMS] = defaultSellerTerms
+    defaults[TERMS_ACCEPTED] = termsAccepted
     opts.defaults = defaults
     
     // Set file name
@@ -150,6 +153,14 @@ class ApplicationSettings extends EventEmitter {
   
   setDefaultBuyerTerms(buyerTerms) {
     this._set(DEFAULT_BUYER_TERMS, buyerTerms)
+  }
+  
+  termsAccepted() {
+    return this._get(TERMS_ACCEPTED)
+  }
+  
+  setTermsAccepted(termsAccepted) {
+    this._set(TERMS_ACCEPTED, termsAccepted)
   }
   
   _get(key) {

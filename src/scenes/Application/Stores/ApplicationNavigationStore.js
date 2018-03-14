@@ -81,6 +81,15 @@ class ApplicationNavigationStore {
 
     return balance / this._numberOfUnitsPerCoin
   }
+
+  @computed get
+  onTorrentListingTab() {
+    return  (
+      this.activeTab === ApplicationNavigationStore.TAB.Downloading ||
+      this.activeTab === ApplicationNavigationStore.TAB.Uploading ||
+      this.activeTab === ApplicationNavigationStore.TAB.Completed
+    )
+  }
   
   @action.bound
   setActiveTab(activeSceneWhenStarted) {

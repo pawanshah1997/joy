@@ -80,6 +80,24 @@ class UIStore {
   @observable currentPhase
 
   /**
+   * Scenes which are valid when in the
+   *
+   * {ALIVE_PHASE_SCENE}
+   */
+  static ALIVE_PHASE_SCENE = {
+    Main : 0,
+    OnboardingWelcome : 1,
+    OnboardingDeparture : 2,
+    VideoPlayer : 3,
+    Terms : 4,
+  }
+
+  /**
+   * {Boolean} Whether to display the terms scene
+   */
+  @observable displayTermsScene
+
+  /**
    * {Number} Total number of pieces sold by us as a seller this
    * session
    */
@@ -147,11 +165,12 @@ class UIStore {
    *
    * @param application {Application}
    */
-  constructor(application) {
+  constructor(application, forceTermsScreen) {
 
     this.totalRevenueFromPieces = 0
     this.numberOfPiecesSoldAsSeller = 0
     this.totalSpendingOnPieces = 0
+    this._forceTermsScreen = forceTermsScreen
 
     // Hold on to application instance
     this._application = application
@@ -276,6 +295,14 @@ class UIStore {
 
       assert(!this.applicationStore.applicationSettings)
       this.applicationStore.applicationSettings = applicationSettings
+
+      // When terms have not been accepted by the user, then we must
+      // display the terms scene
+      let termsAccepted = applicationSettings.termsAccepted()
+
+      let displayTermsScene = !termsAccepted || this._forceTermsScreen
+
+      this.setDisplayTermsScene(displayTermsScene)
 
     } else if(resource === Application.RESOURCE.PRICE_FEED) {
 
@@ -732,12 +759,40 @@ class UIStore {
   setCurrentPhase(currentPhase) {
     this.currentPhase = currentPhase
   }
+
+  @action.bound
+  setDisplayTermsScene(displayTermsScene) {
+    this.displayTermsScene = displayTermsScene
+  }
+
+  @action.bound
+  handleTermsAccepted() {
+
+    if(!this.displayTermsScene)
+      throw Error('Cannot accept terms when not being displayed.')
+
+    // Remove terms scene visibility
+    this.setDisplayTermsScene(false)
+
+    // Mark terms as being accepted in settings
+    this._application.applicationSettings.setTermsAccepted(true)
+  }
+
+  @action.bound
+  handleTermsRejected = () => {
+
+    if(!this.displayTermsScene)
+      throw Error('Cannot reject terms when not being displayed.')
+
+    // Initiate closing application
+    this.closeApplication()
+  }
   
   /**
    * Closes the application, but firrst enables possible
    * onboarding flow if its currently enabled.
    */
-  handleCloseApplicationAttempt() {
+  handleCloseApplicationAttempt = () => {
 
     /**
      * If onboarding is enabled, then display shutdown message - if its not already
@@ -914,6 +969,37 @@ class UIStore {
 
       return [torrent.infoHash, viability]
     }))
+  }
+
+  /**
+   * Scene visible when scene is active
+   * @returns {ALIVE_PHASE_SCENE|null}
+   */
+  @computed get
+  alivePhaseScene() {
+
+    // Make sure we are actually alive
+    if(this.currentPhase !== UIStore.PHASE.Alive)
+      return null
+    else if(this.displayTermsScene)
+      return UIStore.ALIVE_PHASE_SCENE.Terms
+    else if(this.mediaPlayerStore)
+      return UIStore.ALIVE_PHASE_SCENE.VideoPlayer
+    else if(this.onboardingStore && this.onboardingStore.state === OnboardingStore.STATE.WelcomeScreen)
+      return UIStore.ALIVE_PHASE_SCENE.OnboardingWelcome
+    else if(this.onboardingStore && this.onboardingStore.state === OnboardingStore.STATE.DepartureScreen)
+      return UIStore.ALIVE_PHASE_SCENE.OnboardingDeparture
+    else
+      return UIStore.ALIVE_PHASE_SCENE.Main
+  }
+
+  @computed get
+  showCheckingTorrentProgress() {
+
+    return this.alivePhaseScene === UIStore.ALIVE_PHASE_SCENE.Main &&
+      this.applicationNavigationStore.onTorrentListingTab && // on the torrent tabs
+      this.torrentsBeingLoaded.length > 0
+
   }
 
   @action.bound
