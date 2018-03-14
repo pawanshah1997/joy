@@ -95,12 +95,14 @@ function PubKeyHashToBCashP2PKHAddressString(pubKeyHash) {
  */
 function getCompactBitcoinUnits(satoshis) {
 
-    if(typeof satoshis !== 'number' || satoshis < 0)
+    if(typeof satoshis !== 'number' || satoshis < 0) {
+      debugger
       throw new Error('Invalid parameters passed: ' + satoshis)
-    
+    }
+
     let value = 0
     let unit = null
-    
+
     switch (Math.ceil(Math.log(satoshis + 1) / Math.LN10)) {
         case 1:
         case 2:
@@ -136,7 +138,7 @@ function getCompactBitcoinUnits(satoshis) {
             unit = 'BCH'
             break
     }
-    
+
     return {
         value : value,
         unit : unit
