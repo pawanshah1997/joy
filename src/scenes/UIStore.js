@@ -376,7 +376,7 @@ class UIStore {
 
     // Create onboarding store if enabled
     if (isEnabled)
-      onboardingStore = new OnboardingStore(this, OnboardingStore.STATE.WelcomeScreen)
+      onboardingStore = new OnboardingStore(this, OnboardingStore.STATE.WelcomeScreen, true)
 
     // Update application store signal about onboarding being enabled
     // and set store
