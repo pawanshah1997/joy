@@ -771,12 +771,6 @@ class UIStore {
     if(!this.displayTermsScene)
       throw Error('Cannot accept terms when not being displayed.')
 
-    // Given that terms screen was not forced =>
-    // Since terms were being displayed, the stored settings should indicate
-    // that they were not accepted
-    if(!this._forceTermsScreen)
-    assert(!this._application.applicationSettings.termsAccepted())
-
     // Remove terms scene visibility
     this.setDisplayTermsScene(false)
 
@@ -789,10 +783,6 @@ class UIStore {
 
     if(!this.displayTermsScene)
       throw Error('Cannot reject terms when not being displayed.')
-
-    // Since terms were being displayed, the stored settings should indicate
-    // that they were not accepted
-    assert(!this._application.applicationSettings.termsAccepted())
 
     // Initiate closing application
     this.closeApplication()
