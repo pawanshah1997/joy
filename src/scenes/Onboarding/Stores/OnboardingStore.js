@@ -3,8 +3,7 @@
  */
 
 import { observable, action } from 'mobx'
-import {TorrentInfo} from "joystream-node"
-import fs from 'fs'
+import {WHY_BCH} from '../../../constants'
 
 /**
  * (MOBX) User interface store for the onboarding
@@ -29,10 +28,11 @@ class OnboardingStore {
    */
   @observable showBCHNoticeInWallet
 
-  constructor (uiStore, state, showBCHNoticeInWallet) {
+  constructor (uiStore, state, showBCHNoticeInWallet, linkOpener) {
     this._uiStore = uiStore
     this.setState(state)
     this.setShowBCHNoticeInWallet(showBCHNoticeInWallet)
+    this._linkOpener = linkOpener
   }
 
   @action.bound
@@ -94,6 +94,11 @@ class OnboardingStore {
   @action.bound
   acceptBCHInformationNotice = () => {
     this.setShowBCHNoticeInWallet(false)
+  }
+
+  @action.bound
+  whyBCH = () => {
+    this._linkOpener(WHY_BCH)
   }
 }
 
