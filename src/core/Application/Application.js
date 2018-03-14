@@ -336,7 +336,7 @@ class Application extends EventEmitter {
     mkdirp(downloadFolder, null, (err) => {
 
       if(err)
-        console.log('Failed to create download folder: ' + downloadFolder + ' due to ' + err)
+        debug('Failed to create download folder: ' + downloadFolder + ' due to ' + err)
 
     })
 
@@ -391,11 +391,11 @@ class Application extends EventEmitter {
 
     db.open(torrentDatabaseFolder)
       .catch((err) => {
-        console.log(err)
+         debug(err)
       })
       .then((torrentDatabase) => {
         if(!torrentDatabase) {
-          console.log('Will not load torrents from database. Database failed to open.')
+           debug('Will not load torrents from database. Database failed to open.')
           return []
         }
 
@@ -408,7 +408,7 @@ class Application extends EventEmitter {
           return this._torrentDatabase.getAll('torrents')
 
       }).catch((err) => {
-        console.log('Error loading torrents from database: ' + err)
+         debug('Error loading torrents from database: ' + err)
         return []
       })
       .then((savedTorrents) => {
@@ -854,8 +854,8 @@ class Application extends EventEmitter {
 
         return this.wallet.createAndSendPaidDownloadingContract(outputs, contractFeeRate, note)
           .then((transaction) => {
-            console.log('Contract TX:', transaction.toRaw().toString('hex'))
-            console.log('Contract TX ID:', transaction.txid())
+             debug('Contract TX:', transaction.toRaw().toString('hex'))
+             debug('Contract TX ID:', transaction.txid())
             return transaction.toRaw()
           })
       },
@@ -942,7 +942,7 @@ class Application extends EventEmitter {
       // Remove the torrent from the db
       this._torrentDatabase.remove('torrents', infoHash)
         .then(() => {})
-        .catch(() => { console.log('Removing torrent from database failed.')})
+        .catch(() => {  debug('Removing torrent from database failed.')})
 
       // Delete torrent from the this map,
       this.torrents.delete(infoHash)
@@ -1031,9 +1031,9 @@ class Application extends EventEmitter {
 
   _onPriceFeedError = (err) => {
 
-    console.log('priceFeed [error]:')
-    console.log('Could not fetch exchange rate, likely due to no internet, or broken endpoint.')
-    console.log(err)
+     debug('priceFeed [error]:')
+     debug('Could not fetch exchange rate, likely due to no internet, or broken endpoint.')
+     debug(err)
   }
 
   addExampleTorrents () {
