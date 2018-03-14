@@ -80,6 +80,12 @@ class UIStore {
   @observable currentPhase
 
   /**
+  /**
+   * {Boolean} Whether to display the terms scene
+   */
+  @observable displayTermsScene
+
+  /**
    * {Number} Total number of pieces sold by us as a seller this
    * session
    */
@@ -147,11 +153,12 @@ class UIStore {
    *
    * @param application {Application}
    */
-  constructor(application) {
+  constructor(application, forceTermsScreen) {
 
     this.totalRevenueFromPieces = 0
     this.numberOfPiecesSoldAsSeller = 0
     this.totalSpendingOnPieces = 0
+    this._forceTermsScreen = forceTermsScreen
 
     // Hold on to application instance
     this._application = application
@@ -276,6 +283,14 @@ class UIStore {
 
       assert(!this.applicationStore.applicationSettings)
       this.applicationStore.applicationSettings = applicationSettings
+
+      // When terms have not been accepted by the user, then we must
+      // display the terms scene
+      let termsAccepted = applicationSettings.termsAccepted()
+
+      let displayTermsScene = !termsAccepted || this._forceTermsScreen
+
+      this.setDisplayTermsScene(displayTermsScene)
 
     } else if(resource === Application.RESOURCE.PRICE_FEED) {
 
@@ -732,12 +747,50 @@ class UIStore {
   setCurrentPhase(currentPhase) {
     this.currentPhase = currentPhase
   }
+
+  @action.bound
+  setDisplayTermsScene(displayTermsScene) {
+    this.displayTermsScene = displayTermsScene
+  }
+
+  @action.bound
+  handleTermsAccepted() {
+
+    if(!this.displayTermsScene)
+      throw Error('Cannot accept terms when not being displayed.')
+
+    // Given that terms screen was not forced =>
+    // Since terms were being displayed, the stored settings should indicate
+    // that they were not accepted
+    if(!this._forceTermsScreen)
+    assert(!this._application.applicationSettings.termsAccepted())
+
+    // Remove terms scene visibility
+    this.setDisplayTermsScene(false)
+
+    // Mark terms as being accepted in settings
+    this._application.applicationSettings.setTermsAccepted(true)
+  }
+
+  @action.bound
+  handleTermsRejected = () => {
+
+    if(!this.displayTermsScene)
+      throw Error('Cannot reject terms when not being displayed.')
+
+    // Since terms were being displayed, the stored settings should indicate
+    // that they were not accepted
+    assert(!this._application.applicationSettings.termsAccepted())
+
+    // Initiate closing application
+    this.closeApplication()
+  }
   
   /**
    * Closes the application, but firrst enables possible
    * onboarding flow if its currently enabled.
    */
-  handleCloseApplicationAttempt() {
+  handleCloseApplicationAttempt = () => {
 
     /**
      * If onboarding is enabled, then display shutdown message - if its not already
