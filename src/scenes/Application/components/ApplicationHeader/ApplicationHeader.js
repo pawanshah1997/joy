@@ -171,9 +171,9 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
               buttonTitle='Ok'
               buttonClick={() => { props.UIStore.onboardingStore.balanceExplanationAccepted() }} >
               <div style={{ width: '400px' }}>
-                <Section title='Testnet coins'
+                <Section title='Balance'
                          text={
-                           <div>We are sending you free <span style={{ fontWeight: 'bold' }}>testnet</span> coins promptly, and your unconfirmed balance is visible here. Once you see a balance in your wallet you will be able to do paid speedups on torrents.</div>
+                           <div>Your unconfirmed balance is visible here. Once you see a balance in your wallet you will be able to do paid speedups on torrents.</div>
                          } />
                 <SectionSpacer height={'20px'} />
               </div>
