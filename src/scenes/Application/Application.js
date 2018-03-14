@@ -17,6 +17,7 @@ import ApplicationHeader from './components/ApplicationHeader'
 import ApplicationStatusBar from './components/ApplicationStatusBar'
 
 // Our scenes
+import TermsScreen from '../Terms'
 import IdleScene from '../Idle'
 import NotStartedScene from '../NotStarted'
 import LoadingScene from '../Loading'
@@ -188,39 +189,33 @@ const StartedApp = observer((props) => {
       assert(false, 'Not covering ApplicationNavigationStore.TAB cases')
   }
 
-  let onTorrentScene = (
-    props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Downloading ||
-    props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Uploading ||
-    props.UIStore.applicationNavigationStore.activeTab === ApplicationNavigationStore.TAB.Completed
-  )
-
-  const displayMainScenes =
-   !props.UIStore.onboardingStore || (props.UIStore.onboardingStore &&
-   OnBoardingStore.STATE.WelcomeScreen !== props.UIStore.onboardingStore.state &&
-   OnBoardingStore.STATE.DepartureScreen !== props.UIStore.onboardingStore.state)
-
   return (
     <div style={styles.root}>
 
+      { /* Terms scene */ }
+      <TermsScreen show={props.UIStore.alivePhaseScene === UIStore.ALIVE_PHASE_SCENE.Terms}
+                   exitOnClick={props.UIStore.handleTermsRejected}
+                   iAcceptOnClick={props.UIStore.handleTermsAccepted}
+      />
+
       { /* Onboarding scenes */ }
-      <WelcomeScreen onBoardingStore={props.UIStore.onboardingStore} />
-      <DepartureScreen onBoardingStore={props.UIStore.onboardingStore} />
+      <WelcomeScreen show={props.UIStore.alivePhaseScene === UIStore.ALIVE_PHASE_SCENE.OnboardingWelcome}
+                     onBoardingStore={props.UIStore.onboardingStore}
+      />
 
-      { displayMainScenes ?
-        <ApplicationStatusBar startingTorrentCheckingProgressPercentage={props.UIStore.startingTorrentCheckingProgressPercentage}
-                            show=
-                              {
-                                props.UIStore.torrentsBeingLoaded.length > 0
-                              &&
-                                onTorrentScene
-                              }
-        />
-        : null
-      }
+      <DepartureScreen show={props.UIStore.alivePhaseScene === UIStore.ALIVE_PHASE_SCENE.OnboardingDeparture}
+                       onBoardingStore={props.UIStore.onboardingStore}
+      />
 
-      { displayMainScenes ? <VideoPlayerScene activeMediaPlayerStore={props.UIStore.mediaPlayerStore} /> : null }
+      <ApplicationStatusBar show={props.UIStore.showCheckingTorrentProgress}
+                            startingTorrentCheckingProgressPercentage={props.UIStore.startingTorrentCheckingProgressPercentage}
+      />
 
-      { displayMainScenes ?
+      <VideoPlayerScene show={props.UIStore.alivePhaseScene === UIStore.ALIVE_PHASE_SCENE.VideoPlayer}
+                        activeMediaPlayerStore={props.UIStore.mediaPlayerStore}
+      />
+
+      { props.UIStore.alivePhaseScene === UIStore.ALIVE_PHASE_SCENE.Main ?
         <div style={styles.applicationHeaderContainer}>
           <ApplicationHeader
             UIStore={props.UIStore}
