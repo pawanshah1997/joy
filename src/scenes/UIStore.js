@@ -80,6 +80,18 @@ class UIStore {
   @observable currentPhase
 
   /**
+   * Scenes which are valid when in the
+   *
+   * {ALIVE_PHASE_SCENE}
+   */
+  static ALIVE_PHASE_SCENE = {
+    Main : 0,
+    OnboardingWelcome : 1,
+    OnboardingDeparture : 2,
+    VideoPlayer : 3,
+    Terms : 4,
+  }
+
   /**
    * {Boolean} Whether to display the terms scene
    */
@@ -967,6 +979,37 @@ class UIStore {
 
       return [torrent.infoHash, viability]
     }))
+  }
+
+  /**
+   * Scene visible when scene is active
+   * @returns {ALIVE_PHASE_SCENE|null}
+   */
+  @computed get
+  alivePhaseScene() {
+
+    // Make sure we are actually alive
+    if(this.currentPhase !== UIStore.PHASE.Alive)
+      return null
+    else if(this.displayTermsScene)
+      return UIStore.ALIVE_PHASE_SCENE.Terms
+    else if(this.mediaPlayerStore)
+      return UIStore.ALIVE_PHASE_SCENE.VideoPlayer
+    else if(this.onboardingStore && this.onboardingStore.state === OnboardingStore.STATE.WelcomeScreen)
+      return UIStore.ALIVE_PHASE_SCENE.OnboardingWelcome
+    else if(this.onboardingStore && this.onboardingStore.state === OnboardingStore.STATE.DepartureScreen)
+      return UIStore.ALIVE_PHASE_SCENE.OnboardingDeparture
+    else
+      return UIStore.ALIVE_PHASE_SCENE.Main
+  }
+
+  @computed get
+  showCheckingTorrentProgress() {
+
+    return this.alivePhaseScene === UIStore.ALIVE_PHASE_SCENE.Main &&
+      this.applicationNavigationStore.onTorrentListingTab && // on the torrent tabs
+      this.torrentsBeingLoaded.length > 0
+
   }
 
   @action.bound
