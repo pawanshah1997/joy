@@ -53,7 +53,7 @@ const TakingUserInputForm = observer((props) => {
 
       <TextField
         hintText="for example 0.0013"
-        floatingLabelText="TOTAL AMOUNT (BTC)"
+        floatingLabelText="TOTAL AMOUNT (BCH)"
         errorText={props.sendDialogStore.warnAboutInvalidityOfLastProposedAmount ? 'Please provide a valid amount' : null}
         fullWidth={true}
         onBlur={(e) => {props.sendDialogStore.setLastProposedAmount(e.target.value)}}
