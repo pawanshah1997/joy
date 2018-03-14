@@ -272,7 +272,7 @@ class Wallet extends EventEmitter {
 
     this._wallet.on('balance', (balance) => {
       this._setConfirmedBalance(balance.confirmed)
-      this._setTotalBalance(balance.confirmed + balance.unconfirmed)
+      this._setTotalBalance(balance.unconfirmed)
     })
 
     // New receive address generated
@@ -307,7 +307,7 @@ class Wallet extends EventEmitter {
     }
 
     this._setConfirmedBalance(balance.confirmed)
-    this._setTotalBalance(balance.confirmed + balance.unconfirmed)
+    this._setTotalBalance(balance.unconfirmed)
 
     /// Connect to peer network
 

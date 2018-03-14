@@ -114,7 +114,13 @@ class WalletSceneStore {
 
   @computed get
   pendingBalance() {
-    return this._walletStore.totalBalance - this._walletStore.confirmedBalance
+    let pendingBalance = this._walletStore.totalBalance - this._walletStore.confirmedBalance
+
+    if (pendingBalance < 0) {
+      debugger
+    }
+
+    return pendingBalance
   }
 
   @computed get
