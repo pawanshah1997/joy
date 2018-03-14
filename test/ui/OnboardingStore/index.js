@@ -18,9 +18,10 @@ describe('OnboardingStore', function () {
   
   it('constructor initializes observables', function () {
     
-    onboardingStore = new OnboardingStore(uiStore, OnboardingStore.STATE.WelcomeScreen)
+    onboardingStore = new OnboardingStore(uiStore, OnboardingStore.STATE.WelcomeScreen, true)
     
     assert.equal(onboardingStore.state, OnboardingStore.STATE.WelcomeScreen)
+    assert.equal(onboardingStore.showBCHNoticeInWallet, true)
   })
   
   /**
@@ -68,6 +69,13 @@ describe('OnboardingStore', function () {
     assert.isTrue(mockedApplication.stop.calledOnce)
     
   
+  })
+
+  it('accepts BCH information notice acceptance', function() {
+
+    onboardingStore.acceptBCHInformationNotice()
+
+    assert.isFalse(onboardingStore.showBCHNoticeInWallet)
   })
 
 })

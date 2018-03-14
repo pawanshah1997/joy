@@ -24,14 +24,25 @@ class OnboardingStore {
    */
   @observable state
 
-  constructor (uiStore, state) {
+  /**
+   * {Boolean} Whether the BCH notice should be displayed on the wallet scene
+   */
+  @observable showBCHNoticeInWallet
+
+  constructor (uiStore, state, showBCHNoticeInWallet) {
     this._uiStore = uiStore
     this.setState(state)
+    this.setShowBCHNoticeInWallet(showBCHNoticeInWallet)
   }
 
   @action.bound
   setState (state) {
     this.state = state
+  }
+
+  @action.bound
+  setShowBCHNoticeInWallet(showBCHNoticeInWallet) {
+    this.showBCHNoticeInWallet = showBCHNoticeInWallet
   }
 
   @action.bound
@@ -78,6 +89,11 @@ class OnboardingStore {
       this.setState(OnboardingStore.STATE.Silent)
       this._uiStore.closeApplication()
     }
+  }
+
+  @action.bound
+  acceptBCHInformationNotice = () => {
+    this.setShowBCHNoticeInWallet(false)
   }
 }
 
