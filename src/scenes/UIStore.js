@@ -1,6 +1,7 @@
 import {observable, action, computed} from 'mobx'
 import assert from 'assert'
 import {shell} from 'electron'
+import open from 'open'
 
 // Core
 import Application from '../core/Application'
@@ -403,7 +404,7 @@ class UIStore {
 
     // Create onboarding store if enabled
     if (isEnabled)
-      onboardingStore = new OnboardingStore(this, OnboardingStore.STATE.WelcomeScreen)
+      onboardingStore = new OnboardingStore(this, OnboardingStore.STATE.WelcomeScreen, true, open)
 
     // Update application store signal about onboarding being enabled
     // and set store
