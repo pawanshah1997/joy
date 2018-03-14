@@ -23,9 +23,15 @@ function getStyle(props) {
       boxShadow: '0px 3px #41619C'
     },
     topBar : {
-      backgroundColor : '#D5F2D4', //'rgb(' + BCHGreen + ')',
+      /**
+      backgroundColor : 'rgb(242, 242, 242)', //'rgb(' + BCHGreen + ')',
       height : '110px',
       width: '100%'
+       */
+      backgroundColor : 'rgb(' + BCHGreen + ')',
+      height : '8px',
+      width: '100%',
+      marginBottom: '100px'
     },
     logoImg : {
       src : '../src/assets/img/bitcoin-cash.png',
@@ -83,6 +89,29 @@ const AcceptButton = Radium((props) => {
 
 })
 
+const InlineButton = Radium((props) => {
+
+  let styles = {
+    root : {
+      backgroundColor: '#f2f2f2',
+      margin: '10px',
+      padding: '2px 8px',
+      borderRadius: '5px',
+
+      ':hover' : {
+        backgroundColor: '#e2e2e2',
+      }
+    }
+  }
+
+  return (
+    <span style={styles.root}
+          onClick={props.onClick}
+    >{props.label}
+    </span>
+  )
+})
+
 const BCHInformationNotice = (props) => {
 
   let styles = getStyle(props)
@@ -99,7 +128,8 @@ const BCHInformationNotice = (props) => {
       </div>
 
       <div style={styles.textContainer}>
-        JoyStream use Bitcoin Cash, a low fee and reliable cryptocurrency, read more about why here, and read more about the currency here.
+        JoyStream uses Bitcoin Cash, a low fee and reliable cryptocurrency, read more about this crypto currency and why
+        we are using it <InlineButton label="here" onClick={props.onClickWhyBCH}/>
       </div>
 
       <div style={styles.buttonContainer}>
@@ -111,7 +141,8 @@ const BCHInformationNotice = (props) => {
 }
 
 BCHInformationNotice.propTypes = {
-  onClick : PropTypes.func.isRequired
+  onClick : PropTypes.func.isRequired,
+  onClickWhyBCH: PropTypes.func.isRequired,
 }
 
 export default BCHInformationNotice

@@ -18,7 +18,7 @@ describe('OnboardingStore', function () {
   
   it('constructor initializes observables', function () {
     
-    onboardingStore = new OnboardingStore(uiStore, OnboardingStore.STATE.WelcomeScreen, true)
+    onboardingStore = new OnboardingStore(uiStore, OnboardingStore.STATE.WelcomeScreen, true, null)
     
     assert.equal(onboardingStore.state, OnboardingStore.STATE.WelcomeScreen)
     assert.equal(onboardingStore.showBCHNoticeInWallet, true)

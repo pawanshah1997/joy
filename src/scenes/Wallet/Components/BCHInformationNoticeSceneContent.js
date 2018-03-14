@@ -35,14 +35,15 @@ const BCHInformationNoticeSceneContent = (props) => {
 
   return (
     <div style={styles.root}>
-      <BCHInformationNotice onClick={props.onAcceptClick}/>
+      <BCHInformationNotice onClick={props.onAcceptClick} onClickWhyBCH={props.onClickWhyBCH}/>
     </div>
   )
 
 }
 
 BCHInformationNoticeSceneContent.propTypes = {
-  onAcceptClick : PropTypes.func.isRequired
+  onAcceptClick : PropTypes.func.isRequired,
+  onClickWhyBCH : PropTypes.func.isRequired
 }
 
 

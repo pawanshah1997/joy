@@ -10,7 +10,8 @@ const WalletScene = inject('UIStore')(observer((props) => {
   let walletStore = props.UIStore.applicationStore.walletStore
 
   if(props.UIStore.onboardingStore && props.UIStore.onboardingStore.showBCHNoticeInWallet)
-    return <BCHInformationNoticeSceneContent onAcceptClick={props.UIStore.onboardingStore.acceptBCHInformationNotice} />
+    return <BCHInformationNoticeSceneContent onAcceptClick={props.UIStore.onboardingStore.acceptBCHInformationNotice}
+                                             onClickWhyBCH={props.UIStore.onboardingStore.whyBCH}/>
   else if(!walletStore || walletStore.state !== Wallet.STATE.STARTED)
     return <LoadingWalletSceneContent walletStore={walletStore}/>
   else
