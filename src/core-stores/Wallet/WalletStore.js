@@ -46,12 +46,6 @@ class WalletStore {
    */
   @observable paymentStores
 
-  /**
-   * {Map.<PaymnetId>} Map of PaymnetStore promise resolvers
-   */
-  _pendingPaymnetStoreResolvers
-
-
   constructor(state, totalBalance, confirmedBalance, receiveAddress, blockTipHeight, synchronizedBlockHeight, paymentStores, pay) {
 
     this.setState(state)
@@ -81,7 +75,7 @@ class WalletStore {
   }
 
 
-  _waitForPaymentStore (payment) {
+  _awaitPaymentStoreAddition (payment) {
     const paymentId = payment.txId + ':' + payment.outputIndex
 
     return new Promise((resolve) => {
@@ -136,21 +130,17 @@ class WalletStore {
     // Pay
     let payment = await this._pay(pubKeyHash, amount, satsPrkBFee, note)
 
-    // By the time we get here the a paymentStore may have been created and pushed to this.paymentStores,
+    // By the time we get here the a paymentStore may have already been added to this.paymentStores,
     // return it if found.
-    let paymentStore
-
-    this.paymentStores.map(function (store) {
-      if (store.txId === payment.txId && store.outputIndex === payment.outputIndex) {
-        assert(!paymentStore)
-        paymentStore = store
-      }
+    let paymentStore = this.paymentStores.find(function (store) {
+      return store.txId === payment.txId && store.outputIndex === payment.outputIndex
     })
 
     if (paymentStore) return paymentStore
 
-    // Returns a promise which will be resolved when the payment store is created
-    return this._waitForPaymentStore(payment)
+    paymentStore = await this._awaitPaymentStoreAddition(payment)
+
+    return paymentStore
   }
 
 }
