@@ -300,6 +300,8 @@ class Application extends EventEmitter {
       DEFAULT_APPLIATION_SETTINGS.termsAccepted
       )
 
+    this._startedResource(Application.RESOURCE.SETTINGS, onStarted)
+
     // Make sure some download folder actually exists, which
     // may not be the case on the first run
     let downloadFolder = this.applicationSettings.downloadFolder()
@@ -318,8 +320,6 @@ class Application extends EventEmitter {
       this._enableOnboardingIfFirstRun &&
       !this.applicationSettings.numberOfPriorSessions())
       this._setOnboardingIsEnabled(true)
-
-    this._startedResource(Application.RESOURCE.SETTINGS, onStarted)
 
     /**
      * Create Joystream node session
