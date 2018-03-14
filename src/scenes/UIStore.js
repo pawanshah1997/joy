@@ -540,7 +540,7 @@ class UIStore {
       torrentStore.setNumberOfSeeders(numberOfSeeders)
     }))
 
-    torrent.on('paymentSent', action((paymentIncrement, totalNumberOfPayments, totalAmountPaid, pieceIndex) => {
+    torrent.on('sentPayment', action((paymentIncrement, totalNumberOfPayments, totalAmountPaid, pieceIndex) => {
 
       /**
        * A naive mistake here is to miss the fact that a single torrent may involve
