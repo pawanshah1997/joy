@@ -83,7 +83,7 @@ class BalancePanel extends Component {
               <span style={style.fiatBalance}>{prettyBalanceInFiat}</span>
             </div>
             <div style={style.cryptoRow}>
-              <span style={style.cryptoUnit}>BTC</span>
+              <span style={style.cryptoUnit}>BCH</span>
               <span style={style.cryptoBalance}>{balanceInBTC}</span>
             </div>
           </div>

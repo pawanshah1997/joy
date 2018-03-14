@@ -125,7 +125,7 @@ function getCompactBitcoinUnits(satoshis) {
             } else {
                 value = btcConvert(satoshis, 'Satoshi', 'mBTC').toFixed(2)
             }
-            unit = 'mBTC'
+            unit = 'mBCH'
             break
         default:
             if (satoshis % 100000000 === 0) {
@@ -133,7 +133,7 @@ function getCompactBitcoinUnits(satoshis) {
             } else {
                 value = btcConvert(satoshis, 'Satoshi', 'BTC').toFixed(2)
             }
-            unit = 'BTC'
+            unit = 'BCH'
             break
     }
     

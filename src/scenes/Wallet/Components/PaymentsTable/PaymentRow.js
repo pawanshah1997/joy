@@ -388,7 +388,7 @@ class PaymentRow extends Component {
 
               {paymentStore.amount/100000000}
 
-              <span style={styles.amountUnit}>BTC</span>
+              <span style={styles.amountUnit}>BCH</span>
             </span>
 
         </div>

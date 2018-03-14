@@ -44,7 +44,7 @@ const UserProvidingAmountForm = observer((props) => {
       <div style={{ height : '50px'}}></div>
 
       <CurrencyInputField fiatPrefix={'USD'}
-                          cryptoPrefix={'BTC'}
+                          cryptoPrefix={'BCH'}
                           errorMessage={errorText}
                           cryptoToFiatExchangeRate={props.userProvidingAmountFormStore.cryptoToFiatExchangeRate}
                           inputFiat={props.userProvidingAmountFormStore.inputCurrencyType === UserProvidingAmountFormStore.INPUT_CURRENCY.FIAT}
