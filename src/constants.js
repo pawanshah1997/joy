@@ -3,6 +3,7 @@ import path from 'path'
 export const TELEGRAM_URL = "https://t.me/joinchat/CNyeUxHD9H56m3e_44hXIA"
 export const SLACK_URL = "http://slack.joystream.co:3000/"
 export const REDDIT_URL = "http://reddit.com/r/JoyStream"
+export const WHY_BCH = "https://medium.com/@JoyStream/joystream-is-switching-to-bitcoin-cash-c005551ba0df"
 
 /**
  * Number of sats under which if the balance tips we
