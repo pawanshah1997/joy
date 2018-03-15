@@ -14,8 +14,7 @@ import {
   NewButton,
   PublishButton
 } from './Buttons'
-import OnboardingStore from '../../../Onboarding/Stores'
-import ExplainerTip, { Section, SectionSpacer } from '../../../Onboarding/ExplainerTip'
+
 import UIStore from '../../../UIStore'
 import ApplicationNavigationStore from '../../Stores'
 
@@ -127,25 +126,6 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
           {...buttonColorProps}
         />
 
-        {
-          props.UIStore.onboardingStore &&
-          props.UIStore.onboardingStore.state === OnboardingStore.STATE.DisabledFeaturesExplanation
-          ?
-            <ExplainerTip
-            title='To be enabled'
-            explainerTop={60}
-            explainerLeft={-430}
-            circleTop={30}
-            circleLeft={-240}
-            zIndex={2}
-            buttonTitle='Ok'
-            buttonClick={() => { props.UIStore.onboardingStore.disabledFeaturesExplanationAccepted() }} >
-            The live, new and publish tabs are disabled for now, they will be enabled as we roll out these features. Stay tuned for updates !
-            </ExplainerTip>
-          :
-            null
-        }
-
       </ButtonGroup>
 
       <div style={style.spacer} />
@@ -157,30 +137,6 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
         balanceColor={props.balanceColor}
         subtitleColor={props.faceColor}>
 
-        {
-            props.UIStore.onboardingStore &&
-            props.UIStore.onboardingStore.state === OnboardingStore.STATE.BalanceExplanation
-          ?
-            <ExplainerTip
-              title='Your wallet'
-              explainerTop={30}
-              explainerLeft={-450}
-              circleTop={-10}
-              circleLeft={-85}
-              zIndex={2}
-              buttonTitle='Ok'
-              buttonClick={() => { props.UIStore.onboardingStore.balanceExplanationAccepted() }} >
-              <div style={{ width: '400px' }}>
-                <Section title='Testnet coins'
-                         text={
-                           <div>We are sending you free <span style={{ fontWeight: 'bold' }}>testnet</span> coins promptly, and your unconfirmed balance is visible here. Once you see a balance in your wallet you will be able to do paid speedups on torrents.</div>
-                         } />
-                <SectionSpacer height={'20px'} />
-              </div>
-            </ExplainerTip>
-          :
-            null
-        }
       </WalletPanel>
 
     </Header>
