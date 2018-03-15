@@ -106,6 +106,18 @@ class MockWallet extends EventEmitter {
     this.synchronizedBlockHeight = height
     this.emit('synchronizedBlockHeightChanged', height)
   }
+
+  addMockPayment(mockPayment) {
+
+    let existingPaymentsArray = this.paymentsInTransactionWithTXID.get(mockPayment.txId)
+
+    if(existingPaymentsArray)
+      existingPaymentsArray.push(mockPayment)
+    else
+      this.paymentsInTransactionWithTXID.set(mockPayment.txId, [mockPayment])
+
+    this.emit('paymentAdded', mockPayment)
+  }
 }
 
 export default MockWallet

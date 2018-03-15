@@ -2,7 +2,7 @@
   "name": "joystream",
   "productName": "Joystream",
   "version": "0.6.0-alpha",
-  "description": "A new BitTorrent client, with faster speeds, streaming and paid seeding.",
+  "description": "A blockchain powered decentralized media distribution, curation, discovery and monetization platform.",
   "homepage": "https://joystream.co",
   "main": "src/main.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "component-development": "env COMPONENT_DEVELOPMENT_MODE=True NODE_ENV=development electron-forge start",
     "force-onboarding": "env FORCE_ONBOARDING=True NODE_ENV=development electron-forge start",
     "force-terms-screen": "env FORCE_TERMS_SCREEN=True NODE_ENV=development electron-forge start",
-    "test": "xvfb-maybe electron-mocha renderer --recursive ./test",
+    "test": "xvfb-maybe electron-mocha renderer --preload test/preload-polyfill.js --recursive ./test",
     "test-file": "xvfb-maybe electron-mocha renderer ",
     "package": "electron-forge package",
     "make": "electron-forge make",

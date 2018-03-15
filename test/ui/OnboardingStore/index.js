@@ -1,7 +1,3 @@
-
-// babel-polyfill for generator (async/await)
-import 'babel-polyfill'
-
 import OnboardingStore from '../../../src/scenes/Onboarding/Stores/'
 import UIStore from '../../../src/scenes/UIStore'
 import {MockApplication} from '../../core/Mocks'
