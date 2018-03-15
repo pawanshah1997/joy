@@ -52,20 +52,20 @@ class UploadingStore {
    * NB: Not clear if this genuinely needs to be observable, reconsider later.
    */
   @observable torrentFilePathSelected
-  
+
   /**
    * @property {InfoHash} When torrent is being added, that is `state` === STATE.AddingTorrent,
    * then this will be the hash of the given torrent
    */
   infoHashOfTorrentSelected
-  
+
   /**
    * {TorrentStore} When torrent is being added, that is `state` === STATE.AddingTorrent,
    * then this will be the store for the corresponding torrent, after it has been added - but
    * before the full torrent check has been completed, otherwise `null`.
    */
   @observable torrentStoreBeingAdded
-  
+
   constructor (uiStore) {
 
     this._uiStore = uiStore
@@ -114,7 +114,7 @@ class UploadingStore {
       this.setTorrentStoreBeingAdded(null)
       this.infoHashOfTorrentSelected = null
     }
-    
+
     this.state = newState
   }
 
@@ -148,7 +148,7 @@ class UploadingStore {
   setTorrentFilePathSelected (torrentFile) {
     this.torrentFilePathSelected = torrentFile
   }
-  
+
   @action.bound
   setTorrentStoreBeingAdded(torrentStoreBeingAdded) {
     this.torrentStoreBeingAdded = torrentStoreBeingAdded
@@ -159,7 +159,7 @@ class UploadingStore {
     return this.state === UploadingStore.STATE.InitState
   }
 
-  uploadTorrentFile () {
+  startTorrentUploadFlowFromDragAndDrop (files) {
 
     // If the user tries adding when we are not ready,
     // then we just ignore, but UI should avoid this ever
@@ -167,14 +167,17 @@ class UploadingStore {
     if (!this.canStartUpload)
       throw Error('Can only initiate uploading in InitState.')
 
-    this._uploadTorrentFile()
+      // If the user did no pick any files, then we are done
+      if (!files || files.length === 0) {
+        return
+      }
+
+      let torrentFileName = files[0].path
+
+      this._uploadTorrentFile(torrentFileName)
   }
 
-  /**
-   * Routine which presumed we are already
-   * @private
-   */
-  _uploadTorrentFile() {
+  startTorrentUploadFlowWithFilePicker() {
 
     /// User selects torrent file
 
@@ -194,7 +197,13 @@ class UploadingStore {
     }
 
     let torrentFileName = filesPicked[0]
-    
+
+    this._uploadTorrentFile(torrentFileName)
+
+  }
+
+  _uploadTorrentFile (torrentFileName) {
+
     this.setTorrentFilePathSelected(torrentFileName)
 
     /// Read torrent file data
@@ -225,7 +234,7 @@ class UploadingStore {
       this.setState(UploadingStore.STATE.TorrentFileWasInvalid)
       return
     }
-  
+
     // Check if this torrent has not already been added
     if(this._uiStore.applicationStore.torrentStores.has(torrentInfo.infoHash())) {
       this.setState(UploadingStore.STATE.TorrentAlreadyAdded)
@@ -248,9 +257,9 @@ class UploadingStore {
     assert(this.infoHashOfTorrentSelected, ' Torrent infohash must be set')
 
     // Get settings
-  
+
     let torrentInfo = this._torrentInfoSelected
-    
+
     let settings = {
       infoHash : torrentInfo.infoHash(),
       metadata : torrentInfo,
@@ -262,15 +271,15 @@ class UploadingStore {
         sellerTerms: this._uiStore.applicationStore.applicationSettings.defaultSellerTerms()
       }
     }
-    
+
     // Update state
     this.setState(UploadingStore.STATE.AddingTorrent)
 
     // Add torrent with given settings
     this._uiStore.applicationStore.addTorrent(settings, (err, torrentStore) => {
-      
+
       assert(this.state === UploadingStore.STATE.AddingTorrent)
-      
+
       if(err) {
 
         // NB: could there be some other issue here? if so, can we reliably decode it
@@ -279,7 +288,7 @@ class UploadingStore {
         this.setState(UploadingStore.STATE.TorrentAlreadyAdded)
 
       } else {
-        
+
         // <-- is this really right? -->
 
         // We were able to add, now we must wait for calls to
@@ -287,16 +296,16 @@ class UploadingStore {
         // to learn about result. We cannot create local reactions on
         // `torrentStore`, as that violates design principle (a), and
         // also MOBX best practices about updating model in reactions.
-  
+
         this.setTorrentStoreBeingAdded(torrentStore)
-        
+
       }
 
     })
   }
 
   torrentFinishedDownloading() {
-    
+
     // If we are currently trying to add this torrent
 
     if(this.state === UploadingStore.STATE.AddingTorrent) {
@@ -309,7 +318,7 @@ class UploadingStore {
   }
 
   torrentDownloadIncomplete() {
-    
+
     // If we are currently trying to add this torrent
     if(this.state === UploadingStore.STATE.AddingTorrent ) {
 
