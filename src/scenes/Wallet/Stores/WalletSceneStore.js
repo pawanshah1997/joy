@@ -33,7 +33,7 @@ class WalletSceneStore {
    * @param {String} searchString - search string
    * @param {Func} launchExternalTxViewer
    */
-  constructor(walletStore, priceFeedStore, satsPrkBFee, visibleDialog, searchString, launchExternalTxViewer) {
+  constructor(walletStore, priceFeedStore, satsPrkBFee, visibleDialog, searchString, launchExternalTxViewer, numberOfUnitsPerCoin) {
 
     this._walletStore = walletStore
     this._priceFeedStore = priceFeedStore
@@ -41,6 +41,7 @@ class WalletSceneStore {
     this.setVisibleDialog(visibleDialog)
     this.setSearchString(searchString)
     this._launchExternalTxViewer = launchExternalTxViewer
+    this._numberOfUnitsPerCoin = numberOfUnitsPerCoin
   }
 
   @action.bound
@@ -163,7 +164,7 @@ class WalletSceneStore {
   paymentRowStores() {
 
     return this.filteredPayments.map((paymentStore) => {
-      return new PaymentRowStore(paymentStore, this)
+      return new PaymentRowStore(paymentStore, this._priceFeedStore, this._numberOfUnitsPerCoin)
     })
   }
   
