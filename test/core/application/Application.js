@@ -1,9 +1,3 @@
-
-/* global it, describe */
-
-// babel-polyfill for generator (async/await)
-import 'babel-polyfill'
-
 var expect = require('chai').expect
 import sinon from 'sinon'
 import os from 'os'
@@ -288,102 +282,102 @@ describe('Application', function() {
           buyerTerms: buyerTerms
         }
       }
-      
+
       // Add to session
       application.addTorrent(settings, (err, torrent) => {
-        
+
         expect(err).to.be.null
-  
+
         done()
-  
+
       })
-      
+
     })
-    
+
     it('stop', function(done) {
 
       // Adjust timeout, starting the app takes time
       this.timeout(5000)
-      
+
       let stoppingEventEmitted = false
       application.on('stopping', () => {
-        
+
         stoppingEventEmitted = true
-  
+
         // make sure we are currently stopping
         expect(application.state).to.be.equal(Application.STATE.STOPPING)
-  
+
         areWeDone()
-        
+
       })
-  
+
       let resourceStoppedEvents = new Set()
       application.on('resourceStopped', (resource) => {
-    
+
         resourceStoppedEvents.add(resource)
-    
+
       })
-      
+
       let stoppedEventEmitted = false
       application.on('stopped', () => {
-        
+
         stoppedEventEmitted = true
-        
+
         expect(application.state).to.be.equal(Application.STATE.STOPPED)
         expect(resourceStoppedEvents.size).to.be.equal(Application.NUMBER_OF_RESOURCE_TYPES)
-  
+
         areWeDone()
-        
+
       })
-      
+
       let stopCallbackMade = false
       application.stop(() => {
-  
+
         stopCallbackMade = true
-      
+
         expect(application.state).to.be.equal(Application.STATE.STOPPED)
-        
+
         areWeDone()
-      
+
       })
-      
+
       function areWeDone() {
-        
+
         if(stoppingEventEmitted &&
           stoppingEventEmitted &&
           stopCallbackMade)
           done()
-        
+
       }
-    
+
     })
-    
+
     it('starting new app, loading same persisted torrents', function(done) {
-  
+
       // TBD
-      
+
       done()
     })
-    
+
   })
-  
+
 })
 
 function loadTorrentInfoFixture(filename) {
-  
+
   let data = fs.readFileSync('src/assets/torrents/' + filename)
-  
+
   return new TorrentInfo(data)
 }
 
 function resetDirectory(directory) {
-  
+
   // If an old directory exists, we delete it,
   // to give a fresh start
   if(fs.existsSync(directory)) {
     rimraf.sync(directory)
   }
-  
+
   // Create fresh directory
   fs.mkdirSync(directory)
 }
