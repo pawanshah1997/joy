@@ -11,9 +11,10 @@ class PaymentRowStore {
    */
   paymentStore
 
-  constructor(paymentStore, walletSceneStore) {
+  constructor(paymentStore, priceFeedStore, numberOfUnitsPerCoin) {
     this.paymentStore = paymentStore
-    this._walletSceneStore = walletSceneStore
+    this._priceFeedStore = priceFeedStore
+    this._numberOfUnitsPerCoin = numberOfUnitsPerCoin
   }
 
   @computed get
@@ -32,8 +33,20 @@ class PaymentRowStore {
     return date
   }
 
+  /**
+   * {Number} Balance in relevant fiat currency
+   */
+  @computed get
+  amountInFiat() {
+
+    let balance = this.paymentStore.amount
+    let cryptoToUsdExchangeRate = this._priceFeedStore.cryptoToUsdExchangeRate
+
+    return Math.floor((balance * cryptoToUsdExchangeRate) / this._numberOfUnitsPerCoin)
+  }
+
   click() {
-    this._walletSceneStore.viewPayment(this.paymentStore.txId, this.paymentStore.outputIndex)
+    this._uiStore.walletSceneStore.viewPayment(this.paymentStore.txId, this.paymentStore.outputIndex)
   }
 
 }
