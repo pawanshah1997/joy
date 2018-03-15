@@ -2,7 +2,7 @@
   "name": "joystream",
   "productName": "Joystream",
   "version": "0.6.0-alpha",
-  "description": "A new BitTorrent client, with faster speeds, streaming and paid seeding.",
+  "description": "A blockchain powered decentralized media distribution, curation, discovery and monetization platform.",
   "homepage": "https://joystream.co",
   "main": "src/main.js",
   "scripts": {
