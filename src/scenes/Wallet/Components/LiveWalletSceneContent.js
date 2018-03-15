@@ -44,40 +44,10 @@ function getStyles(props) {
       flexGrow: 1,
       justifyContent : 'center',
       backgroundColor : props.uiConstantsStore.primaryColor
-    },
-    bottomNoticationBanner : {
-    
     }
   }
   
 }
-
-const NoticationBanner = (props) => {
-  
-  let styles = {
-    root : {
-      padding : '15px',
-      backgroundColor : '#dc3545'
-    },
-    container : {
-      fontFamily : 'Helvetica',
-      textAlign: 'center',
-      fontSize: '16px',
-      fontWeight: 'bold',
-      color : 'hsla(354, 70%, 89%, 1)'
-    }
-  }
-  
-  return (
-    <div style={styles.root}>
-      <div style={styles.container}>
-        {props.children}
-      </div>
-    </div>
-  )
-  
-}
-
 
 import SvgIcon from 'material-ui/SvgIcon'
 import LoadingWalletSceneContent from "./LoadingWalletSceneContent";
@@ -194,10 +164,6 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
       <div style={styles.paymentsTableContainer}>
         <PaymentsTable walletSceneStore={props.UIStore.walletSceneStore}/>
       </div>
-      
-      <NoticationBanner>
-        This wallet does not use real Bitcoins, rather testnet coins, real coins are coming in the next release.
-      </NoticationBanner>
       
       <SendingDialog sendDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'SendDialogStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
       <ReceiveDialog receiveDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'ReceiveDialogStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
