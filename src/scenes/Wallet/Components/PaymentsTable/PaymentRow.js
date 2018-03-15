@@ -397,7 +397,7 @@ class PaymentRow extends Component {
             </span>
 
             <span style={styles.amountFiat}>
-              { currencyFormatter.format(this.props.paymentRowStore.amountInFiat, { code: 'USD' }) }
+              { currencyFormatter.format(this.props.paymentRowStore.amountInFiat, { code: 'USD', precision: 4 }) }
             </span>
 
         </div>
