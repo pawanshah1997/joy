@@ -382,7 +382,8 @@ class UIStore {
         satsPrkBFee,
         null,
         '',
-        launchExternalTxViewer
+        launchExternalTxViewer,
+        bcoin.protocol.consensus.COIN
       )
       
     }
