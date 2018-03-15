@@ -164,13 +164,13 @@ class WalletSceneStore {
   paymentRowStores() {
 
     return this.filteredPayments.map((paymentStore) => {
-      return new PaymentRowStore(paymentStore, this._priceFeedStore, this._numberOfUnitsPerCoin)
+      return new PaymentRowStore(paymentStore, this._priceFeedStore, this._numberOfUnitsPerCoin, this.viewPayment)
     })
   }
-  
+
   @computed get
   filteredPaymentRowStores() {
-    
+
     return this.paymentRowStores
       .sort(comparePayments)
   }
@@ -194,7 +194,7 @@ class WalletSceneStore {
  * @returns {Number} - value follows normal comparer sementics
  */
 function comparePayments(p1, p2) {
-  
+
   if(!p1.date)
     return -1 // p1 first
   else if(!p2.date)

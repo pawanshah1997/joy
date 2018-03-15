@@ -11,10 +11,11 @@ class PaymentRowStore {
    */
   paymentStore
 
-  constructor(paymentStore, priceFeedStore, numberOfUnitsPerCoin) {
+  constructor(paymentStore, priceFeedStore, numberOfUnitsPerCoin, viewPayment) {
     this.paymentStore = paymentStore
     this._priceFeedStore = priceFeedStore
     this._numberOfUnitsPerCoin = numberOfUnitsPerCoin
+    this._viewPayment = viewPayment
   }
 
   @computed get
@@ -42,11 +43,11 @@ class PaymentRowStore {
     let balance = this.paymentStore.amount
     let cryptoToUsdExchangeRate = this._priceFeedStore.cryptoToUsdExchangeRate
 
-    return Math.floor((balance * cryptoToUsdExchangeRate) / this._numberOfUnitsPerCoin)
+    return ((balance * cryptoToUsdExchangeRate) / this._numberOfUnitsPerCoin)
   }
 
   click() {
-    this._uiStore.walletSceneStore.viewPayment(this.paymentStore.txId, this.paymentStore.outputIndex)
+    this._viewPayment(this.paymentStore.txId, this.paymentStore.outputIndex)
   }
 
 }
