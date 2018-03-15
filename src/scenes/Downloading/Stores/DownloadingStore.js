@@ -20,6 +20,11 @@ class DownloadingStore {
     TorrentAlreadyAdded: 3
   }
 
+  static TORRENT_ADDING_METHOD = {
+    FILE_PICKER: 1,
+    DRAG_AND_DROP: 2
+  }
+
   /**
    * {Map.<TorrentTableRowStore>} Maps info hash to the row store for the corresponding torrent
    * Notice that this is not observable for rendering actual table, see `tableRowStores` below.
@@ -35,6 +40,8 @@ class DownloadingStore {
    * NB as above
    * @observable startDownloadingFlowStore
    */
+
+  @observable latFilePickingMethodUsed
 
   constructor (uiStore) {
 
@@ -122,6 +129,8 @@ class DownloadingStore {
 
   startDownloadWithTorrentFileFromFilePicker () {
 
+    this.latFilePickingMethodUsed = DownloadingStore.TORRENT_ADDING_METHOD.FILE_PICKER
+
     // If the user tries adding when we are not ready,
     // then we just ignore, but UI should avoid this ever
     // happening in practice
@@ -148,6 +157,8 @@ class DownloadingStore {
   }
 
   startDownloadWithTorrentFileFromDragAndDrop (files) {
+
+    this.latFilePickingMethodUsed = DownloadingStore.TORRENT_ADDING_METHOD.DRAG_AND_DROP
 
     // If the user tries adding when we are not ready,
     // then we just ignore, but UI should avoid this ever
@@ -195,7 +206,7 @@ class DownloadingStore {
       this.setState(DownloadingStore.STATE.TorrentFileWasInvalid)
       return
     }
-  
+
     // Check that torrent has not already been added
     if(this._uiStore.applicationStore.torrentStores.has(torrentInfo.infoHash())) {
       this.setState(DownloadingStore.STATE.TorrentAlreadyAdded)
@@ -214,7 +225,7 @@ class DownloadingStore {
         buyerTerms: this._uiStore.applicationStore.applicationSettings.defaultBuyerTerms()
       }
     }
-    
+
     /// Try to add torrent
     this.setState(DownloadingStore.STATE.TorrentBeingAdded)
 

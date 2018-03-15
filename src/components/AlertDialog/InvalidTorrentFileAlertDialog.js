@@ -7,10 +7,10 @@ import PropTypes from 'prop-types'
 
 import AlertDialog from './AlertDialog'
 
-const okLabelText = "NO"
-const tryAgainLabelText = "TRY AGAIN"
-
 const InvalidTorrentFileAlertDialog = (props) => {
+
+  let okLabelText = "OK"
+  const tryAgainLabelText = "TRY AGAIN"
 
     let buttonClicked = (title) => {
 
@@ -22,12 +22,24 @@ const InvalidTorrentFileAlertDialog = (props) => {
 
     }
 
+    let buttonTitles
+    let bodyText = ''
+
+    if(props.canRetry) {
+      bodyText = 'Would you like to try picking another file?'
+      okLabelText = 'NO'
+      buttonTitles = [okLabelText, tryAgainLabelText]
+    } else {
+      bodyText = 'Try another file.'
+      buttonTitles = [okLabelText]
+    }
+
     return (
         <AlertDialog
             title="Torrent file is invalid"
-            body={"Would you like to try picking another file?"}
+            body={bodyText}
             open={props.open}
-            buttonTitles={[okLabelText, tryAgainLabelText]}
+            buttonTitles={buttonTitles}
             buttonClicked={buttonClicked}
         />
     )
