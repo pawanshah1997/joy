@@ -3,6 +3,7 @@
  */
 
 import {observable, action, runInAction, computed} from 'mobx'
+import StreamServer from '../../../core/StreamServer'
 
 /**
  * Video state: WIP!!
@@ -144,6 +145,10 @@ class MediaPlayerStore {
         this._windowSizePriorToResize = null
 
         this._uiStore = uiStore
+
+        this.streamServer = new StreamServer(this.file)
+        this.streamServer.start()
+
     }
 
     @action.bound
@@ -277,6 +282,7 @@ class MediaPlayerStore {
 
     @action.bound
     exit() {
+        this.streamServer.close()
 
         // Adjust window size back to old dimensions, if it has been resized
         if(this._windowSizePriorToResize)

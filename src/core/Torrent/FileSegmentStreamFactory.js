@@ -38,6 +38,8 @@ class FileSegmentStreamFactory {
 
     this.fileName = fileStorage.fileName(fileIndex)
 
+    this.size = fileStorage.fileSize(fileIndex)
+
     this.name = this.fileName // render media is looking for this name property
 
     this.path = path.format({

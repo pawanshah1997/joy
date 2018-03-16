@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Provider, observer, inject } from 'mobx-react'
 import CloseButton from './CloseButton'
-import render from 'render-media'
 
 import TorrentStreamProgress from './TorrentStreamProgress'
 
@@ -27,9 +26,6 @@ class VideoPlayer extends Component {
         autoplay : this.props.mediaPlayerStore.autoPlay
     }
 
-    render.render(this.props.mediaPlayerStore.file, '#' + VIDEO_ELEMENT_ID, opts, (err, elem) => {
-      if (err) return console.error(err.message)
-    })
   }
 
   handleMouseEnter () {
@@ -86,6 +82,7 @@ class VideoPlayer extends Component {
 
 
         <video id={VIDEO_ELEMENT_ID}
+               src='http://localhost:8888'
                onDurationChange={() => { this.props.mediaPlayerStore.durationChanged() }}
                onLoadedMetadata={(event) => { this.props.mediaPlayerStore.metadataLoaded(event) }}
                onLoadedData={() => { this.props.mediaPlayerStore.loadedData(getVideoDOMElement()) }}
