@@ -71,7 +71,7 @@
     "electron-is-dev": "^0.1.2",
     "electron-squirrel-startup": "^1.0.0",
     "humanize-duration": "^3.10.0",
-    "joystream-node": "github:mnaamani/joystream-node#cash",
+    "joystream-node": "^0.2.1",
     "jquery": "^3.2.1",
     "level-namespace": "^0.1.0",
     "leveldown": "^1.6.0",
