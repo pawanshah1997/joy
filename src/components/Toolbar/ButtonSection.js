@@ -5,10 +5,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ReactTooltip from 'react-tooltip'
+import {observer} from 'mobx-react'
 
 import Section from './Section'
 
-const ButtonSection = (props) => {
+const ButtonSection = observer((props) => {
 
     return (
         <Section onClick={props.onClick} className={props.className} tooltip={props.tooltip}>
@@ -18,7 +19,7 @@ const ButtonSection = (props) => {
         </Section>
     )
 
-}
+})
 
 // { props.tooltip ? <ReactTooltip id={props.className} position='top' effect='solid' className="button-section-tooltip"> {props.tooltip} </ReactTooltip> : null }
 

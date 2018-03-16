@@ -133,6 +133,18 @@
   }
 }
 
+.remove_disabled {
+    .button {
+      background-image: url('../assets/icon/dollar.svg');
+    }
+}
+
+.remove_working {
+    .button {
+      background-image: url('../assets/icon/swarm.svg');
+    }
+}
+
 /** trash **/
 
 .trash {
@@ -144,6 +156,18 @@
 .trash:hover {
   .button {
     background-image: url('../assets/icon/trash-hover.svg');
+  }
+}
+
+.trash_disabled {
+  .button {
+    background-image: url('../assets/icon/dollar.svg');
+  }
+}
+
+.trash_working {
+  .button {
+    background-image: url('../assets/icon/swarm.svg');
   }
 }
 
