@@ -53,10 +53,13 @@ class FileSegmentStreamFactory {
    */
   createReadStream (opts = {}) {
 
-    if (this._completed)
+    if (this._completed) {
+      console.log('creating fs.stream')
       return fs.createReadStream(this.path, opts)
-    else
+    } else {
+      console.log('creating libtorrent.stream')
       return new LibtorrentStream(this._torrent, this.fileIndex, opts)
+    }
   }
 }
 

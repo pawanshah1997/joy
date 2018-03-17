@@ -28,13 +28,26 @@ class StreamServer extends EventEmitter {
   }
 
   stop () {
+    this._destroyStream()
+
     this._server.close(() => {
-      this.emit('stopped')
+      // note - if not all responses have ended this will take a while to get closed
+      // and this can delay shutting down the app
     })
+
+    // do not wait for server to close.
+    this.emit('stopped')
   }
 
   getStreamUrl(infoHash, fileIndex) {
     return 'http://' + this._host + ':' + this._port + '/' + infoHash + '/' + fileIndex
+  }
+
+  _destroyStream() {
+    if(this._stream) {
+      this._stream.destroy()
+      this._stream = null
+    }
   }
 
   _onHttpServerListening () {
@@ -47,7 +60,7 @@ class StreamServer extends EventEmitter {
 
   _parseRequest(request) {
     const url = request.url
-    console.log(url)
+
     const parts = url.split('/')
 
     if (parts.length >= 2) {
@@ -59,6 +72,9 @@ class StreamServer extends EventEmitter {
 
   _httpRequestHandler (req, res) {
       // TODO: manage multiple requests to the same torrent
+
+      // Destroy last created stream
+      this._destroyStream()
 
       // parse request url for infoHash, fileIndex
       const [infoHash, fileIndex] = this._parseRequest(req)
@@ -77,16 +93,19 @@ class StreamServer extends EventEmitter {
       const torrent = this._torrents.get(infoHash)
 
       try {
-        var streamFactory = torrent.fileSegmentStreamFactory || torrent.createStreamFactory(parseInt(fileIndex))
+        var streamFactory = torrent.createStreamFactory(parseInt(fileIndex))
       } catch (err) {
         debug('failed to create stream factory', err)
         return res.end()
       }
 
-      // res.on('end', () => {
-      //   console.log('stream response ended!')
-      //   torrent.endStream()
-      // })
+      res.on('close', () => {
+        this._destroyStream()
+      })
+
+      req.on('close', () => {
+
+      })
 
       const total = streamFactory.size
       const torrentFileName = streamFactory.fileName
@@ -108,13 +127,14 @@ class StreamServer extends EventEmitter {
         const end = partialend ? parseInt(partialend, 10) : total - 1
         const chunksize = (end - start) + 1
 
-        const stream = streamFactory.createReadStream({start: start, end: end})
+        this._stream = streamFactory.createReadStream({start: start, end: end})
         res.writeHead(206, { 'Content-Range': 'bytes ' + start + '-' + end + '/' + total, 'Content-Length': chunksize })
-        stream.pipe(res)
+        this._stream.pipe(res)
 
       } else {
         res.writeHead(200, { 'Content-Length': total })
-        streamFactory.createReadStream().pipe(res)
+        this._stream = streamFactory.createReadStream()
+        this._stream.pipe(res)
       }
   }
 

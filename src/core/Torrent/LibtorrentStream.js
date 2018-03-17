@@ -145,6 +145,7 @@ const NORMAL_PRIORITY = 4
 
    // `size` is optional.
   _read (size) {
+    console.log('_read', size)
     // We don't have no more piece to read...
     if (this._missing === 0) return
     if (!this._torrent.handle.havePiece(this._piece)) {
@@ -157,6 +158,7 @@ const NORMAL_PRIORITY = 4
   }
 
   _destroy (err, onclose) {
+    console.log('_destroy() called')
     if (this.destroyed) return
     this.destroyed = true
 
@@ -181,6 +183,7 @@ const NORMAL_PRIORITY = 4
   // Needed for compatibility with media-render. It will be called if ReadableStream
   // need to be destroyed.
   destroy (onclose) {
+    console.log('destroy() called')
     this._destroy(null, onclose)
   }
 

@@ -888,9 +888,9 @@ class UIStore {
       mediaPlayerWindowSizeFetcher,
       mediaPlayerWindowSizeUpdater,
       () => { // When player exits
-        Doorbell.show()
         this.setMediaPlayerStore(null)
         powerSavingBlocker(false)
+        Doorbell.show()
       },
       this
     )

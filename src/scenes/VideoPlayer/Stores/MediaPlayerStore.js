@@ -66,14 +66,6 @@ const VIDEO_PLAYER_STATE = {
  */
 
 
-
-const MEDIA_SOURCE_TYPE = {
-    DISK : 0,
-    STREAMING_TORRENT : 1,
-    HTTP : 2
-}
-
-
 class MediaPlayerStore {
 
     /**
@@ -310,4 +302,3 @@ function playbackTimeAvailable(currentTime, timeRanges) {
 }
 
 module.exports = MediaPlayerStore
-module.exports.MEDIA_SOURCE_TYPE = MEDIA_SOURCE_TYPE
