@@ -14,6 +14,7 @@ import bcoin from 'bcoin'
 import { TorrentInfo, Session } from 'joystream-node'
 import db from '../../db'
 import request from 'request'
+import magnet from 'magnet-uri'
 
 var debug = require('debug')('application')
 import {shell} from 'electron'
@@ -965,36 +966,84 @@ class Application extends EventEmitter {
 
     this.onboardingTorrents.forEach((torrentFileName) => {
 
-        fs.readFile(torrentFileName, (err, data) => {
-          if (err) return console.error('Failed to read example torrent:', torrentFileName, err.message)
-
-          let torrentInfo
-
-          try {
-            torrentInfo = new TorrentInfo(data)
-          } catch (e) {
-            console.error('Failed to parse example torrent file from data:', torrentFileName)
-            return
-          }
-
-          // Make settings for downloading with default settings
-          let settings = {
-            infoHash : torrentInfo.infoHash(),
-            metadata : torrentInfo,
-            resumeData : null,
-            name: torrentInfo.name(),
-            savePath: this.applicationSettings.downloadFolder(),
-            deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
-            extensionSettings : {
-              buyerTerms: this.applicationSettings.defaultBuyerTerms()
-            }
-          }
-
-          this._addTorrent(settings, (err) => {
-            if (err) console.log('Failed to add example torrent', err)
-          })
+        this._addTorrentByFileName(torrentFileName, (err) => {
+          if(err)
+            debug('Failed to add example torrent:', torrentFileName, err.message)
         })
     })
+  }
+
+  _addTorrentByFileName (torrentFileName, callback) {
+    fs.readFile(torrentFileName, (err, data) => {
+      if (err) {
+        return callback(err)
+      }
+
+      let torrentInfo
+
+      try {
+        torrentInfo = new TorrentInfo(data)
+      } catch (e) {
+        return callback(e)
+      }
+
+      // Make settings for downloading with default settings
+      let settings = {
+        infoHash : torrentInfo.infoHash(),
+        metadata : torrentInfo,
+        resumeData : null,
+        name: torrentInfo.name(),
+        savePath: this.applicationSettings.downloadFolder(),
+        deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
+        extensionSettings : {
+          buyerTerms: this.applicationSettings.defaultBuyerTerms()
+        }
+      }
+
+      this._addTorrent(settings, callback)
+    })
+  }
+
+  _addTorrentByMagnetLink (magnetUrl, callback) {
+    var parsedMagnet = magnet.decode(magnetUrl)
+
+    let settings = {
+        infoHash: parsedMagnet.infoHash,
+        url: magnetUrl,
+        resumeData : null,
+        name: parsedMagnet.infoHash,
+        savePath: this.applicationSettings.downloadFolder(),
+        deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
+        extensionSettings : {
+          buyerTerms: this.applicationSettings.defaultBuyerTerms()
+        }
+    }
+
+    this._addTorrent(settings, callback)
+  }
+
+  handleOpenExternalTorrent (uri, callback) {
+
+    try {
+      // check if uri is a valid magnet link
+      let parsedMagnet = magnet.decode(uri)
+
+      if (parsedMagnet && parsedMagnet.infoHash) {
+        this._addTorrentByMagnetLink(uri, callback)
+        return
+      }
+
+    } catch (err) { }
+
+    try {
+      // maybe its a path to a torrent file
+      if (fs.lstatSync(uri).isFile()) {
+        this._addTorrentByFileName(uri, callback)
+        return
+      }
+    } catch (err) { }
+
+    callback('resource not file or magnetlink')
   }
 }
 

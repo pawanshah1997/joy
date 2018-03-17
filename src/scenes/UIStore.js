@@ -325,7 +325,7 @@ class UIStore {
       }))
 
     } else if(resource === Application.RESOURCE.WALLET) {
-      
+
       /**
        * Create and setup wallet store
        */
@@ -346,7 +346,7 @@ class UIStore {
         [],
         wallet.pay.bind(wallet)
       )
-  
+
       this.applicationStore.setWalletStore(walletStore)
 
       // Hook into events
@@ -386,7 +386,7 @@ class UIStore {
         launchExternalTxViewer,
         bcoin.protocol.consensus.COIN
       )
-      
+
     }
 
   })
@@ -447,27 +447,27 @@ class UIStore {
     /// Hook into events
 
     torrent.on('state', action((state) => {
-      
+
       torrentStore.setState(state)
-  
+
       /**
        * When torrent is finished, we have to count towards the navigator
        * Bug: see here https://github.com/JoyStream/joystream-desktop/issues/764
        */
-  
+
       if(state === 'Active.FinishedDownloading.Passive') {
-    
+
         assert(this.applicationNavigationStore)
         this.applicationNavigationStore.handleTorrentCompleted()
-        
+
         // In the future: Add desktop notifications!
-        
+
       }
-      
+
     }))
-    
+
     torrent.on('loaded', action((deepInitialState) => {
-  
+
       /**
        * When adding a torrent through the uploading flow,
        * we need to learn whether uploading the given torrent is feasible,
@@ -478,17 +478,17 @@ class UIStore {
        * if there is such an uploading flow going for the given torrent,
        * and notify the given scene model about the download status.
        */
-      
+
       if(this.uploadingStore &&
         this.uploadingStore.state === UploadingStore.STATE.AddingTorrent &&
         this.uploadingStore.infoHashOfTorrentSelected === torrent.infoHash) {
-        
+
         if(torrent.state.startsWith('Active.DownloadIncomplete'))
           this.uploadingStore.torrentDownloadIncomplete()
         else if(torrent.state.startsWith('Active.FinishedDownloading'))
           this.uploadingStore.torrentFinishedDownloading()
       }
-      
+
     }))
 
     torrent.on('viabilityOfPaidDownloadInSwarm', action((viabilityOfPaidDownloadInSwarm) => {
@@ -517,7 +517,7 @@ class UIStore {
       torrentStore.setTotalSize(torrentInfo.totalSize())
       torrentStore.setTorrentFiles(torrentInfo.files())
     }))
-    
+
     torrent.on('progress', action((progress) => {
       torrentStore.setProgress(progress * 100)
     }))
@@ -789,7 +789,7 @@ class UIStore {
     // Initiate closing application
     this.closeApplication()
   }
-  
+
   /**
    * Closes the application, but firrst enables possible
    * onboarding flow if its currently enabled.
@@ -828,7 +828,7 @@ class UIStore {
     }
 
   }
-  
+
   /**
    * Directly initiates application stoppage.
    */
@@ -1024,6 +1024,11 @@ class UIStore {
   addExampleTorrents () {
     this._application.addExampleTorrents()
   }
+
+  openingExternalTorrentResult (err, torrentName) {
+
+  }
+
 }
 
 function launchExternalTxViewer(txId, outputIndex) {
