@@ -3,7 +3,6 @@
  */
 
 import {observable, action, runInAction, computed} from 'mobx'
-import StreamServer from '../../../core/StreamServer'
 
 /**
  * Video state: WIP!!
@@ -78,11 +77,6 @@ const MEDIA_SOURCE_TYPE = {
 class MediaPlayerStore {
 
     /**
-     * {MEDIA_SOURCE_TYPE}
-     */
-    @observable mediaSourceType
-
-    /**
      * {String}
      */
     @observable mostRecentEventName
@@ -111,14 +105,12 @@ class MediaPlayerStore {
 
     /**
      * Constructor
-     * @param mediaSourceType
      * @param torrent
-     * @param file
+     * @param fileIndex
      * @param loadedTimeRequiredForPlayback {Number} - seconds of media data required before playback is allowed
      */
-    constructor(mediaSourceType,
-                torrentStore,
-                file,
+    constructor(torrentStore,
+                streamUrl,
                 loadedTimeRequiredForPlayback,
                 autoPlay,
                 mediaPlayerWindowSizeFetcher,
@@ -126,9 +118,8 @@ class MediaPlayerStore {
                 onExit,
                 uiStore) {
 
-        this.mediaSourceType = mediaSourceType
         this.torrent = torrentStore
-        this.file = file
+        this.streamUrl = streamUrl
         this._loadedTimeRequiredForPlayback = loadedTimeRequiredForPlayback
         this.autoPlay = autoPlay
 
@@ -145,9 +136,6 @@ class MediaPlayerStore {
         this._windowSizePriorToResize = null
 
         this._uiStore = uiStore
-
-        this.streamServer = new StreamServer(this.file)
-        this.streamServer.start()
 
     }
 
@@ -208,7 +196,7 @@ class MediaPlayerStore {
 
         return
 
-        if(this.mediaSourceType !== MEDIA_SOURCE_TYPE.STREAMING_TORRENT)
+        if(!this.torrent.isDownloading)
             return
 
         let currentTime = videoDOMElement.currentTime
@@ -236,7 +224,7 @@ class MediaPlayerStore {
         // We will only ever show the stream progress if we have an incomplete download.
         // If we have a complete download and this event occurs users may be confused to see
         // The stream progress bar, and possibly a start paid download button.
-        if (this.mediaSourceType === MEDIA_SOURCE_TYPE.STREAMING_TORRENT && this.torrent.isDownloading) {
+        if (this.torrent.isDownloading) {
           this.setShowTorrentStreamProgress(true)
         }
     }
@@ -248,7 +236,7 @@ class MediaPlayerStore {
 
         return
 
-        if(this.mediaSourceType !== MEDIA_SOURCE_TYPE.STREAMING_TORRENT)
+        if(!this.torrent.isDownloading)
             return
 
         if(this.playbackTimeAvailable < this._loadedTimeRequiredForPlayback)
@@ -282,7 +270,6 @@ class MediaPlayerStore {
 
     @action.bound
     exit() {
-        this.streamServer.close()
 
         // Adjust window size back to old dimensions, if it has been resized
         if(this._windowSizePriorToResize)
@@ -295,7 +282,7 @@ class MediaPlayerStore {
     @computed get
     torrentStreamProgress() {
 
-        if(this.mediaSourceType !== MEDIA_SOURCE_TYPE.STREAMING_TORRENT)
+        if(!this.torrent.isDownloading)
             return null
         else if(this.playbackTimeAvailable)
             return this.playbackTimeAvailable > this._loadedTimeRequiredForPlayback ? 1 : this.playbackTimeAvailable / this._loadedTimeRequiredForPlayback

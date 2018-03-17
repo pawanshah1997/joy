@@ -22,10 +22,6 @@ class VideoPlayer extends Component {
 
   componentDidMount () {
 
-    let opts = {
-        autoplay : this.props.mediaPlayerStore.autoPlay
-    }
-
   }
 
   handleMouseEnter () {
@@ -82,7 +78,7 @@ class VideoPlayer extends Component {
 
 
         <video id={VIDEO_ELEMENT_ID}
-               src='http://localhost:8888'
+               src={this.props.mediaPlayerStore.streamUrl}
                onDurationChange={() => { this.props.mediaPlayerStore.durationChanged() }}
                onLoadedMetadata={(event) => { this.props.mediaPlayerStore.metadataLoaded(event) }}
                onLoadedData={() => { this.props.mediaPlayerStore.loadedData(getVideoDOMElement()) }}
@@ -95,6 +91,7 @@ class VideoPlayer extends Component {
                onError={() => { this.props.mediaPlayerStore.errorOccured(getVideoDOMElement()) }}
                style={videoStyle}
                controls
+               autoPlay={this.props.mediaPlayerStore.autoPlay || ''}
         />
 
       </div>

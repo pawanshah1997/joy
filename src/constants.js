@@ -25,15 +25,15 @@ export const EXAMPLE_TORRENTS = [
     makeFullTorrentPath('glass-half-full.torrent'),
     makeFullTorrentPath('cosmos-laundromat.torrent'),
 
-    //makeFullTorrentPath('elephants-dream.torrent'),
+    makeFullTorrentPath('elephants-dream.torrent'),
 
     // The following torrents cannot be played by render-media
     // in genuine streaming mode, so we discontinue for now.
     // NB: Some of these are also larger than the 200MB default
     // blob limit, and hence this would also need to be adgusted!
 
-    // makeFullTorrentPath('big-buck-bunny.torrent'),
-    // makeFullTorrentPath('tears-of-steel.torrent'),
+    makeFullTorrentPath('big-buck-bunny.torrent'),
+    makeFullTorrentPath('tears-of-steel.torrent')
 ]
 
 // Not used - just keeping them here as hint to use in future
