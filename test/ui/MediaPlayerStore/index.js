@@ -5,9 +5,8 @@ var sinon = require('sinon')
 
 const createInitialValues = () => {
   return [
-    0, // mediaSourceType,
     1, // torrent,
-    2, // file,
+    2, // streamUrl,
     3, // loadedTimeRequiredForPlayback,
     4, // autoPlay,
     sinon.spy(), // mediaPlayerWindowSizeFetcher,
@@ -26,10 +25,9 @@ describe('MediaPlayerStore', function () {
   })
 
   it('constructor', function () {
-    assert.equal(mediaPlayerStore.mediaSourceType, initialValues[0])
-    assert.equal(mediaPlayerStore.torrent, initialValues[1])
-    //assert.equal(mediaPlayerStore.file, initialValues[2]) // should this be an @observable
-    assert.equal(mediaPlayerStore.autoPlay, initialValues[4])
+    assert.equal(mediaPlayerStore.torrent, initialValues[0])
+    assert.equal(mediaPlayerStore.streamUrl, initialValues[1]) // should this be an @observable
+    assert.equal(mediaPlayerStore.autoPlay, initialValues[3])
   })
 
 })
