@@ -122,17 +122,17 @@ application.on('started', () => {
   function handleCommandLineArgs (argv) {
     if (!argv || !argv.length) return
 
-    // Ignore if there are too many arguments, only expect one argument
+    // Ignore if there are too many arguments, only expect one
     // when app is launched as protocol handler. We can handle additional options in the future
 
-    if (isDev && argv.length > 3) return // app was launched:   electron index.js $arg
-    if (argv.length > 2) return // packaged app run as:         joystream $arg
+    if (isDev && argv.length > 3) return  // app was launched as: electron index.js $uri
+    if (!isDev && argv.length > 2) return // packaged app run as: joystream $uri
 
-    var arg = isDev ? argv[2] : argv[1]
+    var $uri = isDev ? argv[2] : argv[1]
 
-    if (arg) {
+    if ($uri) {
       // arg is either a magnetlink or a filepath
-      application.handleOpenExternalTorrent(arg, function (err, torrentName) {
+      application.handleOpenExternalTorrent($uri, function (err, torrentName) {
         rootUIStore.openingExternalTorrentResult(err, torrentName)
       })
     }
