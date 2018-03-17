@@ -503,38 +503,12 @@ class Application extends EventEmitter {
 
           })
 
-          // otherwise, if its loading
-          if(torrent.state.startsWith('Loading')) {
+          // Does it make sense to encode settings of a loading torrent?
+          encodedTorrentSettings = encodeTorrentSettings(torrent)
 
-            debug('Torrent is being loaded, hence we wait until its done before we initiate termination: ' + torrent.name)
+          debug('Initiating termination of torrent: ' + torrent.name)
 
-            // then we first wait for it to finish loading
-            // before asking it to terminate
-            torrent.once('loaded', () => {
-
-              terminateLoadedTorrent(torrent)
-            })
-
-          } else {
-
-            // otherwise if its not just loading,
-            // then its active - which is the most frequent scenario,
-            // and we can ask it it terminate immediately
-            terminateLoadedTorrent(torrent)
-
-          }
-
-          function terminateLoadedTorrent(torrent) {
-
-            encodedTorrentSettings = encodeTorrentSettings(torrent)
-
-            assert(torrent.state.startsWith('Active'))
-
-            debug('Initiating termination of torrent: ' + torrent.name)
-
-            torrent._terminate()
-
-          }
+          torrent._terminate()
 
         }
 
@@ -729,6 +703,10 @@ class Application extends EventEmitter {
       if(err)
         onAdded(err)
       else {
+
+        if (this.state === Application.STATE.STOPPING || this.state === Application.STATE.STOPPED) {
+          return onAdded('application is shutting down')
+        }
 
         // Process being added to session
         let torrent = this._onTorrentAddedToSession(settings, newJoystreamNodeTorrent)
