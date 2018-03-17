@@ -26,7 +26,7 @@ function showMainWindow () {
 
 // First thing to check for is if this is an instace of an update installation
 // using the squirell updater framework (Windows and MacOS)
-if(require('electron-squirrel-startup')) {
+if(require('./electron-squirrel-startup')) {
   // This is were we handle tasks relavent to install/update/removal of the application
   app.quit()
 
