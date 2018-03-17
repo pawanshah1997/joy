@@ -64,13 +64,32 @@ const rootUIStore = new UIStore(application, process.env.FORCE_TERMS_SCREEN)
 
 application.on('started', () => {
 
-  // TEMP
-  if(!isDev) remote.app.setAsDefaultProtocolClient('magnet')
+  const isDefaultClient = remote.app.isDefaultProtocolClient('magnet')
+  const defaultClientPreference = application.applicationSettings.defaultClientPreference()
+
+  if(!isDev && remote.process.platform !== 'linux' && !isDefaultClient) {
+    if (defaultClientPreference === 'not_set') {
+      // On first install/update to new release supporting this application setting
+      remote.app.setAsDefaultProtocolClient('magnet')
+      // Next time ask
+      application.applicationSettings.setDefaultClientPreference('ask')
+
+    } else if (defaultClientPreference === 'force') {
+      // If user wants to always force joystream to be the default client
+      remote.app.setAsDefaultProtocolClient('magnet')
+
+    } else if (defaultClientPreference === 'ask') {
+        // prompt UI - should have three actions
+        // (1."Yes", 2."Don't Ask Again", 3."Dismiss")
+        // action yes --> remote.app.setAsDefaultProtocolClient(), then close dialog
+        // action dont ask again -> set application setting to 'dont_ask', then close dialog
+        // action dismiss -> just close dialog
+    }
+  }
 
   const openEvent = remote.getGlobal('queuedOpenEvent')
 
   if (openEvent) {
-    console.log('!!handling queued open event!!')
     application.handleOpenExternalTorrent(openEvent.uri, function (err, torrentName) {
       rootUIStore.openingExternalTorrentResult(err, torrentName)
     })
@@ -80,27 +99,35 @@ application.on('started', () => {
   handleCommandLineArgs(remote.process.argv)
 
   remote.app.on('open-file', function (event, filePath) {
-    console.log('open-file event')
     application.handleOpenExternalTorrent(filePath, function (err, torrentName) {
       rootUIStore.openingExternalTorrentResult(err, torrentName)
     })
   })
 
   remote.app.on('open-url', function (event, url) {
-    console.log('open-url event')
     application.handleOpenExternalTorrent(url, function (err, torrentName) {
       rootUIStore.openingExternalTorrentResult(err, torrentName)
     })
   })
 
   ipcRenderer.on('second-instance', function (event, eventName, argv) {
-    console.log('!!seconds instance!!')
     if (eventName === 'argv') {
       handleCommandLineArgs(argv)
     }
   })
 
+  // Process commandline arguments that were either passed to the main process when the first
+  // instance of the app was launched, or when when the second instance was attempted to be run
+  // (on OSX this only happens if the user run the app from the terminal)
   function handleCommandLineArgs (argv) {
+    if (!argv || !argv.length) return
+
+    // Ignore if there are too many arguments, only expect one argument
+    // when app is launched as protocol handler. We can handle additional options in the future
+
+    if (isDev && argv.length > 3) return // app was launched:   electron index.js $arg
+    if (argv.length > 2) return // packaged app run as:         joystream $arg
+
     var arg = isDev ? argv[2] : argv[1]
 
     if (arg) {

@@ -42,7 +42,7 @@ const PRICE_FEED_POLLING_INTERVAL = 60*1000 //
 /**
  * Default settings to use for the application settings
  */
-const DEFAULT_APPLIATION_SETTINGS = {
+const DEFAULT_APPLICATION_SETTINGS = {
 
   useAssistedPeerDiscovery : true,
 
@@ -68,7 +68,9 @@ const DEFAULT_APPLIATION_SETTINGS = {
     settlementFee: 2000
   },
 
-  termsAccepted : false
+  termsAccepted : false,
+
+  defaultClientPreference: 'not_set' // not_set, ask, dont_ask, force
 }
 
 /**
@@ -293,12 +295,13 @@ class Application extends EventEmitter {
     // these are set on the first run
     this.applicationSettings.open(
       0,
-      DEFAULT_APPLIATION_SETTINGS.makeDefaultSavePathFromBaseFolder(appDirectory),
-      DEFAULT_APPLIATION_SETTINGS.useAssistedPeerDiscovery,
-      DEFAULT_APPLIATION_SETTINGS.bittorrentPort,
-      DEFAULT_APPLIATION_SETTINGS.buyerTerms,
-      DEFAULT_APPLIATION_SETTINGS.sellerTerms,
-      DEFAULT_APPLIATION_SETTINGS.termsAccepted
+      DEFAULT_APPLICATION_SETTINGS.makeDefaultSavePathFromBaseFolder(appDirectory),
+      DEFAULT_APPLICATION_SETTINGS.useAssistedPeerDiscovery,
+      DEFAULT_APPLICATION_SETTINGS.bittorrentPort,
+      DEFAULT_APPLICATION_SETTINGS.buyerTerms,
+      DEFAULT_APPLICATION_SETTINGS.sellerTerms,
+      DEFAULT_APPLICATION_SETTINGS.termsAccepted,
+      DEFAULT_APPLICATION_SETTINGS.defaultClientPreference
       )
 
     this._startedResource(Application.RESOURCE.SETTINGS, onStarted)

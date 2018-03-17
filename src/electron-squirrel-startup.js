@@ -24,7 +24,7 @@ var check = function() {
     var target = path.basename(process.execPath);
 
     if (cmd === '--squirrel-install' || cmd === '--squirrel-updated') {
-      app.setAsDefaultProtocolClient('magnet')
+      // app.setAsDefaultProtocolClient('magnet')
       run(['--createShortcut=' + target + ''], app.quit);
       return true;
     }
@@ -43,4 +43,3 @@ var check = function() {
 };
 
 module.exports = check();
-
