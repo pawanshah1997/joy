@@ -1053,7 +1053,7 @@ function encodeTorrentSettings(torrent) {
     infoHash: torrent.infoHash,
     name: torrent.name,
     savePath: torrent.savePath,
-    deepInitialState: torrent.deepInitialState(),
+    deepInitialState: torrent.state.startsWith('Loading') ? torrent._deepInitialState : torrent.deepInitialState(),
     extensionSettings: {
       buyerTerms: torrent.buyerTerms,
       sellerTerms: torrent.sellerTerms
