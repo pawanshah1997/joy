@@ -6,7 +6,6 @@ import Wallet from '../Wallet'
 import safeEventHandlerShim from '../Wallet/safeEventHandler'
 import Torrent from '../Torrent'
 import DeepInitialState from '../Torrent/Statemachine/DeepInitialState'
-import getCoins from './faucet'
 import mkdirp from 'mkdirp'
 import WalletTopUpOptions from "./WalletTopUpOptions"
 import fs from 'fs'
@@ -187,9 +186,9 @@ class Application extends EventEmitter {
    * of the value of this parameter.
    * @param enableOnboardingIfFirstRun {Bool} - regardless of `onboardingIsEnabled`, if this is true, then onboarding will be shown if
    * the app is running for the first time, as according to the application settings.
-   * @param walletTopUpOptions {WalletTopUpOptions}
+   * @param faucetRequestIssuer {Func} - function for requesting coins from faucet
    */
-  constructor (onboardingTorrents, onboardingIsEnabled, enableOnboardingIfFirstRun, walletTopUpOptions) {
+  constructor (onboardingTorrents, onboardingIsEnabled, enableOnboardingIfFirstRun, faucetRequestIssuer) {
 
     super()
 
@@ -206,8 +205,7 @@ class Application extends EventEmitter {
 
 
     this._enableOnboardingIfFirstRun = enableOnboardingIfFirstRun
-    // Disable wallet topUp if not specified
-    this._walletTopUpOptions = walletTopUpOptions || new WalletTopUpOptions(true, 20000)
+    this._faucetRequestIssuer = faucetRequestIssuer
     this._torrentDatabase = null
 
     // setInterval reference for polling joystream-node session for
@@ -1062,21 +1060,105 @@ class Application extends EventEmitter {
       let parsedMagnet = magnet.decode(uri)
 
       if (parsedMagnet && parsedMagnet.infoHash) {
-        this._addTorrentByMagnetLink(uri, callback)
-        return
-      }
+      this._addTorrentByMagnetLink(uri, callback)
+      return
+    }
 
     } catch (err) { }
 
     try {
       // maybe its a path to a torrent file
       if (fs.lstatSync(uri).isFile()) {
-        this._addTorrentByFileName(uri, callback)
-        return
-      }
+      this._addTorrentByFileName(uri, callback)
+      return
+    }
     } catch (err) { }
 
-    callback('resource not file or magnetlink')
+      callback('resource not file or magnetlink')
+
+  }
+
+  static CLAIM_FREE_BCH_ERROR = {
+    APPLICATION_IN_WRONG_STATE: 0,
+    RECEIVE_ADDRESS_NOT_READY: 1,
+    WALLET_NOT_STARTED : 2,
+    SETTINS_MUST_BE_OPEN : 3,
+    ALREADY_CLAIMED: 4,
+    FAUCET_ERROR: 5
+  }
+
+  /**
+   * Claim free BCH
+   * @param cb {Function} - callback
+   */
+  claimFreeBCH(cb) {
+
+    if(this.state === Application.STATE.STOPPING || this.state === Application.STATE.STOPPED) {
+      cb({code : Application.STATE.CLAIM_FREE_BCH_ERROR.APPLICATION_IN_WRONG_STATE})
+      return
+    }
+
+    // Make sure the wallet is started
+    if(
+      // so it exists
+      !this.wallet
+      ||
+      // and has a a receive address preparedThese are the only states where the receive address is set,
+      // and the we are not shutdown, or doing shutdown
+      !(
+        this.wallet.state === Wallet.STATE.GETTING_BALANCE ||
+        this.wallet.state === Wallet.STATE.CONNECTING_TO_NETWORK ||
+        this.wallet.state === Wallet.STATE.STARTED
+      )
+    ) {
+      cb({code : Application.CLAIM_FREE_BCH_ERROR.RECEIVE_ADDRESS_NOT_READY})
+      return
+    }
+
+    // Make sure the application settings are started
+    if(!this.applicationSettings || this.applicationSettings.state != ApplicationSettings.STATE.OPENED) {
+      cb({code : Application.CLAIM_FREE_BCH_ERROR.SETTINS_MUST_BE_OPEN})
+      return
+    }
+
+    // Check whether we are even going to succeed with this,
+    let claimedFreeBCH = this.applicationSettings.claimedFreeBCH()
+
+    if(claimedFreeBCH) {
+      cb({code : Application.CLAIM_FREE_BCH_ERROR.ALREADY_CLAIMED})
+      return
+    }
+
+    // Request coins to our current receive address
+    this._faucetRequestIssuer(this.wallet.receiveAddress, (err, res) => {
+
+      // If the application is shutting down or fully stopped, then
+      // we don't even try to do anything
+      if(this.state === Application.STATE.STOPPING || this.state === Application.STATE.STOPPED) {
+        debug('Ignoring result of getting coins from fauet')
+        return
+      }
+
+      if(err) {
+
+        // Pass on error
+        cb({
+          code : Application.CLAIM_FREE_BCH_ERROR.FAUCET_ERROR,
+          faucetError :  err
+        })
+
+      } else {
+
+        // Mark as claimed
+        this.applicationSettings.setClaimedFreeBCH(true)
+
+        // make user callback
+        cb(null)
+
+      }
+
+    })
+
   }
 }
 
