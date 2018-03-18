@@ -30,7 +30,7 @@ const StartDownloadingFlow = observer((props) => {
 })
 
 StartDownloadingFlow.propTypes = {
-  downloadingStore: PropTypes.instanceOf(DownloadingStore).isRequired
+  downloadingStore: PropTypes.object // HMR breaks instanceOf(DownloadingStore).isRequired
 }
 
 module.exports = StartDownloadingFlow

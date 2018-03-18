@@ -88,7 +88,7 @@ const SendDialog = observer((props) => {
 })
 
 SendDialog.propTypes = {
-  sendDialogStore : PropTypes.instanceOf(SendDialogStore)
+  sendDialogStore : PropTypes.object // HMR breaks => PropTypes.instanceOf(SendDialogStore)
 }
 
 export default SendDialog

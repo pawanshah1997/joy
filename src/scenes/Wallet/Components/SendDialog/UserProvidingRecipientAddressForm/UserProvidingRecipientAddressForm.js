@@ -89,7 +89,7 @@ function errorTextFromAddressValidationResult(result) {
 }
 
 UserProvidingRecipientAddressForm.propTypes = {
-  userProvidingRecipientAddressFormStore : PropTypes.instanceOf(UserProvidingRecipientAddressFormStore)
+  userProvidingRecipientAddressFormStore : PropTypes.object // HMR breaks instanceOf(UserProvidingRecipientAddressFormStore)
 }
 
 export default UserProvidingRecipientAddressForm
