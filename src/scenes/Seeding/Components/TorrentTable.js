@@ -34,7 +34,7 @@ const TorrentTable = observer((props) => {
   let styles = getStyle(props)
 
   return (
-    <Dropzone disableClick style={styles.dropZoneStyle} onDrop={(files) => { props.uploadingStore.startTorrentUploadFlowWithTorrentFile(files) }}>
+    <Dropzone disableClick style={styles.dropZoneStyle} onDrop={(files) => { props.uploadingStore.startTorrentUploadFlowFromDragAndDrop(files) }}>
       <Table column_titles={['', 'STATE', 'SPEED', 'PRICE', 'REVENUE', 'BUYERS']}>
         {
           props.uploadingStore.torrentRowStores.length === 0

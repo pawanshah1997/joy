@@ -49,6 +49,7 @@ const StartUploadingFlow = observer((props) => {
     <div>
       <InvalidTorrentFileAlertDialog
         open={state === UploadingStore.STATE.TorrentFileWasInvalid}
+        canRetry={props.uploadingStore.latFilePickingMethodUsed === UploadingStore.TORRENT_ADDING_METHOD.FILE_PICKER}
         onAcceptClicked={() => { props.uploadingStore.acceptTorrentFileWasInvalid() }}
         onRetryClicked={() => { props.uploadingStore.retryPickingTorrentFile() }} />
 

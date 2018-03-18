@@ -28,7 +28,7 @@ function getStyles (props) {
 }
 
 const Seeding = inject('UIStore')(observer((props) => {
-  
+
   let styles = getStyles(props)
 
   let labelColorProps = {
@@ -38,18 +38,18 @@ const Seeding = inject('UIStore')(observer((props) => {
 
   return (
     <div style={styles.root}>
-      
+
       <MiddleSection backgroundColor={props.middleSectionBaseColor} height="120px">
-        
+
         <Toolbar>
-          
+
           <ToolbarButton title="add upload"
-                         onClick={() => { props.UIStore.uploadingStore.uploadTorrentFile() }}
+                         onClick={() => { props.UIStore.uploadingStore.startTorrentUploadFlowWithFilePicker() }}
                          iconNode={<AddTorrentIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}} />}
           />
-          
+
         </Toolbar>
-        
+
         <MaxFlexSpacer />
 
         <LabelContainer>
