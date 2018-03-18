@@ -176,10 +176,10 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
                                {...labelColorProps}
             />
             
-            <CurrencyLabel labelText={"PENDING"}
+            {/*<CurrencyLabel labelText={"PENDING"}
                            satoshies={props.UIStore.walletSceneStore.pendingBalance}
                            {...labelColorProps}
-            />
+            />*/}
           
           </LabelContainer>
         
