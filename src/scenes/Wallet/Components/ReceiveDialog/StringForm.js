@@ -31,7 +31,7 @@ function getStyle(props) {
       color : 'rgba(128, 128, 128, 0.99)',
       fontFamily : 'Helvetica neue',
       padding: '10px 20px',
-      fontSize: '25px',
+      fontSize: '20px',
       borderRadius: '4px',
       fontWeight: '100'
     },
