@@ -12,6 +12,8 @@ import {Payment} from '../../core/Wallet'
 import WalletStore, {PaymentStore} from '../../core-stores/Wallet'
 import WalletSceneStore, {PaymentRowStore} from '../../scenes/Wallet/Stores'
 
+import bcoin from 'bcoin'
+
 class PaymentsTableScenarios extends Component {
 
   constructor(props) {
@@ -90,7 +92,9 @@ function makeWalletSceneStore(paymentsInTransactionWithTXID) {
     null,
     (txId, outputIndex) => {
       console.log('Clicked ' + txId + ':' + outputIndex)
-    }
+    },
+    () => { console.log('trying to claim wallet scene')},
+    bcoin.protocol.consensus.COIN
   )
 }
 
