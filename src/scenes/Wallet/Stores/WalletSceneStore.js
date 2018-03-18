@@ -7,6 +7,7 @@ import {observable, action, computed} from 'mobx'
 import SendDialogStore from './SendDialogStore/SendDialogStore'
 import ReceiveDialogStore from './ReceiveDialogStore'
 import PaymentRowStore from './PaymentRowStore'
+import ClaimFreeBCHFlowStore from './ClaimFreeBCHFlowStore'
 
 /**
  * Model for wallet scene.
@@ -14,7 +15,7 @@ import PaymentRowStore from './PaymentRowStore'
 class WalletSceneStore {
 
   /**
-   * {SendDialogStore|ReceiveDialogStore} store for currently visible modal dialog,
+   * {SendDialogStore|ReceiveDialogStore|ClaimFreeBCHFlowStore|null} store for currently visible modal dialog,
    * which is send, receive and view seed dialog
    */
   @observable visibleDialog
@@ -25,22 +26,32 @@ class WalletSceneStore {
   @observable searchString
 
   /**
+   * {Boolean}
+   */
+  @observable allowAttemptToClaimFreeBCH
+
+  /**
    * Constructor
    * @param {WalletStore} walletStore -
    * @param {PriceFeedStore} priceFeedStore -
    * @param {Number} satsPrkBFee
    * @param {SendDialogStore|ReceiveDialogStore} visibleDialog - currently visible dialog
    * @param {String} searchString - search string
+   * @param {Boolean} allowAttemptToClaimFreeBCH - whether to allow user attempt to claim free BCH from faucet
    * @param {Func} launchExternalTxViewer
+   * @param {Func} claimFreeBCHAttemptHandler - handler for attempts to claim free BCH
+   * @param {Number} numberOfUnitsPerCoin -  the number of base unit in coin
    */
-  constructor(walletStore, priceFeedStore, satsPrkBFee, visibleDialog, searchString, launchExternalTxViewer, numberOfUnitsPerCoin) {
+  constructor(walletStore, priceFeedStore, satsPrkBFee, visibleDialog, searchString, allowAttemptToClaimFreeBCH, launchExternalTxViewer, claimFreeBCHAttemptHandler, numberOfUnitsPerCoin) {
 
     this._walletStore = walletStore
     this._priceFeedStore = priceFeedStore
     this._satsPrkBFee = satsPrkBFee
     this.setVisibleDialog(visibleDialog)
     this.setSearchString(searchString)
+    this.setAllowAttemptToClaimFreeBCH(allowAttemptToClaimFreeBCH)
     this._launchExternalTxViewer = launchExternalTxViewer
+    this._claimFreeBCHAttemptHandler = claimFreeBCHAttemptHandler
     this._numberOfUnitsPerCoin = numberOfUnitsPerCoin
   }
 
@@ -52,6 +63,11 @@ class WalletSceneStore {
   @action.bound
   setSearchString(string) {
     this.searchString = string
+  }
+
+  @action.bound
+  setAllowAttemptToClaimFreeBCH(allowAttemptToClaimFreeBCH) {
+    this.allowAttemptToClaimFreeBCH = allowAttemptToClaimFreeBCH
   }
 
   @action.bound
@@ -106,6 +122,24 @@ class WalletSceneStore {
   viewPayment(txId, outputIndex) {
 
     this._launchExternalTxViewer(txId, outputIndex)
+  }
+
+  @action.bound
+  claimFreeBCH = () => {
+
+    if(!this.allowAttemptToClaimFreeBCH)
+      throw Error('Cannot attempt to claim free BCH at this time')
+    else if(this.visibleDialog)
+      throw Error('Cannot open dialog when another is already open')
+
+    // Create model for flow
+    let flowStore = new ClaimFreeBCHFlowStore(this, ClaimFreeBCHFlowStore.STAGE.WAITING_FOR_SERVER_REPLY, null)
+
+    // Set as active dialog model
+    this.setVisibleDialog(flowStore)
+
+    // Issue request to claim free BCH
+    this._claimFreeBCHAttemptHandler()
   }
 
   @computed get
