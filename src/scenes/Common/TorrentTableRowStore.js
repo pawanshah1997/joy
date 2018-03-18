@@ -63,13 +63,13 @@ class TorrentTableRowStore {
 
   remove () {
     this.setBeingRemoved(true)
-    // this._applicationStore.removeTorrent(this.torrentStore.infoHash, false, () => {})
+    this._applicationStore.removeTorrent(this.torrentStore.infoHash, false, () => {})
   }
 
   removeAndDeleteData () {
     this.setBeingRemoved(true)
     this.setDeletingData(true)
-    // this._applicationStore.removeTorrent(this.torrentStore.infoHash, true, () => {})
+    this._applicationStore.removeTorrent(this.torrentStore.infoHash, true, () => {})
   }
 
   openFolder() {

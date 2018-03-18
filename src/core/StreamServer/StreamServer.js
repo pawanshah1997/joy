@@ -86,7 +86,6 @@ class StreamServer extends EventEmitter {
       // Do we have this torrent?
       if(!this._torrents.has(infoHash)) {
         debug('infoHash not in application')
-        debugger
         return res.end() // use proper HTTP error status code
       }
 
