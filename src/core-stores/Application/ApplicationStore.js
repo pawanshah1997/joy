@@ -192,8 +192,10 @@ class ApplicationStore {
   addTorrent (settings, onTorrentStoreAdded) {
 
     // We guard against duplicate pending calls
-    if(this._pendingAddTorrentCallsMap.has(settings.infoHash))
-      throw Error('Cannot add a torrent while a prior call is still being resolved for the same torrent.')
+    if(this._pendingAddTorrentCallsMap.has(settings.infoHash)) {
+      onTorrentStoreAdded('Cannot add a torrent while a prior call is still being resolved for the same torrent.')
+      return
+    }
 
     // Hold on to user callback
     this._pendingAddTorrentCallsMap.set(settings.infoHash, onTorrentStoreAdded)
@@ -216,8 +218,10 @@ class ApplicationStore {
   @action.bound
   removeTorrent (infoHash, deleteData, onTorrentRemoved) {
 
-    if(this._pendingRemoveTorrentCallsMap.has(infoHash))
-      throw Error('Cannot remove torrent while pror call is still being respøved for the same torrent')
+    if(this._pendingRemoveTorrentCallsMap.has(infoHash)) {
+      onTorrentRemoved('Cannot remove torrent while pror call is still being respøved for the same torrent')
+      return
+    }
 
     // Hold on to user callback
     this._pendingRemoveTorrentCallsMap.set(infoHash, onTorrentRemoved)
