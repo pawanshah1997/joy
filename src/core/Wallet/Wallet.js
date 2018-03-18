@@ -476,13 +476,13 @@ class Wallet extends EventEmitter {
 
   /**
    * Make a payment
-   * @param {Hash} pubKeyHash - for destination
+   * @param {bcoin.Address} address - for destination
    * @param {Number} amount - number of satoshis
    * @param {Number} satsPrkBFee - number of satoshis per kB.
    * @param {String} note - note to be attached to the payment
    * @return {Promise} - Returns {@link Payment}
    */
-  async pay(pubKeyHash, amount, satsPrkBFee, note) {
+  async pay(address, amount, satsPrkBFee, note) {
 
     // Check that we are indeed started
     if(this.state !== Wallet.STATE.STARTED)
@@ -496,7 +496,7 @@ class Wallet extends EventEmitter {
     // Create transaction output
     let output = new bcoin.output({
       value : amount,
-      script : bcoin.script.fromPubkeyhash(pubKeyHash)
+      script : bcoin.script.fromAddress(address)
     })
 
     // Ask wallet to build a transaction, fill it with outputs and inputs,

@@ -58,6 +58,7 @@ class WalletStore {
 
     this._pay = pay
     this._pendingPaymnetStoreResolvers = new Map()
+
   }
 
   @action.bound
@@ -115,20 +116,20 @@ class WalletStore {
 
   /**
    * Make a payment
-   * @param {Hash} pubKeyHash - for destination
+   * @param {bcoin.Address} address - for destination
    * @param {Number} amount - number of satoshis
    * @param {Number} satsPrkBFee - number of satoshis per kB.
    * @param {String} note - note to be attached to the payment
    * @returns {Promise} - Returns {@link PaymentStore}
    */
   @action.bound
-  async pay(pubKeyHash, amount, satsPrkBFee, note) {
+  async pay(address, amount, satsPrkBFee, note) {
 
     if(!bcoin.util.isNumber(satsPrkBFee))
       throw new Error('satsPrkBFee is not a valid number')
 
     // Pay
-    let payment = await this._pay(pubKeyHash, amount, satsPrkBFee, note)
+    let payment = await this._pay(address, amount, satsPrkBFee, note)
 
     // By the time we get here the a paymentStore may have already been added to this.paymentStores,
     // return it if found.

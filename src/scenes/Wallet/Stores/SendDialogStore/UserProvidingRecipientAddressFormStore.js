@@ -87,7 +87,7 @@ class UserProvidingRecipientAddressForm {
     if(!addressText || addressText.length === 0)
       throw UserProvidingRecipientAddressForm.ADDRESS_VALIDATION_RESULT_TYPE.EMPTY
 
-    // Try to recover cash address
+    // Try to recover bcoin address
     let address
 
     try {
@@ -95,10 +95,6 @@ class UserProvidingRecipientAddressForm {
     } catch (err) {
       throw UserProvidingRecipientAddressForm.ADDRESS_VALIDATION_RESULT_TYPE.INVALID_NON_EMPTY_FORMATTING
     }
-
-    // Bad address type test
-    if(address.type !== bcoin.address.types.PUBKEYHASH)
-      throw UserProvidingRecipientAddressForm.ADDRESS_VALIDATION_RESULT_TYPE.INVALID_NON_EMPTY_FORMATTING
 
     return address
 
