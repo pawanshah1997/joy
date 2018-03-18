@@ -51,7 +51,8 @@ describe('ApplicationSettings', function() {
       defaultSellerTerms : {
         h: 'my-string',
       },
-      termsAccepted : true
+      termsAccepted : true,
+      defaultClientPreference : 'not_set',
     }
     
     // wait for opened signal,
@@ -67,6 +68,7 @@ describe('ApplicationSettings', function() {
       expect(applicationSettings.defaultBuyerTerms()).to.deep.equal(DEFAULT_SETTINGS.defaultBuyerTerms)
       expect(applicationSettings.defaultSellerTerms()).to.deep.equal(DEFAULT_SETTINGS.defaultSellerTerms)
       expect(applicationSettings.termsAccepted()).to.deep.equal(DEFAULT_SETTINGS.termsAccepted)
+      expect(applicationSettings.defaultClientPreference()).to.deep.equal(DEFAULT_SETTINGS.defaultClientPreference)
       
       done()
       
@@ -80,7 +82,8 @@ describe('ApplicationSettings', function() {
       DEFAULT_SETTINGS.bittorrentPort,
       DEFAULT_SETTINGS.defaultBuyerTerms,
       DEFAULT_SETTINGS.defaultSellerTerms,
-      DEFAULT_SETTINGS.termsAccepted
+      DEFAULT_SETTINGS.termsAccepted,
+      DEFAULT_SETTINGS.defaultClientPreference,
     )
     
   })
@@ -99,7 +102,8 @@ describe('ApplicationSettings', function() {
       defaultSellerTerms : {
         h: 'masdfasdfasdfy-dsf',
       },
-      termsAccepted : false
+      termsAccepted : false,
+      defaultClientPreference : 'set',
     }
     
     // Set new values
@@ -110,6 +114,7 @@ describe('ApplicationSettings', function() {
     applicationSettings.setDefaultBuyerTerms(NEW_SETTINGS.defaultBuyerTerms)
     applicationSettings.setDefaultSellerTerms(NEW_SETTINGS.defaultSellerTerms)
     applicationSettings.setTermsAccepted(NEW_SETTINGS.termsAccepted)
+    applicationSettings.setDefaultClientPreference(NEW_SETTINGS.defaultClientPreference)
     
     // assert new values
     expect(applicationSettings.numberOfPriorSessions()).to.be.equal(NEW_SETTINGS.numberOfPriorSessions)
@@ -119,6 +124,7 @@ describe('ApplicationSettings', function() {
     expect(applicationSettings.defaultBuyerTerms()).to.deep.equal(NEW_SETTINGS.defaultBuyerTerms)
     expect(applicationSettings.defaultSellerTerms()).to.deep.equal(NEW_SETTINGS.defaultSellerTerms)
     expect(applicationSettings.termsAccepted()).to.deep.equal(NEW_SETTINGS.termsAccepted)
+    expect(applicationSettings.defaultClientPreference()).to.deep.equal(NEW_SETTINGS.defaultClientPreference)
     
   })
   
