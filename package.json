@@ -11,6 +11,7 @@
     "component-development": "env COMPONENT_DEVELOPMENT_MODE=True NODE_ENV=development electron-forge start",
     "force-onboarding": "env FORCE_ONBOARDING=True NODE_ENV=development electron-forge start",
     "force-terms-screen": "env FORCE_TERMS_SCREEN=True NODE_ENV=development electron-forge start",
+    "mobx-dev": "env MOBX_DEV=True NODE_ENV=development electron-forge start",
     "test": "xvfb-maybe electron-mocha renderer --preload test/preload-polyfill.js --recursive ./test",
     "test-file": "xvfb-maybe electron-mocha renderer ",
     "package": "electron-forge package",

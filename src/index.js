@@ -153,7 +153,7 @@ window.onbeforeunload = beforeWindowUnload
 // Create renderer which is bound to our resources
 
 let doHotModuleReload = isDev
-let displayMobxDevTools = isDev
+let displayMobxDevTools = !!(process.env.MOBX_DEV && isDev)
 let loadedRenderer = renderer.bind(null, doHotModuleReload, rootUIStore, document.getElementById('root'), displayMobxDevTools)
 
 // We enable HMR only in development mode
