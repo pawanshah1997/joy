@@ -30,7 +30,7 @@ import 'babel-polyfill'
 // NB: this should be the earliest point where bcoin is imported
 import config from './config'
 
-import {ipcRenderer, webFrame, shell} from 'electron'
+import {ipcRenderer, webFrame, shell, remote} from 'electron'
 import os from 'os'
 import path from 'path'
 import isDev from 'electron-is-dev'
@@ -57,47 +57,86 @@ injectTapEventPlugin()
 // Create app
 const application = new Application(EXAMPLE_TORRENTS, process.env.FORCE_ONBOARDING, true)
 
+// Create model of view, with some reasonable defaults
+const rootUIStore = new UIStore(application, process.env.FORCE_TERMS_SCREEN)
+
 /// Hook into major state changes in app
 
 application.on('started', () => {
 
-  /**
-   const magnet = require('magnet-uri')
-   const isDev = require('electron-is-dev')
-   // Do we have queued torrent that need to be loaded ?
-   let magnetUri = Common.hasMagnetUri()
+  const isDefaultClient = remote.app.isDefaultProtocolClient('magnet')
+  const defaultClientPreference = application.applicationSettings.defaultClientPreference()
 
-   if (magnetUri) {
-          debugApplication('We are adding a magnet uri !')
-          client._submitInput('startDownloadWithTorrentFileFromMagnetUri', magnetUri)
-        }
+  if(!isDev && remote.process.platform !== 'linux' && !isDefaultClient) {
+    if (defaultClientPreference === 'not_set') {
+      // On first install/update to new release supporting this application setting
+      remote.app.setAsDefaultProtocolClient('magnet')
+      // Next time ask
+      application.applicationSettings.setDefaultClientPreference('ask')
 
-   function isMagnetUri (stringToCheck) {
-    if (stringToCheck) {
-      return stringToCheck.startsWith('magnet')
+    } else if (defaultClientPreference === 'force') {
+      // If user wants to always force joystream to be the default client
+      remote.app.setAsDefaultProtocolClient('magnet')
+
+    } else if (defaultClientPreference === 'ask') {
+        // prompt UI - should have three actions
+        // (1."Yes", 2."Don't Ask Again", 3."Dismiss")
+        // action yes --> remote.app.setAsDefaultProtocolClient(), then close dialog
+        // action dont ask again -> set application setting to 'dont_ask', then close dialog
+        // action dismiss -> just close dialog
     }
-    return false
   }
 
-  function hasMagnetUri () {
+  const openEvent = remote.getGlobal('queuedOpenEvent')
 
-    let magnetLink = null
-
-    if (isDev) {
-      // Get the magnet link if exist
-      if (isMagnetUri(remote.process.argv[2])) {
-        magnetLink = remote.process.argv[2]
-      }
-    } else {
-      // Get the magnet link if exist
-      if (isMagnetUri(remote.process.argv[1])) {
-        magnetLink = remote.process.argv[1]
-      }
-    }
-
-    return magnetLink
+  if (openEvent) {
+    application.handleOpenExternalTorrent(openEvent.uri, function (err, torrentName) {
+      rootUIStore.openingExternalTorrentResult(err, torrentName)
+    })
   }
-   */
+
+  // Process command line arguments from main process
+  handleCommandLineArgs(remote.process.argv)
+
+  remote.app.on('open-file', function (event, filePath) {
+    application.handleOpenExternalTorrent(filePath, function (err, torrentName) {
+      rootUIStore.openingExternalTorrentResult(err, torrentName)
+    })
+  })
+
+  remote.app.on('open-url', function (event, url) {
+    application.handleOpenExternalTorrent(url, function (err, torrentName) {
+      rootUIStore.openingExternalTorrentResult(err, torrentName)
+    })
+  })
+
+  ipcRenderer.on('second-instance', function (event, eventName, argv) {
+    if (eventName === 'argv') {
+      handleCommandLineArgs(argv)
+    }
+  })
+
+  // Process commandline arguments that were either passed to the main process when the first
+  // instance of the app was launched, or when when the second instance was attempted to be run
+  // (on OSX this only happens if the user run the app from the terminal)
+  function handleCommandLineArgs (argv) {
+    if (!argv || !argv.length) return
+
+    // Ignore if there are too many arguments, only expect one
+    // when app is launched as protocol handler. We can handle additional options in the future
+
+    if (isDev && argv.length > 3) return  // app was launched as: electron index.js $uri
+    if (!isDev && argv.length > 2) return // packaged app run as: joystream $uri
+
+    var $uri = isDev ? argv[2] : argv[1]
+
+    if ($uri) {
+      // arg is either a magnetlink or a filepath
+      application.handleOpenExternalTorrent($uri, function (err, torrentName) {
+        rootUIStore.openingExternalTorrentResult(err, torrentName)
+      })
+    }
+  }
 
 })
 
@@ -109,9 +148,6 @@ application.on('stopped', () => {
 
 // Setup capture of window closing event
 window.onbeforeunload = beforeWindowUnload
-
-// Create model of view, with some reasonable defaults
-let rootUIStore = new UIStore(application, process.env.FORCE_TERMS_SCREEN)
 
 // Create renderer which is bound to our resources
 

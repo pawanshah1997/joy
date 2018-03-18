@@ -25,8 +25,8 @@ function showMainWindow () {
 }
 
 // First thing to check for is if this is an instace of an update installation
-// using the squirell updater framework (Windows and MacOS)
-if(require('electron-squirrel-startup')) {
+// using the squirrel updater framework (Windows only)
+if(require('./electron-squirrel-startup')) {
   // This is were we handle tasks relavent to install/update/removal of the application
   app.quit()
 
@@ -35,6 +35,11 @@ if(require('electron-squirrel-startup')) {
 }
 
 function main () {
+  // capture and queue open-file and open-url events for MacOS
+  // When application is ready it should check if a queued event is available to consume
+  // The reason to queue the event is that the main window will not likely be ready in time to
+  // handle earliest occurance of these events (when app being launching as a protocol handler)
+  require('./queuedOpenEvent.js')
 
   /*
     This method makes your application a Single Instance Application -
@@ -51,8 +56,12 @@ function main () {
       // Someone tried to run a second instance, we should focus our window.
       showMainWindow()
 
-      // TODO: inform main application window of second instance and argv
+      // Inform main application window of second instance and arguments
       // This is where Windows and Linux will get arguments when launched for being a protocol handler
+      // As well as MacOS if being run from commandline (as opposed to from the finder by double clicking the app icon)
+      if (win) {
+        win.webContents.send('second-instance', 'argv', argv)
+      }
   })
 
   if (shouldQuit) {
@@ -60,12 +69,9 @@ function main () {
     return
   }
 
-  // For MacOS
-  // TODO: capture and queue these events here. Main window will not likely be ready in time to
-  // handle earliest occurance of these events (when app is launching as a protocol handler)
+  // Just open the window..
   app.on('open-file', showMainWindow)
   app.on('open-url', showMainWindow)
-
 
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
