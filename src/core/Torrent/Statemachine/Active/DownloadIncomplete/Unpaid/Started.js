@@ -54,10 +54,6 @@ var Started = new BaseMachine({
               throw Error('Not yet implemented')
             },
 
-            processSentPayment  : function (client, alert) {
-              client._handlePaymentSentAlert(alert)
-            },
-
             processPeerPluginStatuses: function(client, statuses) {
 
               // Update peer list
