@@ -34,13 +34,13 @@ let app = animator.mockApplication
 var injectTapEventPlugin = require('react-tap-event-plugin')
 injectTapEventPlugin()
 
-// First time render
-render()
-
 // Setup future rendering
 if (module.hot) {
     module.hot.accept(render)
 }
+
+// First time render
+render()
 
 function render() {
 
