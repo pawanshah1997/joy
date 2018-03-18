@@ -50,7 +50,7 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
     rootColors : {
       normal : props.baseColor,
       hover : props.attentionColor,
-      selected : props.accentColor
+      selected : props.attentionColor // props.accentColor
     },
     contentColors : {
       normal : props.faceColor,
