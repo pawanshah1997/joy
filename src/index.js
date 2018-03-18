@@ -267,3 +267,12 @@ function beforeWindowUnload(e) {
 function checkForUpdates () {
   ipcRenderer.send('auto-updater-channel', 'init')
 }
+
+/**
+ * We only export the ui store object when in dev mode,
+ * this is for safety reasons. The export allows
+ * us to interrogate the object from the browser window
+ * console.
+ */
+if(isDev)
+  module.exports = rootUIStore
