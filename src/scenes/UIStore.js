@@ -735,7 +735,7 @@ class UIStore {
     let walletStore = this.applicationStore.walletStore
     assert(walletStore)
 
-    walletStore.paymentStores.push(paymentStore)
+    walletStore.addPaymentStore(paymentStore)
 
     /// Hook up events
 
