@@ -15,6 +15,7 @@ import { TorrentInfo, Session } from 'joystream-node'
 import db from '../../db'
 import request from 'request'
 import magnet from 'magnet-uri'
+import StreamServer from '../StreamServer/StreamServer'
 
 var debug = require('debug')('application')
 import {shell} from 'electron'
@@ -116,11 +117,12 @@ class Application extends EventEmitter {
    */
   static RESOURCE = {
 
-    SETTINGS : 0,
-    WALLET : 1,
+    SETTINGS: 0,
+    WALLET: 1,
     JOYSTREAM_NODE_SESSION: 2,
-    PRICE_FEED : 3,
-    STORED_TORRENTS : 4
+    PRICE_FEED: 3,
+    STORED_TORRENTS: 4,
+    STREAM_SERVER: 5
   }
 
   static get NUMBER_OF_RESOURCE_TYPES() { return Object.keys(Application.RESOURCE).length }
@@ -165,6 +167,11 @@ class Application extends EventEmitter {
    * {Map<String.Torrent>} Map of torrents currently added
    */
   torrents
+
+  /**
+   * {StreamServer} Media Streaming Server
+   */
+   streamServer
 
   /**
    * Constructor
@@ -419,6 +426,25 @@ class Application extends EventEmitter {
 
     })
 
+    // const streamServerHost = this.applicationSettings.streamServerHost()
+    // const streamServerPort = this.applicationSettings.streamServerPort()
+    // we can use port 0 (just listen on a random port)
+
+    this.streamServer = new StreamServer(this.torrents, /*{host, port}*/)
+
+    this.streamServer.on('started', () => {
+        this._startedResource(Application.RESOURCE.STREAM_SERVER, onStarted)
+    })
+
+    this.streamServer.on('error', (err) => {
+      debug('StreamServer Error:', err)
+    })
+
+    this.streamServer.start()
+  }
+
+  getTorrentStreamUrl (infoHash, fileIndex) {
+    return this.streamServer.getStreamUrl(infoHash, fileIndex)
   }
 
   /**
@@ -635,6 +661,15 @@ class Application extends EventEmitter {
 
     } else
       this.wallet.stop()
+
+    this.streamServer.once('stopped', () => {
+
+      assert(this.state === Application.STATE.STOPPING)
+
+      this._stoppedResource(Application.RESOURCE.STREAM_SERVER, onStopped)
+    })
+
+    this.streamServer.stop()
   }
 
   /**

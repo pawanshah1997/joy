@@ -38,7 +38,7 @@ class FileSegmentStreamFactory {
 
     this.fileName = fileStorage.fileName(fileIndex)
 
-    this.name = this.fileName // render media is looking for this name property
+    this.size = fileStorage.fileSize(fileIndex)
 
     this.path = path.format({
       dir: this._torrent.handle.savePath(),
@@ -53,10 +53,13 @@ class FileSegmentStreamFactory {
    */
   createReadStream (opts = {}) {
 
-    if (this._completed)
+    if (this._completed) {
+      console.log('creating fs.stream')
       return fs.createReadStream(this.path, opts)
-    else
+    } else {
+      console.log('creating libtorrent.stream')
       return new LibtorrentStream(this._torrent, this.fileIndex, opts)
+    }
   }
 }
 

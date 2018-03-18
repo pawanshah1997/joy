@@ -855,6 +855,8 @@ class UIStore {
   playMedia(infoHash, fileIndex) {
     const torrent = this._application.torrents.get(infoHash)
 
+    const streamUrl = this._application.getTorrentStreamUrl(infoHash, fileIndex)
+
     if (!torrent) {
       throw new Error('playMedia: torrent not in session')
     }
@@ -873,28 +875,22 @@ class UIStore {
       throw new Error('playMedia: torrent still loading')
     }
 
-    const fullyDownloaded = torrent.state.startsWith('Active.FinishedDownloading')
-
-    const mediaSourceType = fullyDownloaded ? MediaPlayerStore.MEDIA_SOURCE_TYPE.DISK : MediaPlayerStore.MEDIA_SOURCE_TYPE.STREAMING_TORRENT
     const loadedSecondsRequiredForPlayback = 10
-    let autoPlay = true
 
-    var file = torrent.createStreamFactory(fileIndex)
+    const autoPlay = true
 
     // Create store for player
     const store = new MediaPlayerStore(
-      mediaSourceType,
       torrentStore,
-      file,
+      streamUrl,
       loadedSecondsRequiredForPlayback,
       autoPlay,
       mediaPlayerWindowSizeFetcher,
       mediaPlayerWindowSizeUpdater,
       () => { // When player exits
-        Doorbell.show()
         this.setMediaPlayerStore(null)
         powerSavingBlocker(false)
-        torrent.endStream()
+        Doorbell.show()
       },
       this
     )

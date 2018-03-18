@@ -12,7 +12,7 @@ class StreamScenarios extends Component {
 
     this.state = {
       videoPlayer: false,
-      mediaPlayerStore : new MediaPlayerStore(MediaPlayerStore.MEDIA_SOURCE_TYPE.STREAMING_TORRENT,
+      mediaPlayerStore : new MediaPlayerStore(
           new TorrentStore(
               null,
               null,

@@ -96,35 +96,28 @@ const WelcomeScreenContent = (props) => {
                                     {...imageDimensionProps}
                     />
 
-                    {
-                        /**
-                         * DISABLED
 
-                        <ExampleTorrent title={"Big Buck Bunny"}
-                            byteSize={1024*1024*264}
-                            imageSrc="../src/assets/img/exampleTorrents/big-buck-bunny.jpg"
-                            {...imageDimensionProps}
-                        />
+                    <ExampleTorrent title={"Big Buck Bunny"}
+                        byteSize={1024*1024*264}
+                        imageSrc="../src/assets/img/exampleTorrents/big-buck-bunny.jpg"
+                        {...imageDimensionProps}
+                    />
 
-                        <ExampleSpacer />
+                    <ExampleSpacer />
 
-                        <ExampleTorrent title={"Elephants Dream"}
-                            byteSize={1024*1024*425}
-                            imageSrc="../src/assets/img/exampleTorrents/elephants-dream.jpg"
-                            {...imageDimensionProps}
-                        />
+                    <ExampleTorrent title={"Elephants Dream"}
+                        byteSize={1024*1024*425}
+                        imageSrc="../src/assets/img/exampleTorrents/elephants-dream.jpg"
+                        {...imageDimensionProps}
+                    />
 
-                        <ExampleSpacer />
+                    <ExampleSpacer />
 
-                        <ExampleTorrent title={"Tears of Steel"}
-                             byteSize={1024*1024*545}
-                             imageSrc="../src/assets/img/exampleTorrents/tears-of-steel.jpg"
-                             {...imageDimensionProps}
-                        />
-
-
-                         **/
-                    }
+                    <ExampleTorrent title={"Tears of Steel"}
+                         byteSize={1024*1024*545}
+                         imageSrc="../src/assets/img/exampleTorrents/tears-of-steel.jpg"
+                         {...imageDimensionProps}
+                    />
 
                 </div>
 
