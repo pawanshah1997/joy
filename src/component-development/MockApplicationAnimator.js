@@ -1,9 +1,13 @@
 import Application from '../core/Application'
 import Wallet, {Payment} from '../core/Wallet'
-import {MockApplication, MockWallet} from '../../test/core/Mocks'
-import MockTorrent from "../../test/core/Mocks/Torrent";
-import MockPayment from '../../test/core/Mocks/Payment'
-import MockPriceFeed from '../../test/core/Mocks/PriceFeed'
+import {
+  MockApplication,
+  MockWallet,
+  MockApplicationSettings,
+  MockTorrent,
+  MockPriceFeed,
+  MockPayment
+} from '../../test/core/Mocks'
 
 import bcoin from 'bcoin'
 
@@ -32,6 +36,14 @@ class MockApplicationAnimator {
   
   startApp() {
     this.mockApplication.setState(Application.STATE.STARTING)
+  }
+
+  startSettings(opts = { claimedFreeBCH : false }) {
+
+    let mockApplicationSettings = new MockApplicationSettings(opts)
+
+    this.mockApplication.applicationSettings = mockApplicationSettings
+    this.mockApplication.emit('resourceStarted', Application.RESOURCE.SETTINGS)
   }
   
   setWallet() {
@@ -74,6 +86,7 @@ class MockApplicationAnimator {
   
   fastForwardWallet(state = Wallet.STATE.STARTED) {
     this.startApp()
+    this.startSettings()
     this.setPriceFeed()
     this.setWallet()
     this.mockApplication.wallet.setState(state)
