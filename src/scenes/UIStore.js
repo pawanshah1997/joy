@@ -519,7 +519,7 @@ class UIStore {
       torrentStore.setTotalSize(torrentInfo.totalSize())
       torrentStore.setTorrentFiles(torrentInfo.files())
       torrentStore.setPieceLength(torrentInfo.pieceLength())
-      torrentSTore.setNumberOfPieces(torrentInfo.numPieces())
+      torrentStore.setNumberOfPieces(torrentInfo.numPieces())
     }))
 
     torrent.on('progress', action((progress) => {
