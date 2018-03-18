@@ -41,7 +41,7 @@ class DownloadingStore {
    * @observable startDownloadingFlowStore
    */
 
-  @observable latFilePickingMethodUsed
+  @observable lastFilePickingMethodUsed
 
   constructor (uiStore) {
 
@@ -129,7 +129,7 @@ class DownloadingStore {
 
   startDownloadWithTorrentFileFromFilePicker () {
 
-    this.latFilePickingMethodUsed = DownloadingStore.TORRENT_ADDING_METHOD.FILE_PICKER
+    this.lastFilePickingMethodUsed = DownloadingStore.TORRENT_ADDING_METHOD.FILE_PICKER
 
     // If the user tries adding when we are not ready,
     // then we just ignore, but UI should avoid this ever
@@ -158,7 +158,7 @@ class DownloadingStore {
 
   startDownloadWithTorrentFileFromDragAndDrop (files) {
 
-    this.latFilePickingMethodUsed = DownloadingStore.TORRENT_ADDING_METHOD.DRAG_AND_DROP
+    this.lastFilePickingMethodUsed = DownloadingStore.TORRENT_ADDING_METHOD.DRAG_AND_DROP
 
     // If the user tries adding when we are not ready,
     // then we just ignore, but UI should avoid this ever

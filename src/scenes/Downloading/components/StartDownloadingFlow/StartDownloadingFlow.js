@@ -18,7 +18,7 @@ const StartDownloadingFlow = observer((props) => {
     <div>
       <InvalidTorrentFileAlertDialog
         open={props.downloadingStore.state === DownloadingStore.STATE.TorrentFileWasInvalid}
-        canRetry={props.downloadingStore.latFilePickingMethodUsed === DownloadingStore.TORRENT_ADDING_METHOD.FILE_PICKER}
+        canRetry={props.downloadingStore.lastFilePickingMethodUsed === DownloadingStore.TORRENT_ADDING_METHOD.FILE_PICKER}
         onAcceptClicked={() => { props.downloadingStore.acceptTorrentFileWasInvalid() }}
         onRetryClicked={() => { props.downloadingStore.retryPickingTorrentFile() }} />
 

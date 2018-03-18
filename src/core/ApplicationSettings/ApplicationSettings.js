@@ -61,7 +61,7 @@ class ApplicationSettings extends EventEmitter {
    * @param bittorrentPort
    * @param termsAccepted {Boolean} - whether user has accepted the terms
    */
-<<<<<<< HEAD
+
   open(numberOfPriorSessions,
        downloadFolder,
        useAssistedPeerDiscovery,
@@ -70,9 +70,6 @@ class ApplicationSettings extends EventEmitter {
        defaultSellerTerms,
        termsAccepted,
        defaultClientPreference) {
-=======
-  open(numberOfPriorSessions, downloadFolder, useAssistedPeerDiscovery, bittorrentPort, defaultBuyerTerms, defaultSellerTerms, termsAccepted) {
->>>>>>> ApplicationSettings: add lastRunAppVersion setting
 
     if(this.state !== ApplicationSettings.STATE.CLOSED)
       throw Error('Can only open when closed')
@@ -177,21 +174,20 @@ class ApplicationSettings extends EventEmitter {
     this._set(TERMS_ACCEPTED, termsAccepted)
   }
 
-<<<<<<< HEAD
   defaultClientPreference() {
     return this._get(DEFAULT_CLIENT_PREFERENCE)
   }
 
   setDefaultClientPreference(preference) {
     this._set(DEFAULT_CLIENT_PREFERENCE, preference)
-=======
+  }
+
   setLastRanVersionOfApp (version) {
     this._set(LAST_RAN_VERSION, version)
   }
 
   lastRanVersionOfApp () {
     return this._get(LAST_RAN_VERSION)
->>>>>>> ApplicationSettings: add lastRunAppVersion setting
   }
 
   _get(key) {
