@@ -25,8 +25,8 @@ function getStyles(props) {
     title : {
       display : props.title ? 'block' : 'none',
       fontFamily : 'Helvetica neue',
-      fontSize : '24px',
-      fontWeight : '400',
+      fontSize : '30px',
+      fontWeight : '900',
       textAlign : 'center',
       color : 'hsla(0, 0%, 35%, 1)', //'#808080',
       backgroundColor : 'white', // <== header
