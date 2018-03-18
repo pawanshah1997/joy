@@ -14,6 +14,7 @@ const DEFAULT_BUYER_TERMS = 'defaultBuyerTerms'
 const DEFAULT_SELLER_TERMS = 'defaultSellerTerms'
 const TERMS_ACCEPTED = 'termsAccepted'
 const DEFAULT_CLIENT_PREFERENCE = 'defaultClientPreference'
+const LAST_RAN_VERSION = 'lastRanVersion'
 
 /**
  * ApplicationSettings.
@@ -60,6 +61,7 @@ class ApplicationSettings extends EventEmitter {
    * @param bittorrentPort
    * @param termsAccepted {Boolean} - whether user has accepted the terms
    */
+
   open(numberOfPriorSessions,
        downloadFolder,
        useAssistedPeerDiscovery,
@@ -178,6 +180,14 @@ class ApplicationSettings extends EventEmitter {
 
   setDefaultClientPreference(preference) {
     this._set(DEFAULT_CLIENT_PREFERENCE, preference)
+  }
+
+  setLastRanVersionOfApp (version) {
+    this._set(LAST_RAN_VERSION, version)
+  }
+
+  lastRanVersionOfApp () {
+    return this._get(LAST_RAN_VERSION)
   }
 
   _get(key) {

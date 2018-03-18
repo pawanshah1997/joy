@@ -71,7 +71,7 @@ class UploadingStore {
    */
   @observable torrentStoreBeingAdded
 
-  @observable latFilePickingMethodUsed
+  @observable lastFilePickingMethodUsed
 
   constructor (uiStore) {
 
@@ -168,7 +168,7 @@ class UploadingStore {
 
   startTorrentUploadFlowFromDragAndDrop (files) {
 
-    this.latFilePickingMethodUsed = UploadingStore.TORRENT_ADDING_METHOD.DRAG_AND_DROP
+    this.lastFilePickingMethodUsed = UploadingStore.TORRENT_ADDING_METHOD.DRAG_AND_DROP
 
     // If the user tries adding when we are not ready,
     // then we just ignore, but UI should avoid this ever
@@ -188,7 +188,7 @@ class UploadingStore {
 
   startTorrentUploadFlowWithFilePicker() {
 
-    this.latFilePickingMethodUsed = UploadingStore.TORRENT_ADDING_METHOD.FILE_PICKER
+    this.lastFilePickingMethodUsed = UploadingStore.TORRENT_ADDING_METHOD.FILE_PICKER
 
     /// User selects torrent file
 
@@ -279,7 +279,7 @@ class UploadingStore {
       savePath: savePath,
       deepInitialState: DeepInitialState.UPLOADING.STARTED,
       extensionSettings : {
-        sellerTerms: this._uiStore.applicationStore.applicationSettings.defaultSellerTerms()
+        sellerTerms: this._uiStore.applicationStore.defaultSellerTerms(torrentInfo.pieceLength(), torrentInfo.numPieces())
       }
     }
 

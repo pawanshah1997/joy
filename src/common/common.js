@@ -5,6 +5,19 @@
 import btcConvert from 'bitcoin-convert'
 import bytes from 'bytes'
 import humanizeDuration from 'humanize-duration'
+import assert from 'assert'
+
+function satoshiPerMbToSatoshiPerPiece (satoshiPerMb, pieceLengthBytes) {
+  assert (pieceLengthBytes > 0)
+  assert (satoshiPerMb > 0)
+
+  const pieceSizeMB = pieceLengthBytes / (1024 * 1024)
+
+  const piecePriceSatoshi = satoshiPerMb * pieceSizeMB
+
+  // Round up to nearest integer value
+  return Math.ceil(piecePriceSatoshi)
+}
 
 /**
 const BitcoinUnit = {
@@ -317,5 +330,6 @@ export {
     getCompactBitcoinUnitsString,
     convenientBytes,
     convenientHumanizeDuration,
-    standardHumanizeDurationOptions
+    standardHumanizeDurationOptions,
+    satoshiPerMbToSatoshiPerPiece
 }

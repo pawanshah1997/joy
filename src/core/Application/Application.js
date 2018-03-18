@@ -17,6 +17,7 @@ import db from '../../db'
 import request from 'request'
 import magnet from 'magnet-uri'
 import StreamServer from '../StreamServer/StreamServer'
+import {satoshiPerMbToSatoshiPerPiece} from '../../common/'
 
 var debug = require('debug')('application')
 import {shell} from 'electron'
@@ -211,6 +212,18 @@ class Application extends EventEmitter {
     this._joystreamNodeSession = null
   }
 
+  static walletPath (appDirectory) {
+    return path.join(appDirectory, FOLDER_NAME.WALLETS, bcoin.network.primary.type)
+  }
+
+  static torrentDatabasePath (appDirectory) {
+    return path.join(appDirectory, FOLDER_NAME.TORRENT_DB)
+  }
+
+  static createApplicationSettings () {
+    return new ApplicationSettings()
+  }
+
   /**
    * Start application
    * Presumes that the application directory ('appDirectory')
@@ -246,7 +259,7 @@ class Application extends EventEmitter {
      // mkdirp.sync(FOLDER_NAME.WALLETS)
 
     // Make and hold on to path to wallet
-    this._walletPath = path.join(this._appDirectory, FOLDER_NAME.WALLETS, bcoin.network.primary.type)
+    this._walletPath = Application.walletPath(this._appDirectory)
 
     const spvNodeOptions = {
       prefix: this._walletPath,
@@ -299,7 +312,7 @@ class Application extends EventEmitter {
      */
 
     // Create application settings
-    this.applicationSettings = new ApplicationSettings()
+    this.applicationSettings = Application.createApplicationSettings()
 
     // Open settings (is synchronous), with given default values,
     // these are set on the first run
@@ -323,7 +336,7 @@ class Application extends EventEmitter {
     mkdirp(downloadFolder, null, (err) => {
 
       if(err)
-        console.log('Failed to create download folder: ' + downloadFolder + ' due to ' + err)
+        debug('Failed to create download folder: ' + downloadFolder + ' due to ' + err)
 
     })
 
@@ -374,13 +387,12 @@ class Application extends EventEmitter {
      */
 
     // Torrent database folder
-    const torrentDatabaseFolder = path.join(this._appDirectory, FOLDER_NAME.TORRENT_DB)
+    const torrentDatabaseFolder = Application.torrentDatabasePath(this._appDirectory)
 
     db.open(torrentDatabaseFolder)
       .then((torrentDatabase) => {
         this._startedResource(Application.RESOURCE.STORED_TORRENTS, onStarted)
 
-        // Hold on to torrent database
         this._torrentDatabase = torrentDatabase
 
         // Should we skip loading any existing torrents
@@ -389,26 +401,28 @@ class Application extends EventEmitter {
         else // (async) loading of all torrent entries
           return this._torrentDatabase.getAll('torrents')
 
-      }).catch((err) => {
-
-        console.log('Could not open torrent database: ' + err)
-        return []
       })
       .then((savedTorrents) => {
 
-        // Add all saved torrents to session with saved settings
-        savedTorrents.forEach((savedTorrent) => {
+          // Add all saved torrents to session with saved settings
+          savedTorrents.forEach((savedTorrent) => {
 
-          // Need to convert data from db into a torrentInfo
-          // NB: https://github.com/JoyStream/joystream-desktop/issues/668
-          savedTorrent.metadata = new TorrentInfo(Buffer.from(savedTorrent.metadata, 'base64'))
+            // Need to convert data from db into a torrentInfo
+            // NB: https://github.com/JoyStream/joystream-desktop/issues/668
+            if (savedTorrent.metadata) {
+              savedTorrent.metadata = new TorrentInfo(Buffer.from(savedTorrent.metadata, 'base64'))
+            }
 
-          // add to session
-          this._addTorrent(savedTorrent, (err, torrent) => {
+            if (savedTorrent.resumeData) {
+              savedTorrent.resumeData = Buffer.from(savedTorrent.resumeData, 'base64')
+            }
 
-            assert(!err)
+            // add to session
+            this._addTorrent(savedTorrent, (err, torrent) => {
 
-          })
+              assert(!err)
+
+            })
 
         })
 
@@ -634,6 +648,17 @@ class Application extends EventEmitter {
     this.streamServer.stop()
   }
 
+  defaultBuyerTerms (pieceLength, numPieces) {
+    let defaultTerms = this.applicationSettings.defaultBuyerTerms()
+    let convertedTerms = {...defaultTerms}
+
+    convertedTerms.maxPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.maxPrice, pieceLength)
+
+    convertedTerms.maxPrice = Math.ceil(Math.max(convertedTerms.maxPrice, 547 / numPieces))
+
+    return convertedTerms
+  }
+
   /**
    * Add torrent with given settings
    *
@@ -702,7 +727,7 @@ class Application extends EventEmitter {
     // joystream-node decoder doesn't correctly check if resumeData propery is undefined, it only checks
     // if the key on the params object exists so we need to conditionally set it here.
     if (settings.resumeData)
-      params.resumeData = Buffer.from(settings.resumeData, 'base64')
+      params.resumeData = settings.resumeData
 
     // set param flags - auto_managed/paused
     params.flags = {
@@ -783,8 +808,8 @@ class Application extends EventEmitter {
 
         return this.wallet.createAndSendPaidDownloadingContract(outputs, contractFeeRate, note)
           .then((transaction) => {
-            console.log('Contract TX:', transaction.toRaw().toString('hex'))
-            console.log('Contract TX ID:', transaction.txid())
+             debug('Contract TX:', transaction.toRaw().toString('hex'))
+             debug('Contract TX ID:', transaction.txid())
             return transaction.toRaw()
           })
       },
@@ -802,7 +827,7 @@ class Application extends EventEmitter {
     torrent.on('Loading.WaitingForMissingBuyerTerms', (data) => {
 
       // NB: Replace by querying application settings later!
-      let terms = this.applicationSettings.defaultBuyerTerms()
+      let terms = this.defaultBuyerTerms(torrent.torrentInfo.pieceLength(), torrent.torrentInfo.numPieces())
 
       // change name
       torrent.provideMissingBuyerTerms(terms)
@@ -871,7 +896,7 @@ class Application extends EventEmitter {
       // Remove the torrent from the db
       this._torrentDatabase.remove('torrents', infoHash)
         .then(() => {})
-        .catch(() => { console.log('Removing torrent from database failed.')})
+        .catch(() => {  debug('Removing torrent from database failed.')})
 
       // Delete torrent from the this map,
       this.torrents.delete(infoHash)
@@ -960,9 +985,9 @@ class Application extends EventEmitter {
 
   _onPriceFeedError = (err) => {
 
-    console.log('priceFeed [error]:')
-    console.log('Could not fetch exchange rate, likely due to no internet, or broken endpoint.')
-    console.log(err)
+     debug('priceFeed [error]:')
+     debug('Could not fetch exchange rate, likely due to no internet, or broken endpoint.')
+     debug(err)
   }
 
   addExampleTorrents () {
@@ -1000,7 +1025,7 @@ class Application extends EventEmitter {
         savePath: this.applicationSettings.downloadFolder(),
         deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
         extensionSettings : {
-          buyerTerms: this.applicationSettings.defaultBuyerTerms()
+          buyerTerms: this.defaultBuyerTerms(torrentInfo.pieceLength(), torrentInfo.numPieces())
         }
       }
 
@@ -1147,13 +1172,6 @@ function encodeTorrentSettings(torrent) {
 
   return encoded
 
-}
-
-// TODO: Move this into Torrent class as a static member method
-function createStartingDownloadSettings(torrentInfo, savePath, buyerTerms) {
-  const infoHash = torrentInfo.infoHash()
-
-  return
 }
 
 
