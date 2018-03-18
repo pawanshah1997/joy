@@ -364,6 +364,7 @@ class Application extends EventEmitter {
 
     db.open(torrentDatabaseFolder)
       .then((torrentDatabase) => {
+        this._startedResource(Application.RESOURCE.STORED_TORRENTS, onStarted)
 
         // Hold on to torrent database
         this._torrentDatabase = torrentDatabase
@@ -377,41 +378,25 @@ class Application extends EventEmitter {
       }).catch((err) => {
 
         console.log('Could not open torrent database: ' + err)
-
+        return []
       })
       .then((savedTorrents) => {
 
-        let numberOfSavedTorrentsYetToFullyLoad = savedTorrents.length
+        // Add all saved torrents to session with saved settings
+        savedTorrents.forEach((savedTorrent) => {
 
-        if(numberOfSavedTorrentsYetToFullyLoad === 0)
-          this._startedResource(Application.RESOURCE.STORED_TORRENTS, onStarted)
-        else
-          // Add all saved torrents to session with saved settings
-          savedTorrents.forEach((savedTorrent) => {
+          // Need to convert data from db into a torrentInfo
+          // NB: https://github.com/JoyStream/joystream-desktop/issues/668
+          savedTorrent.metadata = new TorrentInfo(Buffer.from(savedTorrent.metadata, 'base64'))
 
-            // Need to convert data from db into a torrentInfo
-            // NB: https://github.com/JoyStream/joystream-desktop/issues/668
-            savedTorrent.metadata = new TorrentInfo(Buffer.from(savedTorrent.metadata, 'base64'))
+          // add to session
+          this._addTorrent(savedTorrent, (err, torrent) => {
 
-            // add to session
-            this._addTorrent(savedTorrent, (err, torrent) => {
-
-              assert(!err)
-
-              // When loaded, check if we are done loading all,
-              // if so note this
-              torrent.on('loaded', () => {
-
-                numberOfSavedTorrentsYetToFullyLoad--
-
-                if(numberOfSavedTorrentsYetToFullyLoad === 0)
-                  this._startedResource(Application.RESOURCE.STORED_TORRENTS, onStarted)
-
-              })
-
-            })
+            assert(!err)
 
           })
+
+        })
 
     })
 
