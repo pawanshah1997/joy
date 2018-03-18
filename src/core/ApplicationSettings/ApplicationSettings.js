@@ -15,6 +15,7 @@ const DEFAULT_SELLER_TERMS = 'defaultSellerTerms'
 const TERMS_ACCEPTED = 'termsAccepted'
 const DEFAULT_CLIENT_PREFERENCE = 'defaultClientPreference'
 const LAST_RAN_VERSION = 'lastRanVersion'
+const CLAIMED_FREE_BCH = 'completedFreeBCH'
 
 /**
  * ApplicationSettings.
@@ -60,6 +61,8 @@ class ApplicationSettings extends EventEmitter {
    * @param useAssistedPeerDiscovery
    * @param bittorrentPort
    * @param termsAccepted {Boolean} - whether user has accepted the terms
+   * @param defaultClientPreference {}
+   * @param claimedFreeBCH {Boolean} -
    */
 
   open(numberOfPriorSessions,
@@ -69,7 +72,8 @@ class ApplicationSettings extends EventEmitter {
        defaultBuyerTerms,
        defaultSellerTerms,
        termsAccepted,
-       defaultClientPreference) {
+       defaultClientPreference,
+       claimedFreeBCH) {
 
     if(this.state !== ApplicationSettings.STATE.CLOSED)
       throw Error('Can only open when closed')
@@ -87,6 +91,17 @@ class ApplicationSettings extends EventEmitter {
     defaults[DEFAULT_SELLER_TERMS] = defaultSellerTerms
     defaults[TERMS_ACCEPTED] = termsAccepted
     defaults[DEFAULT_CLIENT_PREFERENCE] = defaultClientPreference
+
+    // LAST_RAN_VERSION:
+    //
+    // NB: This will be automatically fixed by having an optional
+    // conveyeor for params.
+    //
+    // Notice that we are not setting a default value for LAST_RAN_VERSION
+    // it must be kept unset so that it may be detected that this is first
+    // time run after update to release which has this setting.
+
+    defaults[CLAIMED_FREE_BCH] = claimedFreeBCH
     opts.defaults = defaults
 
     // Set file name
@@ -182,12 +197,21 @@ class ApplicationSettings extends EventEmitter {
     this._set(DEFAULT_CLIENT_PREFERENCE, preference)
   }
 
+
   setLastRanVersionOfApp (version) {
     this._set(LAST_RAN_VERSION, version)
   }
 
   lastRanVersionOfApp () {
     return this._get(LAST_RAN_VERSION)
+  }
+
+  claimedFreeBCH() {
+    return this._get(CLAIMED_FREE_BCH)
+  }
+
+  setClaimedFreeBCH(claimedFreeBCH) {
+    this._set(CLAIMED_FREE_BCH, claimedFreeBCH)
   }
 
   _get(key) {

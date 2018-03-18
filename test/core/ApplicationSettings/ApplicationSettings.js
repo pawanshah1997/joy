@@ -53,6 +53,7 @@ describe('ApplicationSettings', function() {
       },
       termsAccepted : true,
       defaultClientPreference : 'not_set',
+      claimedFreeBCH : false
     }
     
     // wait for opened signal,
@@ -69,6 +70,7 @@ describe('ApplicationSettings', function() {
       expect(applicationSettings.defaultSellerTerms()).to.deep.equal(DEFAULT_SETTINGS.defaultSellerTerms)
       expect(applicationSettings.termsAccepted()).to.deep.equal(DEFAULT_SETTINGS.termsAccepted)
       expect(applicationSettings.defaultClientPreference()).to.deep.equal(DEFAULT_SETTINGS.defaultClientPreference)
+      expect(applicationSettings.claimedFreeBCH()).to.deep.equal(DEFAULT_SETTINGS.claimedFreeBCH)
       
       done()
       
@@ -84,6 +86,7 @@ describe('ApplicationSettings', function() {
       DEFAULT_SETTINGS.defaultSellerTerms,
       DEFAULT_SETTINGS.termsAccepted,
       DEFAULT_SETTINGS.defaultClientPreference,
+      DEFAULT_SETTINGS.claimedFreeBCH
     )
     
   })
@@ -104,6 +107,7 @@ describe('ApplicationSettings', function() {
       },
       termsAccepted : false,
       defaultClientPreference : 'set',
+      claimedFreeBCH: true
     }
     
     // Set new values
@@ -115,6 +119,7 @@ describe('ApplicationSettings', function() {
     applicationSettings.setDefaultSellerTerms(NEW_SETTINGS.defaultSellerTerms)
     applicationSettings.setTermsAccepted(NEW_SETTINGS.termsAccepted)
     applicationSettings.setDefaultClientPreference(NEW_SETTINGS.defaultClientPreference)
+    applicationSettings.setClaimedFreeBCH(NEW_SETTINGS.claimedFreeBCH)
     
     // assert new values
     expect(applicationSettings.numberOfPriorSessions()).to.be.equal(NEW_SETTINGS.numberOfPriorSessions)
@@ -125,6 +130,7 @@ describe('ApplicationSettings', function() {
     expect(applicationSettings.defaultSellerTerms()).to.deep.equal(NEW_SETTINGS.defaultSellerTerms)
     expect(applicationSettings.termsAccepted()).to.deep.equal(NEW_SETTINGS.termsAccepted)
     expect(applicationSettings.defaultClientPreference()).to.deep.equal(NEW_SETTINGS.defaultClientPreference)
+    expect(applicationSettings.claimedFreeBCH()).to.deep.equal(NEW_SETTINGS.claimedFreeBCH)
     
   })
   
