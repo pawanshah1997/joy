@@ -3,6 +3,7 @@ import {EventEmitter} from "events"
 import ApplicationSettings from '../ApplicationSettings'
 import PriceFeed from '../PriceFeed'
 import Wallet from '../Wallet'
+import safeEventHandlerShim from '../Wallet/safeEventHandler'
 import Torrent from '../Torrent'
 import DeepInitialState from '../Torrent/Statemachine/DeepInitialState'
 import getCoins from './faucet'
@@ -272,7 +273,9 @@ class Application extends EventEmitter {
       this._startedResource(Application.RESOURCE.WALLET, onStarted)
     })
 
-    this.wallet.on('totalBalanceChanged', this._totalWalletBalanceChanged)
+    this.wallet.on('totalBalanceChanged', safeEventHandlerShim((balance) => {
+        this._totalWalletBalanceChanged(balance)
+    }),'core-wallet.totalBalanceChanged')
 
     // Start wallet
     this.wallet.start()
@@ -986,7 +989,7 @@ class Application extends EventEmitter {
     this.emit('onboardingIsEnabled', onboardingIsEnabled)
   }
 
-  _totalWalletBalanceChanged = (balance) => {
+  _totalWalletBalanceChanged (balance) {
 
     debug('new total balance: ' + balance)
 
