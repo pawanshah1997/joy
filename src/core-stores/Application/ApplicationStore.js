@@ -37,7 +37,7 @@ class ApplicationStore {
   /**
    * @propety {PriceFeedStore}
    */
-  priceFeedStore
+  @observable priceFeedStore
 
   /**
    * {Map.<TorrentStore>} All torrent stores currently on application core
@@ -79,7 +79,7 @@ class ApplicationStore {
     this.setOnboardingIsEnabled(onboardingIsEnabled)
     this.applicationSettings = applicationSettings
     this.walletStore = walletStore
-    this.priceFeedStore = priceFeedStore
+    this.setPriceFeedStore(priceFeedStore)
     this._setTorrentStores(new Map())
     this._starter = starter
     this._stopper = stopper
@@ -121,6 +121,11 @@ class ApplicationStore {
   @action.bound
   setWalletStore(walletStore) {
     this.walletStore = walletStore
+  }
+
+  @action.bound
+  setPriceFeedStore(priceFeedStore) {
+    this.priceFeedStore = priceFeedStore
   }
 
   @action.bound
