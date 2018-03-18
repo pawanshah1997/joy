@@ -425,6 +425,8 @@ class UIStore {
       savePath: torrent.savePath,
       state: torrent.state,
       totalSize: torrent.torrentInfo ? torrent.torrentInfo.totalSize() : 0,
+      pieceLength: torrent.torrentInfo ? torrent.torrentInfo.pieceLength() : 0,
+      numberOfPieces: torrent.torrentInfo ? torrent.torrentInfo.numPieces() : 0,
       progress: torrent.progress,
       viabilityOfPaidDownloadInSwarm : torrent.viabilityOfPaidDownloadInSwarm,
       downloadedSize: torrent.downloadedSize,
@@ -516,6 +518,8 @@ class UIStore {
       torrentStore.setName(torrentInfo.name())
       torrentStore.setTotalSize(torrentInfo.totalSize())
       torrentStore.setTorrentFiles(torrentInfo.files())
+      torrentStore.setPieceLength(torrentInfo.pieceLength())
+      torrentStore.setNumberOfPieces(torrentInfo.numPieces())
     }))
 
     torrent.on('progress', action((progress) => {
