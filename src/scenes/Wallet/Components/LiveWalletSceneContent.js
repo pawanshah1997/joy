@@ -180,10 +180,10 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
           <MaxFlexSpacer />
           
           <LabelContainer>
-            
+            {/* Disabled - high CPU utilization when animating circural progress
             <WalletStatusLabel synchronizationPercentage={props.UIStore.walletSceneStore.synchronizationPercentage}
                                {...labelColorProps}
-            />
+            />*/}
             
             {/*<CurrencyLabel labelText={"PENDING"}
                            satoshies={props.UIStore.walletSceneStore.pendingBalance}
