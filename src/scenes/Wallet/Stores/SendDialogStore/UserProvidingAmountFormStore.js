@@ -195,7 +195,7 @@ class UserProvidingAmountFormStore {
     if(!decimalAmount)
       throw UserProvidingAmountFormStore.AMOUNT_VALIDATION_RESULT_TYPE.INVALID_AMOUNT_FORMAT
 
-    let amountInNumberOfSatoshis = decimalAmount * amountToSatoshiRate
+    let amountInNumberOfSatoshis = Math.ceil(decimalAmount * amountToSatoshiRate)
 
     if(amountInNumberOfSatoshis > maximum)
       throw UserProvidingAmountFormStore.AMOUNT_VALIDATION_RESULT_TYPE.AMOUNT_TOO_LARGE

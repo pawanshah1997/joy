@@ -4,7 +4,9 @@ const FAUCET_URLS = {
   // Bitcoin testnet
   'testnet': 'http://45.79.102.125:7099/withdraw/',
   // Bitcoin Cash testnet
-  'bitcoincashtestnet': 'http://45.79.102.125:7098/withdraw/'
+  'bitcoincashtestnet': 'http://45.79.102.125:7098/withdraw/',
+  // Bitcoin Cash Mainnet
+  'bitcoincash': 'http://45.79.102.125:7097/withdraw/'
 }
 
 /**
@@ -22,6 +24,21 @@ function getCoins (address, callback = () => {}) {
   _getCoins(url, address.toString(), callback)
 }
 
+const ErrorCodes = {
+  // Errors generated locally
+  NETWORK_ERROR: 10, // network request failed
+  RESPONSE_PARSE_ERROR: 11, // failed to parse the response from faucet
+
+  // Error codes from faucet
+  RATE_LIMIT_SERVER: 1,  // server withdrawl limit reached
+  RATE_LIMIT_CLIENT: 2, // user withdrawal limit reached
+  WALLET_OFFLINE: 3, // server wallet is offline
+  NO_FUNDS: 4, // faucet out of funds
+  ADDRESS_MISSING: 5,
+  ADDRESS_INVALID: 6,
+  SERVER_INTERNAL_ERROR: 7 // internal error sending coins
+}
+
 /**
   * Makes a request to testnet faucet to get some free coins
   * @faucetUrl - URL to joystream faucet web service (string)
@@ -35,7 +52,7 @@ function _getCoins (faucetUrl, address, callback = () => {}) {
   request({url: faucetUrl, qs: query}, (err, response, body) => {
     if (err) {
       // network error
-      callback(err.message)
+      callback({code: ErrorCodes.NETWORK_ERROR, message: err.message})
     } else {
       // Success
       if (response.statusCode === 200) {
@@ -44,15 +61,20 @@ function _getCoins (faucetUrl, address, callback = () => {}) {
 
       // Faucet rejected request - details in data.message
       try {
-        var errorMessage = JSON.parse(body).data.message
+        var error = JSON.parse(body).data
       } catch (e) {
         // error parsing json response
-        return callback('request failed. unable to parse error message in response')
+        return callback({code: ErrorCodes.RESPONSE_PARSE_ERROR,
+                         message: 'unable to parse error message in response'})
       }
 
-      callback(errorMessage)
+      callback(error)
     }
   })
 }
 
 export default getCoins
+export {
+  ErrorCodes,
+  getCoins
+}

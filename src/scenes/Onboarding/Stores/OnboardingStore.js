@@ -3,8 +3,7 @@
  */
 
 import { observable, action } from 'mobx'
-import {TorrentInfo} from "joystream-node"
-import fs from 'fs'
+import {WHY_BCH} from '../../../constants'
 
 /**
  * (MOBX) User interface store for the onboarding
@@ -24,14 +23,26 @@ class OnboardingStore {
    */
   @observable state
 
-  constructor (uiStore, state) {
+  /**
+   * {Boolean} Whether the BCH notice should be displayed on the wallet scene
+   */
+  @observable showBCHNoticeInWallet
+
+  constructor (uiStore, state, showBCHNoticeInWallet, linkOpener) {
     this._uiStore = uiStore
     this.setState(state)
+    this.setShowBCHNoticeInWallet(showBCHNoticeInWallet)
+    this._linkOpener = linkOpener
   }
 
   @action.bound
   setState (state) {
     this.state = state
+  }
+
+  @action.bound
+  setShowBCHNoticeInWallet(showBCHNoticeInWallet) {
+    this.showBCHNoticeInWallet = showBCHNoticeInWallet
   }
 
   @action.bound
@@ -78,6 +89,16 @@ class OnboardingStore {
       this.setState(OnboardingStore.STATE.Silent)
       this._uiStore.closeApplication()
     }
+  }
+
+  @action.bound
+  acceptBCHInformationNotice = () => {
+    this.setShowBCHNoticeInWallet(false)
+  }
+
+  @action.bound
+  whyBCH = () => {
+    this._linkOpener(WHY_BCH)
   }
 }
 

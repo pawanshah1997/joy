@@ -1,6 +1,7 @@
 import {observable, action, computed} from 'mobx'
 import assert from 'assert'
 import {shell} from 'electron'
+import open from 'open'
 
 // Core
 import Application from '../core/Application'
@@ -80,6 +81,24 @@ class UIStore {
   @observable currentPhase
 
   /**
+   * Scenes which are valid when in the
+   *
+   * {ALIVE_PHASE_SCENE}
+   */
+  static ALIVE_PHASE_SCENE = {
+    Main : 0,
+    OnboardingWelcome : 1,
+    OnboardingDeparture : 2,
+    VideoPlayer : 3,
+    Terms : 4,
+  }
+
+  /**
+   * {Boolean} Whether to display the terms scene
+   */
+  @observable displayTermsScene
+
+  /**
    * {Number} Total number of pieces sold by us as a seller this
    * session
    */
@@ -147,11 +166,12 @@ class UIStore {
    *
    * @param application {Application}
    */
-  constructor(application) {
+  constructor(application, forceTermsScreen) {
 
     this.totalRevenueFromPieces = 0
     this.numberOfPiecesSoldAsSeller = 0
     this.totalSpendingOnPieces = 0
+    this._forceTermsScreen = forceTermsScreen
 
     // Hold on to application instance
     this._application = application
@@ -277,6 +297,14 @@ class UIStore {
       assert(!this.applicationStore.applicationSettings)
       this.applicationStore.applicationSettings = applicationSettings
 
+      // When terms have not been accepted by the user, then we must
+      // display the terms scene
+      let termsAccepted = applicationSettings.termsAccepted()
+
+      let displayTermsScene = !termsAccepted || this._forceTermsScreen
+
+      this.setDisplayTermsScene(displayTermsScene)
+
     } else if(resource === Application.RESOURCE.PRICE_FEED) {
 
       /**
@@ -297,7 +325,7 @@ class UIStore {
       }))
 
     } else if(resource === Application.RESOURCE.WALLET) {
-      
+
       /**
        * Create and setup wallet store
        */
@@ -318,7 +346,7 @@ class UIStore {
         [],
         wallet.pay.bind(wallet)
       )
-  
+
       this.applicationStore.setWalletStore(walletStore)
 
       // Hook into events
@@ -355,9 +383,10 @@ class UIStore {
         satsPrkBFee,
         null,
         '',
-        launchExternalTxViewer
+        launchExternalTxViewer,
+        bcoin.protocol.consensus.COIN
       )
-      
+
     }
 
   })
@@ -376,7 +405,7 @@ class UIStore {
 
     // Create onboarding store if enabled
     if (isEnabled)
-      onboardingStore = new OnboardingStore(this, OnboardingStore.STATE.WelcomeScreen)
+      onboardingStore = new OnboardingStore(this, OnboardingStore.STATE.WelcomeScreen, true, open)
 
     // Update application store signal about onboarding being enabled
     // and set store
@@ -418,27 +447,27 @@ class UIStore {
     /// Hook into events
 
     torrent.on('state', action((state) => {
-      
+
       torrentStore.setState(state)
-  
+
       /**
        * When torrent is finished, we have to count towards the navigator
        * Bug: see here https://github.com/JoyStream/joystream-desktop/issues/764
        */
-  
+
       if(state === 'Active.FinishedDownloading.Passive') {
-    
+
         assert(this.applicationNavigationStore)
         this.applicationNavigationStore.handleTorrentCompleted()
-        
+
         // In the future: Add desktop notifications!
-        
+
       }
-      
+
     }))
-    
+
     torrent.on('loaded', action((deepInitialState) => {
-  
+
       /**
        * When adding a torrent through the uploading flow,
        * we need to learn whether uploading the given torrent is feasible,
@@ -449,17 +478,17 @@ class UIStore {
        * if there is such an uploading flow going for the given torrent,
        * and notify the given scene model about the download status.
        */
-      
+
       if(this.uploadingStore &&
         this.uploadingStore.state === UploadingStore.STATE.AddingTorrent &&
         this.uploadingStore.infoHashOfTorrentSelected === torrent.infoHash) {
-        
+
         if(torrent.state.startsWith('Active.DownloadIncomplete'))
           this.uploadingStore.torrentDownloadIncomplete()
         else if(torrent.state.startsWith('Active.FinishedDownloading'))
           this.uploadingStore.torrentFinishedDownloading()
       }
-      
+
     }))
 
     torrent.on('viabilityOfPaidDownloadInSwarm', action((viabilityOfPaidDownloadInSwarm) => {
@@ -488,7 +517,7 @@ class UIStore {
       torrentStore.setTotalSize(torrentInfo.totalSize())
       torrentStore.setTorrentFiles(torrentInfo.files())
     }))
-    
+
     torrent.on('progress', action((progress) => {
       torrentStore.setProgress(progress * 100)
     }))
@@ -513,7 +542,7 @@ class UIStore {
       torrentStore.setNumberOfSeeders(numberOfSeeders)
     }))
 
-    torrent.on('paymentSent', action((paymentIncrement, totalNumberOfPayments, totalAmountPaid, pieceIndex) => {
+    torrent.on('sentPayment', action((paymentIncrement, totalNumberOfPayments, totalAmountPaid, pieceIndex) => {
 
       /**
        * A naive mistake here is to miss the fact that a single torrent may involve
@@ -706,7 +735,7 @@ class UIStore {
     let walletStore = this.applicationStore.walletStore
     assert(walletStore)
 
-    walletStore.paymentStores.push(paymentStore)
+    walletStore.addPaymentStore(paymentStore)
 
     /// Hook up events
 
@@ -732,12 +761,40 @@ class UIStore {
   setCurrentPhase(currentPhase) {
     this.currentPhase = currentPhase
   }
-  
+
+  @action.bound
+  setDisplayTermsScene(displayTermsScene) {
+    this.displayTermsScene = displayTermsScene
+  }
+
+  @action.bound
+  handleTermsAccepted() {
+
+    if(!this.displayTermsScene)
+      throw Error('Cannot accept terms when not being displayed.')
+
+    // Remove terms scene visibility
+    this.setDisplayTermsScene(false)
+
+    // Mark terms as being accepted in settings
+    this._application.applicationSettings.setTermsAccepted(true)
+  }
+
+  @action.bound
+  handleTermsRejected = () => {
+
+    if(!this.displayTermsScene)
+      throw Error('Cannot reject terms when not being displayed.')
+
+    // Initiate closing application
+    this.closeApplication()
+  }
+
   /**
    * Closes the application, but firrst enables possible
    * onboarding flow if its currently enabled.
    */
-  handleCloseApplicationAttempt() {
+  handleCloseApplicationAttempt = () => {
 
     /**
      * If onboarding is enabled, then display shutdown message - if its not already
@@ -771,7 +828,7 @@ class UIStore {
     }
 
   }
-  
+
   /**
    * Directly initiates application stoppage.
    */
@@ -798,6 +855,8 @@ class UIStore {
   playMedia(infoHash, fileIndex) {
     const torrent = this._application.torrents.get(infoHash)
 
+    const streamUrl = this._application.getTorrentStreamUrl(infoHash, fileIndex)
+
     if (!torrent) {
       throw new Error('playMedia: torrent not in session')
     }
@@ -816,28 +875,22 @@ class UIStore {
       throw new Error('playMedia: torrent still loading')
     }
 
-    const fullyDownloaded = torrent.state.startsWith('Active.FinishedDownloading')
-
-    const mediaSourceType = fullyDownloaded ? MediaPlayerStore.MEDIA_SOURCE_TYPE.DISK : MediaPlayerStore.MEDIA_SOURCE_TYPE.STREAMING_TORRENT
     const loadedSecondsRequiredForPlayback = 10
-    let autoPlay = true
 
-    var file = torrent.createStreamFactory(fileIndex)
+    const autoPlay = true
 
     // Create store for player
     const store = new MediaPlayerStore(
-      mediaSourceType,
       torrentStore,
-      file,
+      streamUrl,
       loadedSecondsRequiredForPlayback,
       autoPlay,
       mediaPlayerWindowSizeFetcher,
       mediaPlayerWindowSizeUpdater,
       () => { // When player exits
-        Doorbell.show()
         this.setMediaPlayerStore(null)
         powerSavingBlocker(false)
-        torrent.endStream()
+        Doorbell.show()
       },
       this
     )
@@ -916,6 +969,37 @@ class UIStore {
     }))
   }
 
+  /**
+   * Scene visible when scene is active
+   * @returns {ALIVE_PHASE_SCENE|null}
+   */
+  @computed get
+  alivePhaseScene() {
+
+    // Make sure we are actually alive
+    if(this.currentPhase !== UIStore.PHASE.Alive)
+      return null
+    else if(this.displayTermsScene)
+      return UIStore.ALIVE_PHASE_SCENE.Terms
+    else if(this.mediaPlayerStore)
+      return UIStore.ALIVE_PHASE_SCENE.VideoPlayer
+    else if(this.onboardingStore && this.onboardingStore.state === OnboardingStore.STATE.WelcomeScreen)
+      return UIStore.ALIVE_PHASE_SCENE.OnboardingWelcome
+    else if(this.onboardingStore && this.onboardingStore.state === OnboardingStore.STATE.DepartureScreen)
+      return UIStore.ALIVE_PHASE_SCENE.OnboardingDeparture
+    else
+      return UIStore.ALIVE_PHASE_SCENE.Main
+  }
+
+  @computed get
+  showCheckingTorrentProgress() {
+
+    return this.alivePhaseScene === UIStore.ALIVE_PHASE_SCENE.Main &&
+      this.applicationNavigationStore.onTorrentListingTab && // on the torrent tabs
+      this.torrentsBeingLoaded.length > 0
+
+  }
+
   @action.bound
   setTorrentTerminatingProgress(progress) {
     this.torrentTerminatingProgress = progress
@@ -936,6 +1020,11 @@ class UIStore {
   addExampleTorrents () {
     this._application.addExampleTorrents()
   }
+
+  openingExternalTorrentResult (err, torrentName) {
+
+  }
+
 }
 
 function launchExternalTxViewer(txId, outputIndex) {

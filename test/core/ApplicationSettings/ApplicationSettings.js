@@ -50,7 +50,8 @@ describe('ApplicationSettings', function() {
       },
       defaultSellerTerms : {
         h: 'my-string',
-      }
+      },
+      termsAccepted : true
     }
     
     // wait for opened signal,
@@ -65,6 +66,7 @@ describe('ApplicationSettings', function() {
       expect(applicationSettings.bittorrentPort()).to.be.equal(DEFAULT_SETTINGS.bittorrentPort)
       expect(applicationSettings.defaultBuyerTerms()).to.deep.equal(DEFAULT_SETTINGS.defaultBuyerTerms)
       expect(applicationSettings.defaultSellerTerms()).to.deep.equal(DEFAULT_SETTINGS.defaultSellerTerms)
+      expect(applicationSettings.termsAccepted()).to.deep.equal(DEFAULT_SETTINGS.termsAccepted)
       
       done()
       
@@ -78,6 +80,7 @@ describe('ApplicationSettings', function() {
       DEFAULT_SETTINGS.bittorrentPort,
       DEFAULT_SETTINGS.defaultBuyerTerms,
       DEFAULT_SETTINGS.defaultSellerTerms,
+      DEFAULT_SETTINGS.termsAccepted
     )
     
   })
@@ -95,7 +98,8 @@ describe('ApplicationSettings', function() {
       },
       defaultSellerTerms : {
         h: 'masdfasdfasdfy-dsf',
-      }
+      },
+      termsAccepted : false
     }
     
     // Set new values
@@ -105,6 +109,7 @@ describe('ApplicationSettings', function() {
     applicationSettings.setBittorrentPort(NEW_SETTINGS.bittorrentPort)
     applicationSettings.setDefaultBuyerTerms(NEW_SETTINGS.defaultBuyerTerms)
     applicationSettings.setDefaultSellerTerms(NEW_SETTINGS.defaultSellerTerms)
+    applicationSettings.setTermsAccepted(NEW_SETTINGS.termsAccepted)
     
     // assert new values
     expect(applicationSettings.numberOfPriorSessions()).to.be.equal(NEW_SETTINGS.numberOfPriorSessions)
@@ -113,6 +118,7 @@ describe('ApplicationSettings', function() {
     expect(applicationSettings.bittorrentPort()).to.be.equal(NEW_SETTINGS.bittorrentPort)
     expect(applicationSettings.defaultBuyerTerms()).to.deep.equal(NEW_SETTINGS.defaultBuyerTerms)
     expect(applicationSettings.defaultSellerTerms()).to.deep.equal(NEW_SETTINGS.defaultSellerTerms)
+    expect(applicationSettings.termsAccepted()).to.deep.equal(NEW_SETTINGS.termsAccepted)
     
   })
   

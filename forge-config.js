@@ -43,8 +43,14 @@ module.exports = {
   "electronPackagerConfig": {
     "asar": true,
     "icon": "src/assets/appicon/icon",
-    "protocol": ["magnet", "joystream"],
-    "protocolName": ["BitTorrent Magnet URL", "Joystream Magnet URL"],
+    "protocols" : [
+      {
+        "name": "BitTorrent Magnet URL",
+        "schemes": [
+            "magnet"
+        ]
+      }
+    ],
     "ignore": [
       ".gitignore",
       ".travis",
@@ -74,10 +80,14 @@ module.exports = {
   "electronInstallerDebian": {
     "icon": "src/assets/appicon/icon.png",
     "categories": [
-      "Utility"
+      "Utility",
+      "Network",
+      "FileTransfer",
+      "P2P"
     ],
     "mimeType": ["application/x-bittorrent", "x-scheme-handler/magnet"],
-    "bin" : "Joystream"
+    "bin" : "Joystream",
+    "desktopTemplate": path.resolve(process.cwd(), 'res/linux-desktop.ejs')
   },
   "electronInstallerDMG": {
     "background":"src/assets/img/osx-installer-screen.png",

@@ -1,8 +1,3 @@
-/* global it, describe */
-
-// babel-polyfill for generator (async/await)
-import 'babel-polyfill'
-
 import { assert, expect } from 'chai'
 
 import net from 'net'

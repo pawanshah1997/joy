@@ -33,7 +33,7 @@ class WalletSceneStore {
    * @param {String} searchString - search string
    * @param {Func} launchExternalTxViewer
    */
-  constructor(walletStore, priceFeedStore, satsPrkBFee, visibleDialog, searchString, launchExternalTxViewer) {
+  constructor(walletStore, priceFeedStore, satsPrkBFee, visibleDialog, searchString, launchExternalTxViewer, numberOfUnitsPerCoin) {
 
     this._walletStore = walletStore
     this._priceFeedStore = priceFeedStore
@@ -41,6 +41,7 @@ class WalletSceneStore {
     this.setVisibleDialog(visibleDialog)
     this.setSearchString(searchString)
     this._launchExternalTxViewer = launchExternalTxViewer
+    this._numberOfUnitsPerCoin = numberOfUnitsPerCoin
   }
 
   @action.bound
@@ -114,7 +115,13 @@ class WalletSceneStore {
 
   @computed get
   pendingBalance() {
-    return this._walletStore.totalBalance - this._walletStore.confirmedBalance
+    let pendingBalance = this._walletStore.totalBalance - this._walletStore.confirmedBalance
+
+    if (pendingBalance < 0) {
+      debugger
+    }
+
+    return pendingBalance
   }
 
   @computed get
@@ -157,13 +164,13 @@ class WalletSceneStore {
   paymentRowStores() {
 
     return this.filteredPayments.map((paymentStore) => {
-      return new PaymentRowStore(paymentStore, this)
+      return new PaymentRowStore(paymentStore, this._priceFeedStore, this._numberOfUnitsPerCoin, this.viewPayment)
     })
   }
-  
+
   @computed get
   filteredPaymentRowStores() {
-    
+
     return this.paymentRowStores
       .sort(comparePayments)
   }
@@ -187,7 +194,7 @@ class WalletSceneStore {
  * @returns {Number} - value follows normal comparer sementics
  */
 function comparePayments(p1, p2) {
-  
+
   if(!p1.date)
     return -1 // p1 first
   else if(!p2.date)

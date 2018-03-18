@@ -3,6 +3,7 @@ import {EventEmitter} from "events"
 import ApplicationSettings from '../ApplicationSettings'
 import PriceFeed from '../PriceFeed'
 import Wallet from '../Wallet'
+import safeEventHandlerShim from '../Wallet/safeEventHandler'
 import Torrent from '../Torrent'
 import DeepInitialState from '../Torrent/Statemachine/DeepInitialState'
 import getCoins from './faucet'
@@ -14,6 +15,8 @@ import bcoin from 'bcoin'
 import { TorrentInfo, Session } from 'joystream-node'
 import db from '../../db'
 import request from 'request'
+import magnet from 'magnet-uri'
+import StreamServer from '../StreamServer/StreamServer'
 
 var debug = require('debug')('application')
 import {shell} from 'electron'
@@ -41,7 +44,7 @@ const PRICE_FEED_POLLING_INTERVAL = 60*1000 //
 /**
  * Default settings to use for the application settings
  */
-const DEFAULT_APPLIATION_SETTINGS = {
+const DEFAULT_APPLICATION_SETTINGS = {
 
   useAssistedPeerDiscovery : true,
 
@@ -65,7 +68,11 @@ const DEFAULT_APPLIATION_SETTINGS = {
     maxNumberOfSellers: 5,
     minContractFeePerKb: 2000,
     settlementFee: 2000
-  }
+  },
+
+  termsAccepted : false,
+
+  defaultClientPreference: 'not_set' // not_set, ask, dont_ask, force
 }
 
 /**
@@ -111,11 +118,12 @@ class Application extends EventEmitter {
    */
   static RESOURCE = {
 
-    SETTINGS : 0,
-    WALLET : 1,
+    SETTINGS: 0,
+    WALLET: 1,
     JOYSTREAM_NODE_SESSION: 2,
-    PRICE_FEED : 3,
-    STORED_TORRENTS : 4
+    PRICE_FEED: 3,
+    STORED_TORRENTS: 4,
+    STREAM_SERVER: 5
   }
 
   static get NUMBER_OF_RESOURCE_TYPES() { return Object.keys(Application.RESOURCE).length }
@@ -160,6 +168,11 @@ class Application extends EventEmitter {
    * {Map<String.Torrent>} Map of torrents currently added
    */
   torrents
+
+  /**
+   * {StreamServer} Media Streaming Server
+   */
+   streamServer
 
   /**
    * Constructor
@@ -260,7 +273,9 @@ class Application extends EventEmitter {
       this._startedResource(Application.RESOURCE.WALLET, onStarted)
     })
 
-    this.wallet.on('totalBalanceChanged', this._totalWalletBalanceChanged)
+    this.wallet.on('totalBalanceChanged', safeEventHandlerShim((balance) => {
+        this._totalWalletBalanceChanged(balance)
+    }),'core-wallet.totalBalanceChanged')
 
     // Start wallet
     this.wallet.start()
@@ -290,12 +305,16 @@ class Application extends EventEmitter {
     // these are set on the first run
     this.applicationSettings.open(
       0,
-      DEFAULT_APPLIATION_SETTINGS.makeDefaultSavePathFromBaseFolder(appDirectory),
-      DEFAULT_APPLIATION_SETTINGS.useAssistedPeerDiscovery,
-      DEFAULT_APPLIATION_SETTINGS.bittorrentPort,
-      DEFAULT_APPLIATION_SETTINGS.buyerTerms,
-      DEFAULT_APPLIATION_SETTINGS.sellerTerms
+      DEFAULT_APPLICATION_SETTINGS.makeDefaultSavePathFromBaseFolder(appDirectory),
+      DEFAULT_APPLICATION_SETTINGS.useAssistedPeerDiscovery,
+      DEFAULT_APPLICATION_SETTINGS.bittorrentPort,
+      DEFAULT_APPLICATION_SETTINGS.buyerTerms,
+      DEFAULT_APPLICATION_SETTINGS.sellerTerms,
+      DEFAULT_APPLICATION_SETTINGS.termsAccepted,
+      DEFAULT_APPLICATION_SETTINGS.defaultClientPreference
       )
+
+    this._startedResource(Application.RESOURCE.SETTINGS, onStarted)
 
     // Make sure some download folder actually exists, which
     // may not be the case on the first run
@@ -315,8 +334,6 @@ class Application extends EventEmitter {
       this._enableOnboardingIfFirstRun &&
       !this.applicationSettings.numberOfPriorSessions())
       this._setOnboardingIsEnabled(true)
-
-    this._startedResource(Application.RESOURCE.SETTINGS, onStarted)
 
     /**
      * Create Joystream node session
@@ -361,6 +378,7 @@ class Application extends EventEmitter {
 
     db.open(torrentDatabaseFolder)
       .then((torrentDatabase) => {
+        this._startedResource(Application.RESOURCE.STORED_TORRENTS, onStarted)
 
         // Hold on to torrent database
         this._torrentDatabase = torrentDatabase
@@ -374,44 +392,47 @@ class Application extends EventEmitter {
       }).catch((err) => {
 
         console.log('Could not open torrent database: ' + err)
-
+        return []
       })
       .then((savedTorrents) => {
 
-        let numberOfSavedTorrentsYetToFullyLoad = savedTorrents.length
+        // Add all saved torrents to session with saved settings
+        savedTorrents.forEach((savedTorrent) => {
 
-        if(numberOfSavedTorrentsYetToFullyLoad === 0)
-          this._startedResource(Application.RESOURCE.STORED_TORRENTS, onStarted)
-        else
-          // Add all saved torrents to session with saved settings
-          savedTorrents.forEach((savedTorrent) => {
+          // Need to convert data from db into a torrentInfo
+          // NB: https://github.com/JoyStream/joystream-desktop/issues/668
+          savedTorrent.metadata = new TorrentInfo(Buffer.from(savedTorrent.metadata, 'base64'))
 
-            // Need to convert data from db into a torrentInfo
-            // NB: https://github.com/JoyStream/joystream-desktop/issues/668
-            savedTorrent.metadata = new TorrentInfo(Buffer.from(savedTorrent.metadata, 'base64'))
+          // add to session
+          this._addTorrent(savedTorrent, (err, torrent) => {
 
-            // add to session
-            this._addTorrent(savedTorrent, (err, torrent) => {
-
-              assert(!err)
-
-              // When loaded, check if we are done loading all,
-              // if so note this
-              torrent.on('loaded', () => {
-
-                numberOfSavedTorrentsYetToFullyLoad--
-
-                if(numberOfSavedTorrentsYetToFullyLoad === 0)
-                  this._startedResource(Application.RESOURCE.STORED_TORRENTS, onStarted)
-
-              })
-
-            })
+            assert(!err)
 
           })
 
+        })
+
     })
 
+    // const streamServerHost = this.applicationSettings.streamServerHost()
+    // const streamServerPort = this.applicationSettings.streamServerPort()
+    // we can use port 0 (just listen on a random port)
+
+    this.streamServer = new StreamServer(this.torrents, /*{host, port}*/)
+
+    this.streamServer.on('started', () => {
+        this._startedResource(Application.RESOURCE.STREAM_SERVER, onStarted)
+    })
+
+    this.streamServer.on('error', (err) => {
+      debug('StreamServer Error:', err)
+    })
+
+    this.streamServer.start()
+  }
+
+  getTorrentStreamUrl (infoHash, fileIndex) {
+    return this.streamServer.getStreamUrl(infoHash, fileIndex)
   }
 
   /**
@@ -500,38 +521,12 @@ class Application extends EventEmitter {
 
           })
 
-          // otherwise, if its loading
-          if(torrent.state.startsWith('Loading')) {
+          // Does it make sense to encode settings of a loading torrent?
+          encodedTorrentSettings = encodeTorrentSettings(torrent)
 
-            debug('Torrent is being loaded, hence we wait until its done before we initiate termination: ' + torrent.name)
+          debug('Initiating termination of torrent: ' + torrent.name)
 
-            // then we first wait for it to finish loading
-            // before asking it to terminate
-            torrent.once('loaded', () => {
-
-              terminateLoadedTorrent(torrent)
-            })
-
-          } else {
-
-            // otherwise if its not just loading,
-            // then its active - which is the most frequent scenario,
-            // and we can ask it it terminate immediately
-            terminateLoadedTorrent(torrent)
-
-          }
-
-          function terminateLoadedTorrent(torrent) {
-
-            encodedTorrentSettings = encodeTorrentSettings(torrent)
-
-            assert(torrent.state.startsWith('Active'))
-
-            debug('Initiating termination of torrent: ' + torrent.name)
-
-            torrent._terminate()
-
-          }
+          torrent._terminate()
 
         }
 
@@ -628,6 +623,15 @@ class Application extends EventEmitter {
 
     } else
       this.wallet.stop()
+
+    this.streamServer.once('stopped', () => {
+
+      assert(this.state === Application.STATE.STOPPING)
+
+      this._stoppedResource(Application.RESOURCE.STREAM_SERVER, onStopped)
+    })
+
+    this.streamServer.stop()
   }
 
   /**
@@ -726,6 +730,10 @@ class Application extends EventEmitter {
       if(err)
         onAdded(err)
       else {
+
+        if (this.state === Application.STATE.STOPPING || this.state === Application.STATE.STOPPED) {
+          return onAdded('application is shutting down')
+        }
 
         // Process being added to session
         let torrent = this._onTorrentAddedToSession(settings, newJoystreamNodeTorrent)
@@ -944,32 +952,9 @@ class Application extends EventEmitter {
     this.emit('onboardingIsEnabled', onboardingIsEnabled)
   }
 
-  _totalWalletBalanceChanged = (balance) => {
+  _totalWalletBalanceChanged (balance) {
 
     debug('new total balance: ' + balance)
-
-    if(this.state === Application.STATE.STARTED || this.state === Application.STATE.STARTING) {
-
-      // Beg faucet for funds if we are supposed to
-      if (this._walletTopUpOptions.doTopUp && this._walletTopUpOptions.walletBalanceLowerBound > balance) {
-
-        let address = this.wallet.receiveAddress
-
-        console.log('Faucet: Requesting some testnet coins to address: ' + address.toString())
-
-        getCoins(address, function (err) {
-
-          if (err) {
-            console.log('Faucet:', err)
-          } else {
-            console.log('Faucet: Request accepted')
-          }
-
-        })
-
-      }
-
-    }
 
   }
 
@@ -985,36 +970,84 @@ class Application extends EventEmitter {
 
     this.onboardingTorrents.forEach((torrentFileName) => {
 
-        fs.readFile(torrentFileName, (err, data) => {
-          if (err) return console.error('Failed to read example torrent:', torrentFileName, err.message)
-
-          let torrentInfo
-
-          try {
-            torrentInfo = new TorrentInfo(data)
-          } catch (e) {
-            console.error('Failed to parse example torrent file from data:', torrentFileName)
-            return
-          }
-
-          // Make settings for downloading with default settings
-          let settings = {
-            infoHash : torrentInfo.infoHash(),
-            metadata : torrentInfo,
-            resumeData : null,
-            name: torrentInfo.name(),
-            savePath: this.applicationSettings.downloadFolder(),
-            deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
-            extensionSettings : {
-              buyerTerms: this.applicationSettings.defaultBuyerTerms()
-            }
-          }
-
-          this._addTorrent(settings, (err) => {
-            if (err) console.log('Failed to add example torrent', err)
-          })
+        this._addTorrentByFileName(torrentFileName, (err) => {
+          if(err)
+            debug('Failed to add example torrent:', torrentFileName, err.message)
         })
     })
+  }
+
+  _addTorrentByFileName (torrentFileName, callback) {
+    fs.readFile(torrentFileName, (err, data) => {
+      if (err) {
+        return callback(err)
+      }
+
+      let torrentInfo
+
+      try {
+        torrentInfo = new TorrentInfo(data)
+      } catch (e) {
+        return callback(e)
+      }
+
+      // Make settings for downloading with default settings
+      let settings = {
+        infoHash : torrentInfo.infoHash(),
+        metadata : torrentInfo,
+        resumeData : null,
+        name: torrentInfo.name(),
+        savePath: this.applicationSettings.downloadFolder(),
+        deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
+        extensionSettings : {
+          buyerTerms: this.applicationSettings.defaultBuyerTerms()
+        }
+      }
+
+      this._addTorrent(settings, callback)
+    })
+  }
+
+  _addTorrentByMagnetLink (magnetUrl, callback) {
+    var parsedMagnet = magnet.decode(magnetUrl)
+
+    let settings = {
+        infoHash: parsedMagnet.infoHash,
+        url: magnetUrl,
+        resumeData : null,
+        name: parsedMagnet.infoHash,
+        savePath: this.applicationSettings.downloadFolder(),
+        deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
+        extensionSettings : {
+          buyerTerms: this.applicationSettings.defaultBuyerTerms()
+        }
+    }
+
+    this._addTorrent(settings, callback)
+  }
+
+  handleOpenExternalTorrent (uri, callback) {
+
+    try {
+      // check if uri is a valid magnet link
+      let parsedMagnet = magnet.decode(uri)
+
+      if (parsedMagnet && parsedMagnet.infoHash) {
+        this._addTorrentByMagnetLink(uri, callback)
+        return
+      }
+
+    } catch (err) { }
+
+    try {
+      // maybe its a path to a torrent file
+      if (fs.lstatSync(uri).isFile()) {
+        this._addTorrentByFileName(uri, callback)
+        return
+      }
+    } catch (err) { }
+
+    callback('resource not file or magnetlink')
   }
 }
 
@@ -1095,7 +1128,7 @@ function encodeTorrentSettings(torrent) {
     infoHash: torrent.infoHash,
     name: torrent.name,
     savePath: torrent.savePath,
-    deepInitialState: torrent.deepInitialState(),
+    deepInitialState: torrent.state.startsWith('Loading') ? torrent._deepInitialState : torrent.deepInitialState(),
     extensionSettings: {
       buyerTerms: torrent.buyerTerms,
       sellerTerms: torrent.sellerTerms

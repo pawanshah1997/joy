@@ -13,6 +13,7 @@ import ReactTooltip from 'react-tooltip'
 
 import { Payment } from '../../../../core/Wallet'
 import CashAddressFormat from '../../CashAddressFormat'
+import currencyFormatter from 'currency-formatter'
 
 const Field = (props) => {
 
@@ -161,7 +162,7 @@ function getStyles(props, state) {
     },
     toAddressValue : {
       marginLeft : '4px',
-      color: 'hsla(220, 48%, 80%, 1)',
+      color: 'rgb(149, 149, 150)',
       userSelect: 'text',
       //backgroundColor: 'rgba(128, 156, 210, 0.1)',
       //paddingLeft: '4px',
@@ -180,11 +181,11 @@ function getStyles(props, state) {
     amountField : {
       //flex : '0 0 210px',
       //paddingLeft: '40px',
-
+      display: 'flex',
+      flexDirection: 'column',
       flex : '0 0 160px',
-      display : 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
+      alignItems: 'flex-end',
+      justifyContent: 'center',
       color : 'hsla(220, 48%, 45%, 1)',
     },
     amount : {
@@ -197,6 +198,10 @@ function getStyles(props, state) {
       fontFamily: 'Arial',
       fontWeight: 'bold',
       marginLeft: '10px'
+    },
+    amountFiat: {
+      color: 'rgb(149, 149, 150)',
+      fontSize: '14px'
     },
     confirmationStatus : {
       backgroundColor : 'hsla(240, 0%, 79%, 1)',
@@ -388,7 +393,11 @@ class PaymentRow extends Component {
 
               {paymentStore.amount/100000000}
 
-              <span style={styles.amountUnit}>BTC</span>
+              <span style={styles.amountUnit}>BCH</span>
+            </span>
+
+            <span style={styles.amountFiat}>
+              { currencyFormatter.format(this.props.paymentRowStore.amountInFiat, { code: 'USD', precision: 4 }) }
             </span>
 
         </div>
