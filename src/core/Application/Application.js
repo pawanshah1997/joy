@@ -73,7 +73,10 @@ const DEFAULT_APPLICATION_SETTINGS = {
 
   termsAccepted : false,
 
-  defaultClientPreference: 'not_set' // not_set, ask, dont_ask, force
+  defaultClientPreference: 'not_set', // not_set, ask, dont_ask, force
+
+  claimedFreeBCH : false
+
 }
 
 /**
@@ -324,7 +327,8 @@ class Application extends EventEmitter {
       DEFAULT_APPLICATION_SETTINGS.buyerTerms,
       DEFAULT_APPLICATION_SETTINGS.sellerTerms,
       DEFAULT_APPLICATION_SETTINGS.termsAccepted,
-      DEFAULT_APPLICATION_SETTINGS.defaultClientPreference
+      DEFAULT_APPLICATION_SETTINGS.defaultClientPreference,
+      DEFAULT_APPLICATION_SETTINGS.claimedFreeBCH
       )
 
     this._startedResource(Application.RESOURCE.SETTINGS, onStarted)
