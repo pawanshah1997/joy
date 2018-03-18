@@ -43,6 +43,7 @@ import { EXAMPLE_TORRENTS } from './constants'
 import UIStore from './scenes'
 import assert from 'assert'
 import mkdirp from 'mkdirp'
+import getCoins from './core/Application/faucet'
 
 /**
  * Some Components use react-tap-event-plugin to listen for touch events because onClick is not
@@ -55,7 +56,7 @@ var injectTapEventPlugin = require('react-tap-event-plugin')
 injectTapEventPlugin()
 
 // Create app
-const application = new Application(EXAMPLE_TORRENTS, process.env.FORCE_ONBOARDING, true)
+const application = new Application(EXAMPLE_TORRENTS, process.env.FORCE_ONBOARDING, true, getCoins)
 
 // Create model of view, with some reasonable defaults
 const rootUIStore = new UIStore(application, process.env.FORCE_TERMS_SCREEN)
@@ -266,3 +267,12 @@ function beforeWindowUnload(e) {
 function checkForUpdates () {
   ipcRenderer.send('auto-updater-channel', 'init')
 }
+
+/**
+ * We only export the ui store object when in dev mode,
+ * this is for safety reasons. The export allows
+ * us to interrogate the object from the browser window
+ * console.
+ */
+if(isDev)
+  module.exports = rootUIStore

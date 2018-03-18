@@ -73,7 +73,7 @@ const TakingUserInputForm = observer((props) => {
 })
 
 TakingUserInputForm.propTypes = {
-  sendDialogStore : PropTypes.instanceOf(SendDialogStore)
+  sendDialogStore : PropTypes.object // HMR breaks instanceOf(SendDialogStore)
 }
 
 export default TakingUserInputForm

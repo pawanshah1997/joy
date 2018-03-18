@@ -23,6 +23,10 @@ const PaymentsTableBody = observer((props) => {
       backgroundColor : 'white',
       alignItems : 'center', //tableIsEmpty ? 'center' : 'inherit',
       justifyContent : tableIsEmpty ? 'center' : 'inherit',
+
+      // For curved bottom off edge of screen
+      borderRadius: '0px 0px 7px 7px',
+      marginBottom: '30px'
     },
     rowContainer : {
       display : 'flex',
@@ -80,7 +84,7 @@ const PaymentsTableBody = observer((props) => {
 })
 
 PaymentsTableBody.propTypes = {
-  paymentRowStores : PropTypes.arrayOf(PropTypes.instanceOf(PaymentRowStore))
+  paymentRowStores : PropTypes.arrayOf(PropTypes.object) // inner should be instanceOf(PaymentRowStore)), but HMR breaks it
 }
 
 export default PaymentsTableBody

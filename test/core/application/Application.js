@@ -5,8 +5,7 @@ import fs from 'fs'
 import rimraf from 'rimraf'
 import path from 'path'
 
-import config from '../../../src/config'
-import Application, {WalletTopUpOptions} from '../../../src/core/Application'
+import Application from '../../../src/core/Application'
 import DeepInitialState from '../../../src/core/Torrent/Statemachine/DeepInitialState'
 import { TorrentInfo } from 'joystream-node'
 
@@ -30,6 +29,7 @@ describe('Application', function() {
   describe('normal cycle', function() {
   
     let application = null
+    let coinGetter = sinon.spy()
     
     afterEach(function() {
   
@@ -42,10 +42,8 @@ describe('Application', function() {
   
     it('create', function() {
     
-      let walletTopUpOptions = new WalletTopUpOptions(false, 0)
-    
-      application = new Application([], false, false, walletTopUpOptions)
-    
+      application = new Application([], false, false, coinGetter)
+
       expect(application.state).to.be.equal(Application.STATE.STOPPED)
     
     })
@@ -291,6 +289,34 @@ describe('Application', function() {
         done()
 
       })
+
+    })
+
+    it('can claim free coins from faucet', function(done) {
+
+      let userCallback = (err) => {
+
+        expect(err).to.be.null
+
+        done()
+      }
+
+      application.claimFreeBCH(userCallback)
+
+      // Make sure that coin fetcher was called once, with
+      // a normal address
+      expect(coinGetter.calledOnce).to.be.true
+
+      // Make coin getter call user below with
+      // a success code, which should invoke the callback `userCallback`
+      let call = coinGetter.getCall(0)
+      let receiveAddress = call.args[0]
+      let internalApplicationCb = call.args[1]
+
+      // Give response from underlying faucet function,
+      // here we could pass network error codes of varoius kinds,
+      // and make corresponding asserts in `userCallback`
+      internalApplicationCb()
 
     })
 

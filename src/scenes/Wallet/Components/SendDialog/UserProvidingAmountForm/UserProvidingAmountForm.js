@@ -111,7 +111,7 @@ function errorTextFromAmountValidationResult(result) {
 }
 
 UserProvidingAmountForm.propTypes = {
-  userProvidingAmountFormStore : PropTypes.instanceOf(UserProvidingAmountFormStore)
+  userProvidingAmountFormStore : PropTypes.object // HMR breaks instanceOf(UserProvidingAmountFormStore)
 }
 
 export default UserProvidingAmountForm

@@ -37,7 +37,7 @@ class ApplicationStore {
   /**
    * @propety {PriceFeedStore}
    */
-  priceFeedStore
+  @observable priceFeedStore
 
   /**
    * {Map.<TorrentStore>} All torrent stores currently on application core
@@ -79,7 +79,7 @@ class ApplicationStore {
     this.setOnboardingIsEnabled(onboardingIsEnabled)
     this.applicationSettings = applicationSettings
     this.walletStore = walletStore
-    this.priceFeedStore = priceFeedStore
+    this.setPriceFeedStore(priceFeedStore)
     this._setTorrentStores(new Map())
     this._starter = starter
     this._stopper = stopper
@@ -121,6 +121,11 @@ class ApplicationStore {
   @action.bound
   setWalletStore(walletStore) {
     this.walletStore = walletStore
+  }
+
+  @action.bound
+  setPriceFeedStore(priceFeedStore) {
+    this.priceFeedStore = priceFeedStore
   }
 
   @action.bound
@@ -193,8 +198,10 @@ class ApplicationStore {
   addTorrent (settings, onTorrentStoreAdded) {
 
     // We guard against duplicate pending calls
-    if(this._pendingAddTorrentCallsMap.has(settings.infoHash))
-      throw Error('Cannot add a torrent while a prior call is still being resolved for the same torrent.')
+    if(this._pendingAddTorrentCallsMap.has(settings.infoHash)) {
+      onTorrentStoreAdded('Cannot add a torrent while a prior call is still being resolved for the same torrent.')
+      return
+    }
 
     // Hold on to user callback
     this._pendingAddTorrentCallsMap.set(settings.infoHash, onTorrentStoreAdded)
@@ -217,8 +224,10 @@ class ApplicationStore {
   @action.bound
   removeTorrent (infoHash, deleteData, onTorrentRemoved) {
 
-    if(this._pendingRemoveTorrentCallsMap.has(infoHash))
-      throw Error('Cannot remove torrent while pror call is still being respøved for the same torrent')
+    if(this._pendingRemoveTorrentCallsMap.has(infoHash)) {
+      onTorrentRemoved('Cannot remove torrent while pror call is still being respøved for the same torrent')
+      return
+    }
 
     // Hold on to user callback
     this._pendingRemoveTorrentCallsMap.set(infoHash, onTorrentRemoved)

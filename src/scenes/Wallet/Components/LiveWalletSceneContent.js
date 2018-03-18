@@ -4,6 +4,7 @@ import { inject, observer } from 'mobx-react'
 // Components
 import SendingDialog from './SendDialog'
 import ReceiveDialog from './ReceiveDialog'
+import ClaimFreeBCHFlowDialog from './ClaimFreeBCHFlowDialog'
 
 import {
   Label,
@@ -142,20 +143,28 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
             }}>
             </div>
 
+            {
 
-            <ToolbarButton title="free coins"
-                           onClick={() => { props.UIStore.walletSceneStore.getFreeCoins()}}
-                           iconNode={<GetCoinsIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>}
-                           colors={
-                             {
-                               normalColor: '#4caf50',
-                               hoverColor: '#419544',
-                               activeColor: '#2c632d',
-                               borderBottomColor: '#275929'
-                             }
-                           }
-            />
-            
+              /** Only display free coins button is the user can actually claim them **/
+
+              props.UIStore.walletSceneStore.allowAttemptToClaimFreeBCH
+              ?
+                <ToolbarButton title="free coins"
+                               onClick={props.UIStore.walletSceneStore.claimFreeBCH}
+                               iconNode={<GetCoinsIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>}
+                               colors={
+                                 {
+                                   normalColor: '#4caf50',
+                                   hoverColor: '#419544',
+                                   activeColor: '#2c632d',
+                                   borderBottomColor: '#3b873e'
+                                 }
+                               }
+                />
+              :
+                null
+            }
+
             { /**
              
              <ToolbarButton title="view seed"
@@ -193,6 +202,7 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
       
       <SendingDialog sendDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'SendDialogStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
       <ReceiveDialog receiveDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'ReceiveDialogStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
+      <ClaimFreeBCHFlowDialog claimFreeBCHFlowDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'ClaimFreeBCHFlowStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
     
     </div>
   )

@@ -51,7 +51,7 @@ const ReceiveDialog = observer((props) => {
 })
 
 ReceiveDialog.propTypes = {
-  receiveDialogStore : PropTypes.instanceOf(ReceiveDialogStore)
+  receiveDialogStore : PropTypes.object // HMR breaks instanceOf(ReceiveDialogStore)
 }
 
 export default ReceiveDialog

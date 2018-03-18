@@ -75,6 +75,5 @@ function _getCoins (faucetUrl, address, callback = () => {}) {
 
 export default getCoins
 export {
-  ErrorCodes,
-  getCoins
+  ErrorCodes
 }

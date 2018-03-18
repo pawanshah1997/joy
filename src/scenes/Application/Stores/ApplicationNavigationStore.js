@@ -62,7 +62,9 @@ class ApplicationNavigationStore {
 
     let balance = applicationStore.walletStore.totalBalance
 
-    return Math.floor((balance * applicationStore.priceFeedStore.cryptoToUsdExchangeRate) / this._numberOfUnitsPerCoin)
+    let fiatBalance = (balance * applicationStore.priceFeedStore.cryptoToUsdExchangeRate) / this._numberOfUnitsPerCoin
+
+    return fiatBalance
   }
 
   /**
