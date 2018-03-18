@@ -42,12 +42,12 @@ const StartPaidDownloadingSection = observer((props) => {
     // This one breaks
     //console.log(props.row.torrentStore.startPaidDownloadViability instanceof StartPaidDownloadViability.NoJoyStreamPeerConnections)
     //console.log(props.row.torrentStore.startPaidDownloadViability.constructor.name === 'NoJoyStreamPeerConnections')
-    
+
     // Derive ButtonSection props
     let className
     let onClick
-  
-    if(props.row.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart') {
+
+    if(props.row.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart' && !props.row.beingRemoved) {
         className = "start_paid_downloading"
         onClick = () => { props.row.torrentStore.startPaidDownload() }
     } else {
@@ -57,7 +57,8 @@ const StartPaidDownloadingSection = observer((props) => {
 
     return (
         <ButtonSection className={className} tooltip="Start paid speedup" onClick={onClick}>
-            <BlockedStartBadge viabilityOfPaidDownloadingTorrent={props.row.viabilityOfPaidDownloadingTorrent}/>
+            <BlockedStartBadge viabilityOfPaidDownloadingTorrent={props.row.viabilityOfPaidDownloadingTorrent}
+                               beingRemoved={props.row.beingRemoved} />
         </ButtonSection>
     )
 })
@@ -86,6 +87,8 @@ const AlertIcon = (props) => {
 }
 
 const BlockedStartBadge = (props) => {
+    if(props.beingRemoved)
+      return null
 
     let content = blockedBadgeContent(props.viabilityOfPaidDownloadingTorrent)
 
@@ -142,7 +145,7 @@ function blockedBadgeContent(viabilityOfPaidDownloadingTorrent)  {
     else {
 
         console.log('should not come here')
-      
+
         assert(false)
 
         //assert(viabilityOfPaidDownloadingTorrent instanceof ViabilityOfPaidDownloadingTorrent.CanStart)

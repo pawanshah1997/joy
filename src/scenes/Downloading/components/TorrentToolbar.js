@@ -18,6 +18,8 @@ import TorrentTableRowStore from '../../Common/TorrentTableRowStore'
 
 const TorrentToolbar = observer((props) => {
 
+  const beingRemoved = props.torrentTableRowStore.beingRemoved
+
   return (
     <Toolbar>
 
@@ -27,17 +29,21 @@ const TorrentToolbar = observer((props) => {
 
       <StartPaidDownloadingSection row={props.torrentTableRowStore} />
 
-      <ToggleStatusSection canStart={props.torrentTableRowStore.torrentStore.canStart}
-                           canStop={props.torrentTableRowStore.torrentStore.canStop}
+      <ToggleStatusSection canStart={props.torrentTableRowStore.torrentStore.canStart && !props.torrentTableRowStore.beingRemoved}
+                           canStop={props.torrentTableRowStore.torrentStore.canStop && !props.torrentTableRowStore.beingRemoved}
                            start={() => { props.torrentTableRowStore.torrentStore.start() }}
                            stop={() => { props.torrentTableRowStore.torrentStore.stop() }}
       />
 
       {/** <ChangeBuyerTermsSection torrent={props.torrent}/> **/}
 
-      <RemoveSection onClick={() => { props.torrentTableRowStore.remove() }} />
+      <RemoveSection enabled={!props.torrentTableRowStore.beingRemoved}
+                     working={props.torrentTableRowStore.beingRemoved && !props.torrentTableRowStore.deletingData}
+                     onClick={() => { props.torrentTableRowStore.remove() }} />
 
-      <RemoveAndDeleteSection onClick={() => { props.torrentTableRowStore.removeAndDeleteData() }} />
+      <RemoveAndDeleteSection enabled={!props.torrentTableRowStore.beingRemoved}
+                              working={props.torrentTableRowStore.deletingData}
+                              onClick={() => { props.torrentTableRowStore.removeAndDeleteData() }} />
 
       <OpenFolderSection onClick={() => { props.torrentTableRowStore.openFolder() }} />
 
