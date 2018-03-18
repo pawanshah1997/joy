@@ -2,9 +2,11 @@ import {observable, action, computed} from 'mobx'
 import assert from 'assert'
 import {shell} from 'electron'
 import open from 'open'
+var debug = require('debug')('UIStore')
 
 // Core
 import Application from '../core/Application'
+import ApplicationSettings from '../core/ApplicationSettings'
 import Wallet from '../core/Wallet'
 import bcoin from 'bcoin'
 
@@ -25,7 +27,7 @@ import ApplicationNavigationStore from './Application/Stores'
 import DownloadingStore from './Downloading/Stores'
 import UploadingStore from './Seeding/Stores'
 import CompletedStore from './Completed/Stores'
-import WalletSceneStore from './Wallet/Stores'
+import WalletSceneStore, { ClaimFreeBCHFlowStore } from './Wallet/Stores'
 import Doorbell from './Doorbell'
 import MediaPlayerStore from './VideoPlayer/Stores/MediaPlayerStore'
 
@@ -316,7 +318,7 @@ class UIStore {
 
       // Create
       assert(!this.applicationStore.priceFeedStore)
-      this.applicationStore.priceFeedStore = new PriceFeedStore(priceFeed.cryptoToUsdExchangeRate)
+      this.applicationStore.setPriceFeedStore(new PriceFeedStore(priceFeed.cryptoToUsdExchangeRate))
 
       // Hook into events
       priceFeed.on('tick', action((cryptoToUsdExchangeRate) => {
@@ -376,6 +378,10 @@ class UIStore {
       // We can get away with very low 2 Sat/byte
       let satsPrkBFee = 2048
 
+      // We need settings to be opened, and we are guaranteed that this has happened
+      // before wallet is ready
+      assert(this._application.applicationSettings.state === ApplicationSettings.STATE.OPENED)
+
       assert(!this.walletSceneStore)
       this.walletSceneStore = new WalletSceneStore(
         this.applicationStore.walletStore,
@@ -383,7 +389,9 @@ class UIStore {
         satsPrkBFee,
         null,
         '',
+        !this._application.applicationSettings.claimedFreeBCH(),
         launchExternalTxViewer,
+        this.claimFreeBCH,
         bcoin.protocol.consensus.COIN
       )
 
@@ -907,6 +915,38 @@ class UIStore {
 
     // Turn on power saving blocker
     powerSavingBlocker(true)
+  }
+
+  @action.bound
+  claimFreeBCH = () => {
+
+    this._application.claimFreeBCH((err) => {
+
+      let dialogVisible = !this.walletSceneStore.visibleDialog ||
+        this.walletSceneStore.visibleDialog.constructor.name !== 'ClaimFreeBCHFlowStore'
+
+      if(err) {
+
+        if(dialogVisible) {
+          this.walletSceneStore.visibleDialog.error = err.code
+          this.walletSceneStore.visibleDialog.setStage(ClaimFreeBCHFlowStore.STAGE.DISPLAY_FAILURE_MESSAGE)
+        } else {
+          debug('Ignored error result of claiming free BCH, dialog abandoned')
+        }
+
+      } else {
+
+        // If there was no error, then hide the button
+        this.walletSceneStore.setAllowAttemptToClaimFreeBCH(false)
+
+        // and if the dialog is visible, we update it with a success message
+        if(dialogVisible)
+          this.walletSceneStore.visibleDialog.setStage(ClaimFreeBCHFlowStore.STAGE.DISPLAY_SUCCESS_MESSAGE)
+
+      }
+
+    })
+
   }
 
   @computed get
