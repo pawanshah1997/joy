@@ -922,8 +922,7 @@ class UIStore {
 
     this._application.claimFreeBCH((err) => {
 
-      let dialogVisible = !this.walletSceneStore.visibleDialog ||
-        this.walletSceneStore.visibleDialog.constructor.name !== 'ClaimFreeBCHFlowStore'
+      let dialogVisible = this.walletSceneStore.visibleDialog && this.walletSceneStore.visibleDialog.constructor.name === 'ClaimFreeBCHFlowStore'
 
       if(err) {
 
