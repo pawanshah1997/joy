@@ -23,7 +23,8 @@ function getStyles(props) {
         fontSize : '22px',
         fontFamily: 'Helvetica',
         fontWeight: '500',
-        marginTop: '-4px'
+        marginTop: '-4px',
+        color: 'rgba(205, 215, 234, 1)'
       },
       amountUnit : {
         fontSize : '14px',

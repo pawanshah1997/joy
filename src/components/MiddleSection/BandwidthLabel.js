@@ -14,7 +14,8 @@ function getStyles(props) {
     return {
         value : {
           marginRight : '3px',
-          fontSize: '22px'
+          fontSize: '22px',
+          color: 'rgba(205, 215, 234, 1)'
         },
         unit : {
           fontSize: '18px',
