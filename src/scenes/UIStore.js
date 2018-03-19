@@ -1049,16 +1049,16 @@ class UIStore {
     if(!this.applicationStore.priceFeedStore)
       return null
     else
-      return this.totalSpendingOnPieces * this.applicationStore.priceFeedStore.cryptoToUsdExchangeRate
+      return (this.totalSpendingOnPieces / bcoin.protocol.consensus.COIN) * this.applicationStore.priceFeedStore.cryptoToUsdExchangeRate
   }
 
   @computed get
-  totalTotalRevenueFromPieces() {
+  totalRevenueFromPiecesInFiat() {
 
     if(!this.applicationStore.priceFeedStore)
       return null
     else
-      return this.totalRevenueFromPieces * this.applicationStore.priceFeedStore.cryptoToUsdExchangeRate
+      return (this.totalRevenueFromPieces / bcoin.protocol.consensus.COIN) * this.applicationStore.priceFeedStore.cryptoToUsdExchangeRate
   }
 
 
