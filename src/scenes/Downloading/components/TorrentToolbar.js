@@ -37,12 +37,12 @@ const TorrentToolbar = observer((props) => {
 
       {/** <ChangeBuyerTermsSection torrent={props.torrent}/> **/}
 
-      <RemoveSection enabled={!props.torrentTableRowStore.beingRemoved}
-                     working={props.torrentTableRowStore.beingRemoved && !props.torrentTableRowStore.deletingData}
+      <RemoveSection enabled={true /** !props.torrentTableRowStore.beingRemoved **/}
+                     working={false /** props.torrentTableRowStore.beingRemoved && !props.torrentTableRowStore.deletingData **/}
                      onClick={() => { props.torrentTableRowStore.remove() }} />
 
-      <RemoveAndDeleteSection enabled={!props.torrentTableRowStore.beingRemoved}
-                              working={props.torrentTableRowStore.deletingData}
+      <RemoveAndDeleteSection enabled={true /** !props.torrentTableRowStore.beingRemoved **/}
+                              working={false /** props.torrentTableRowStore.deletingData **/}
                               onClick={() => { props.torrentTableRowStore.removeAndDeleteData() }} />
 
       <OpenFolderSection onClick={() => { props.torrentTableRowStore.openFolder() }} />

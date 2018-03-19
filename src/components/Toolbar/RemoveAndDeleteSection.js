@@ -23,7 +23,6 @@ const RemoveAndDeleteSection = observer((props) => {
       if (props.working) {
         // show spinner
         className = 'trash_working'
-        tooltip = 'Removing...'
       } else {
         // show disabled
         className = 'trash_disabled'
