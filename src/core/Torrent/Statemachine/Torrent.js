@@ -54,22 +54,22 @@ var Torrent = new BaseMachine({
             },
 
             uploadStarted: function (client, alert) {
-              
+
               let peer = client.peers.get(alert.pid)
-              
+
               // Peer must exist if we received this alert
               assert(peer)
-              
+
               peer.uploadStarted(alert)
             },
 
             anchorAnnounced: function (client, alert) {
-              
+
               let peer = client.peers.get(alert.pid)
-  
+
               // Peer must exist if we received this alert
               assert(peer)
-              
+
               peer.anchorAnnounced(alert)
             },
 
@@ -82,6 +82,10 @@ var Torrent = new BaseMachine({
                 }
 
                 client._broadcastRawTransaction(alert.settlementTx)
+            },
+
+            processSentPayment  : function (client, alert) {
+              client._handlePaymentSentAlert(alert)
             }
         },
 
