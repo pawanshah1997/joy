@@ -55,7 +55,7 @@ const Completed = inject('UIStore')(observer((props) => {
           <CurrencyLabel
             tooltip={'Total revenue from uploads'}
             satoshies={props.UIStore.totalRevenueFromPieces}
-            amountInFiat={props.UIStore.totalTotalRevenueFromPieces}
+            amountInFiat={props.UIStore.totalRevenueFromPiecesInFiat}
             {...labelColorProps} />
         </LabelContainer>
       </MiddleSection>

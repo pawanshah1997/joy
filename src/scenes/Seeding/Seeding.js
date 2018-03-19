@@ -62,7 +62,7 @@ const Seeding = inject('UIStore')(observer((props) => {
 
           <CurrencyLabel tooltip={'Total revenue from uploads'}
                          satoshies={props.UIStore.totalRevenueFromPieces}
-                         amountInFiat={props.UIStore.totalTotalRevenueFromPieces}
+                         amountInFiat={props.UIStore.totalRevenueFromPiecesInFiat}
             {...labelColorProps} />
 
           <BandwidthLabel tooltip={'Total upload speed'}
