@@ -80,7 +80,7 @@ class WalletSceneStore {
 
     let cryptoToFiatExchangeRate = parseFloat(this._priceFeedStore.cryptoToUsdExchangeRate)
     let paymentFailureErrorMessage = ''
-    let minimumPaymentAmount = 0 // pass in dust limit
+    let minimumPaymentAmount = 547 // pass in dust limit
 
     // Its critical that the actual fee rate is compatible with bcoin.util.isNumber, which requires that its a safe integer,
     // hence we just take ceiling to be sure.

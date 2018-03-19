@@ -74,8 +74,11 @@ class SendDialogStore {
 
     this.setActiveForm(activeForm)
 
+    // Generous rough estimate for a payment tx fee
+    const totalFee = Math.ceil((350 / 1024) * this._satsPrKbFee)
+
     // Create sub stores
-    this.userProvidingAmountFormStore = new UserProvidingAmountFormStore(this, '', UserProvidingAmountFormStore.INPUT_CURRENCY.FIAT, cryptoToFiatExchangeRate, this._walletStore, this._satsPrKbFee, this._minimumPaymentAmount)
+    this.userProvidingAmountFormStore = new UserProvidingAmountFormStore(this, '', UserProvidingAmountFormStore.INPUT_CURRENCY.FIAT, cryptoToFiatExchangeRate, this._walletStore, totalFee, this._minimumPaymentAmount)
     this.userProvidingRecipientAddressFormStore = new UserProvidingRecipientAddressFormStore(this, '')
   }
 
