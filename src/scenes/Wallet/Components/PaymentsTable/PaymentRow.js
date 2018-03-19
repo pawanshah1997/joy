@@ -176,7 +176,8 @@ function getStyles(props, state) {
       justifyContent : 'center'
     },
     circularProgress : {
-
+      height: '32px',
+      width: '32px'
     },
     amountField : {
       //flex : '0 0 210px',
@@ -233,6 +234,16 @@ const OpenIcon = (props) => {
   )
 }
 
+const UnconfirmedTransactionIcon = (props) => {
+
+  return (
+    <SvgIcon viewBox="0 0 32 32" style={props.style}>
+      <path fill={props.strokeColor} d="M4,16C4,9.383,9.383,4,16,4c2.377,0,4.657,0.696,6.603,1.983l-3.724,3.724l10.3,1.472l-1.472-10.3l-3.672,3.672C21.693,2.903,18.911,2,16,2C8.28,2,2,8.28,2,16c0,0.552,0.448,1,1,1S4,16.552,4,16z"></path>
+      <path fill={props.strokeColor} d="M29,15c-0.552,0-1,0.448-1,1c0,6.617-5.383,12-12,12c-2.377,0-4.657-0.696-6.603-1.983l3.724-3.724l-10.3-1.472l1.472,10.3l3.672-3.672C10.307,29.097,13.089,30,16,30c7.72,0,14-6.28,14-14C30,15.448,29.552,15,29,15z"></path>
+    </SvgIcon>
+  )
+}
+
 const Button = Radium((props) => {
 
   let color = 'rgb(180, 196, 229)'
@@ -273,8 +284,6 @@ const Button = Radium((props) => {
     </input>
   )
 })
-
-
 
 @observer
 class PaymentRow extends Component {
@@ -366,12 +375,17 @@ class PaymentRow extends Component {
               <CompletedIcon style={{ height : '32px', width : '32px'}}
                              strokeColor={'rgb(180, 196, 229)'}/>
               :
+              <UnconfirmedTransactionIcon style={styles.circularProgress}
+                                          strokeColor={'hsla(220, 48%, 45%, 1)'}
+              />
+                /**
               <CircularProgress color={'hsla(220, 48%, 45%, 1)'}
                                 size={32}
                                 style={styles.circularProgress}
-              />
+              />**/
           }
 
+          { /*
           <ReactTooltip id={this.props.paymentId + "confirmationStatusField"}
                         place='top'
                         effect='solid'
@@ -384,6 +398,8 @@ class PaymentRow extends Component {
               "Pending payment"
             }
           </ReactTooltip>
+          */
+          }
 
         </div>
 
