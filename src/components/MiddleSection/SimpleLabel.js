@@ -17,7 +17,7 @@ function getStyle(props) {
         left : {
             paddingTop: '1px', // adjust text to vertical center
             paddingLeft: '20px',
-            paddingRight: '14px',
+            paddingRight: '20px',
             color: props.colorLeft,
             fontWeight: 'bold',
             fontSize: '12px',
@@ -84,7 +84,7 @@ SimpleLabel.propTypes = {
 }
 
 SimpleLabel.defaultProps = {
-    height : 40,
+    height : 55,
     colorLeft : 'rgba(255, 255, 255, 0.7)'
 }
 

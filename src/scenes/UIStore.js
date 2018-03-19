@@ -1043,6 +1043,25 @@ class UIStore {
 
   }
 
+  @computed get
+  totalSpendingOnPiecesInFiat() {
+
+    if(!this.applicationStore.priceFeedStore)
+      return null
+    else
+      return this.totalSpendingOnPieces * this.applicationStore.priceFeedStore.cryptoToUsdExchangeRate
+  }
+
+  @computed get
+  totalTotalRevenueFromPieces() {
+
+    if(!this.applicationStore.priceFeedStore)
+      return null
+    else
+      return this.totalRevenueFromPieces * this.applicationStore.priceFeedStore.cryptoToUsdExchangeRate
+  }
+
+
   @action.bound
   setTorrentTerminatingProgress(progress) {
     this.torrentTerminatingProgress = progress

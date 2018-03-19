@@ -108,7 +108,7 @@ const StartedApp = observer((props) => {
   let middleSectionColorProps = {
     middleSectionBaseColor : UI_CONSTANTS.primaryColor,
     middleSectionDarkBaseColor : UI_CONSTANTS.darkPrimaryColor,
-    middleSectionHighlightColor :UI_CONSTANTS.higlightColor
+    middleSectionHighlightColor : UI_CONSTANTS.higlightColor
   }
   
   let styles = {

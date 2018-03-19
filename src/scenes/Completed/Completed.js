@@ -38,7 +38,7 @@ const Completed = inject('UIStore')(observer((props) => {
         <MaxFlexSpacer />
 
         <LabelContainer>
-          
+
           { /**
            <TorrentCountLabel
            count={props.UIStore.completedStore.torrentRowStores.length}
@@ -47,13 +47,15 @@ const Completed = inject('UIStore')(observer((props) => {
           }
 
           <CurrencyLabel
-            labelText={'SPENDING'}
+            tooltip={'Total spending on downloads'}
             satoshies={props.UIStore.totalSpendingOnPieces}
+            amountInFiat={props.UIStore.totalSpendingOnPiecesInFiat}
             {...labelColorProps} />
 
           <CurrencyLabel
-            labelText={'REVENUE'}
+            tooltip={'Total revenue from uploads'}
             satoshies={props.UIStore.totalRevenueFromPieces}
+            amountInFiat={props.UIStore.totalTotalRevenueFromPieces}
             {...labelColorProps} />
         </LabelContainer>
       </MiddleSection>

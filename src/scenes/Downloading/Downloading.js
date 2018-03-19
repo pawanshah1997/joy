@@ -64,12 +64,14 @@ const Downloading = inject('UIStore')(observer((props) => {
            **/
           }
 
-          <CurrencyLabel labelText={"SPENDING"}
+          <CurrencyLabel tooltip={"Total spending on downloads"}
                          satoshies={props.UIStore.totalSpendingOnPieces}
+                         amountInFiat={props.UIStore.totalSpendingOnPiecesInFiat}
                          {...labelColorProps}
           />
 
-          <BandwidthLabel labelText={'DOWNLOAD SPEED'}
+          <BandwidthLabel tooltip={"Total download speed"}
+                          isUp={false}
                           bytesPerSecond={props.UIStore.downloadingStore.totalDownloadSpeed}
                           {...labelColorProps}
           />

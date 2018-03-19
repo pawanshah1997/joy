@@ -145,7 +145,7 @@ function getStyles(props, state) {
     },
     descriptionField : {
       //flexGrow : '1',
-      flex : '0 0 385px',
+      flex : '0 0 350px', // 385
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
@@ -197,11 +197,13 @@ function getStyles(props, state) {
       fontSize : '14px',
       fontFamily: 'Arial',
       fontWeight: 'bold',
-      marginLeft: '10px'
+      marginRight: '5px',
+      color: 'rgb(180, 196, 229)'
     },
     amountFiat: {
       color: 'rgb(149, 149, 150)',
-      fontSize: '14px'
+      fontSize: '14px',
+      marginTop: '-6px'
     },
     confirmationStatus : {
       backgroundColor : 'hsla(240, 0%, 79%, 1)',
@@ -390,10 +392,8 @@ class PaymentRow extends Component {
         <div style={styles.amountField}>
 
             <span style={styles.amount}>
-
-              {paymentStore.amount/100000000}
-
               <span style={styles.amountUnit}>BCH</span>
+              {(paymentStore.amount/100000000).toFixed(8)}
             </span>
 
             <span style={styles.amountFiat}>

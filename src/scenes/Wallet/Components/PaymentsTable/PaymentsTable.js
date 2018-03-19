@@ -17,11 +17,11 @@ function getStyles(props) {
       flexDirection : 'column',
       width : '930px' //'100%'
     },
-    spacer :{
-      display : 'none',
-      height : '10px',
-      borderRadius : '10px 20px 30px 40px'
-      //marginBottom : '30px'
+    footer :{
+      height : '5px',
+      backgroundColor: '#89a2d5', //'white',
+      borderRadius : '0px 0px 7px 7px',
+      marginBottom : '40px'
     }
   }
 
@@ -39,7 +39,7 @@ const PaymentsTable = observer((props) => {
     <div style={styles.root}>
       <Header walletSceneStore={props.walletSceneStore}/>
       <PaymentsTableBody paymentRowStores={props.walletSceneStore.filteredPaymentRowStores}/>
-      <div style={styles.spacer}></div>
+      <div style={styles.footer}></div>
     </div>
   )
 
