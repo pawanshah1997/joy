@@ -94,7 +94,7 @@ class UserProvidingAmountFormStore {
 
   @computed get
   maximumPaymentAmountInSatoshis() {
-    return this._walletStore.totalBalance - this.totalFee
+    return Math.max(this._walletStore.totalBalance - this.totalFee, 0)
   }
 
   @computed get
@@ -103,10 +103,7 @@ class UserProvidingAmountFormStore {
     let maxInCRYPTO = this.maximumPaymentAmountInSatoshis / bcoin.protocol.consensus.COIN
 
     if(this.inputCurrencyType === UserProvidingAmountFormStore.INPUT_CURRENCY.FIAT)
-      return Math.floor(
-        maxInCRYPTO *
-        (this.inputCurrencyType === UserProvidingAmountFormStore.INPUT_CURRENCY.FIAT ? this.cryptoToFiatExchangeRate : 1)
-      )
+      return maxInCRYPTO * this.cryptoToFiatExchangeRate
     else
       return maxInCRYPTO
   }
@@ -143,7 +140,7 @@ class UserProvidingAmountFormStore {
 
   @computed get
   amountToSatoshiRate() {
-    return Math.ceil(bcoin.protocol.consensus.COIN * (this.inputCurrencyType === UserProvidingAmountFormStore.INPUT_CURRENCY.FIAT ? 1/this.cryptoToFiatExchangeRate : 1))
+    return bcoin.protocol.consensus.COIN * (this.inputCurrencyType === UserProvidingAmountFormStore.INPUT_CURRENCY.FIAT ? 1/this.cryptoToFiatExchangeRate : 1)
   }
 
   @action.bound
@@ -195,7 +192,7 @@ class UserProvidingAmountFormStore {
     if(!decimalAmount)
       throw UserProvidingAmountFormStore.AMOUNT_VALIDATION_RESULT_TYPE.INVALID_AMOUNT_FORMAT
 
-    let amountInNumberOfSatoshis = Math.ceil(decimalAmount * amountToSatoshiRate)
+    let amountInNumberOfSatoshis = Math.floor(decimalAmount * amountToSatoshiRate)
 
     if(amountInNumberOfSatoshis > maximum)
       throw UserProvidingAmountFormStore.AMOUNT_VALIDATION_RESULT_TYPE.AMOUNT_TOO_LARGE
