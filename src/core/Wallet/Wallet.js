@@ -715,6 +715,8 @@ class Wallet extends EventEmitter {
 
           let confirmed = txRecord.height !== -1
 
+          payment.updateSeenDate(new Date(txRecord.ps * 1000))
+          payment.updateMinedDate(new Date(txRecord.ts * 1000))
           payment.updateConfirmed(confirmed)
           payment.updateBlockIdOfBlockHoldingTransaction(confirmed ? txRecord.block : undefined)
           payment.updateBlockHeightOfBlockHoldingTransaction(confirmed ? txRecord.height : undefined)
