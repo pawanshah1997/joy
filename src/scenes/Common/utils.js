@@ -68,11 +68,13 @@ function computeViabilityOfPaidDownloadingTorrent(state, walletStarted, balance,
 
     // Here it must be that swarm is viable, by
     // test in prior step
-
-    if(balance == 0) // <== fix later to be a more complex constraint
+    // assert(viabilityOfPaidDownloadInSwarm.estimate)
+    if(balance < viabilityOfPaidDownloadInSwarm.estimate) {
       return new InsufficientFunds(viabilityOfPaidDownloadInSwarm.estimate, balance)
-    else
+    } else {
+      // Enough Funds Available
       return new CanStart(viabilityOfPaidDownloadInSwarm.suitableAndJoined, viabilityOfPaidDownloadInSwarm.estimate)
+    }
   }
 }
 
