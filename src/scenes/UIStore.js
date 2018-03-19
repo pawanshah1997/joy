@@ -751,7 +751,9 @@ class UIStore {
 
     /// Hook up events
 
-    payment.on('confirmedChanged', action((confirmed) => {
+    payment.on('confirmedChanged', action((confirmed, seenDate, minedDate) => {
+      paymentStore.setSeenDate(seenDate)
+      paymentStore.setMinedDate(minedDate)
       paymentStore.setConfirmed(confirmed)
     }))
 
