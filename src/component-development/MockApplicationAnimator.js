@@ -1,5 +1,6 @@
 import Application from '../core/Application'
 import Wallet, {Payment} from '../core/Wallet'
+import ApplicationSettings from '../core/ApplicationSettings'
 import {
   MockApplication,
   MockWallet,
@@ -44,6 +45,8 @@ class MockApplicationAnimator {
 
     this.mockApplication.applicationSettings = mockApplicationSettings
     this.mockApplication.emit('resourceStarted', Application.RESOURCE.SETTINGS)
+
+    mockApplicationSettings.state = ApplicationSettings.STATE.OPENED
   }
   
   setWallet() {
