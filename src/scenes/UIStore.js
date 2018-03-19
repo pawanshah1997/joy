@@ -375,8 +375,7 @@ class UIStore {
       // let satsPrkBFee = 0.00239 * bcoin.protocol.consensus.COIN
 
       // http://statocashi.info/dashboard/db/fee-estimates?orgId=1&from=now-7d&to=now
-      // We can get away with very low 2 Sat/byte
-      let satsPrkBFee = 2048
+      let satsPrkBFee = 1050
 
       // We need settings to be opened, and we are guaranteed that this has happened
       // before wallet is ready

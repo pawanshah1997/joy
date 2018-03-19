@@ -57,17 +57,17 @@ const DEFAULT_APPLICATION_SETTINGS = {
 
   buyerTerms : {
     maxPrice: 20,
-    maxLock: 5,
+    maxLock: 20,
     minNumberOfSellers: 1,
-    maxContractFeePerKb: 2000
+    maxContractFeePerKb: 1024
   },
 
   sellerTerms : {
     minPrice: 20,
-    minLock: 1,
+    minLock: 10,
     maxNumberOfSellers: 5,
-    minContractFeePerKb: 2000,
-    settlementFee: 2000
+    minContractFeePerKb: 1024,
+    settlementFee: 450
   },
 
   termsAccepted : false,
