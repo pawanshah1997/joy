@@ -726,7 +726,7 @@ class UIStore {
       type: payment.type,
       txId: payment.txId,
       outputIndex: payment.outputIndex,
-      seendDate: payment.seenDate,
+      seenDate: payment.seenDate,
       minedDate: payment.minedDate,
       toAddress: payment.toAddress,
       amount: payment.amount,
