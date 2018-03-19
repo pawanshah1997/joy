@@ -31,8 +31,8 @@ function getStyles (props) {
       fontWeight: 'bold',
       fontSize: '30px',
       backgroundColor: 'hsla(219, 41%, 40%, 1)',
-      padding: '10px 40px',
-      borderRadius: '50px'
+      padding: '10px 25px',
+      borderRadius: '5px'
     },
     iconContainer: {
       display: 'flex',

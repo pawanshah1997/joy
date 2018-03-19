@@ -43,7 +43,7 @@ export const EXAMPLE_TORRENTS = [
 export const UI_CONSTANTS = {
     primaryColor : '#496daf',
     labelTextHighlightColor : 'hsl(219, 41%, 42%)',
-    darkPrimaryColor : 'hsla(219, 41%, 37%, 1)',
+    darkPrimaryColor : 'rgba(62, 92, 147, 1)', // 'hsla(219, 41%, 37%, 1)',
     darkestPrimaryColor : 'hsla(219, 41%, 26%, 1)',
-    higlightColor : 'hsl(218, 41%, 30%)'
+    higlightColor : 'rgba(53, 78, 126, 1)' //'hsl(218, 41%, 30%)'
 }

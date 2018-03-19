@@ -23,10 +23,6 @@ const PaymentsTableBody = observer((props) => {
       backgroundColor : 'white',
       alignItems : 'center', //tableIsEmpty ? 'center' : 'inherit',
       justifyContent : tableIsEmpty ? 'center' : 'inherit',
-
-      // For curved bottom off edge of screen
-      borderRadius: '0px 0px 7px 7px',
-      marginBottom: '30px'
     },
     rowContainer : {
       display : 'flex',

@@ -11,10 +11,10 @@ function getStyles(props) {
   return {
     root : {
       display : 'flex',
-      flex : '0 0 10px',
+      flex : '0 0 5px',
       //backgroundColor: 'hsla(218, 41%, 66%, 1)',
       //backgroundColor: 'hsla(218, 41%, 77%, 1)', //'hsla(0, 0%, 94%, 1)',
-      backgroundColor: 'white',
+      backgroundColor: '#89a2d5', //'white',
       borderRadius: '7px 7px 0px 0px'
     },
     paymentsTitleContainer: {

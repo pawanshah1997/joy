@@ -53,15 +53,21 @@ const Seeding = inject('UIStore')(observer((props) => {
         <MaxFlexSpacer />
 
         <LabelContainer>
-          <TorrentCountLabel count={props.UIStore.uploadingStore.torrentRowStores.length}
+
+          { /**
+           <TorrentCountLabel count={props.UIStore.uploadingStore.torrentRowStores.length}
+           {...labelColorProps} />
+           **/
+          }
+
+          <CurrencyLabel tooltip={'Total revenue from uploads'}
+                         satoshies={props.UIStore.totalRevenueFromPieces}
+                         amountInFiat={props.UIStore.totalTotalRevenueFromPieces}
             {...labelColorProps} />
 
-          <CurrencyLabel labelText={'REVENUE'}
-            satoshies={props.UIStore.totalRevenueFromPieces}
-            {...labelColorProps} />
-
-          <BandwidthLabel labelText={'UPLOAD SPEED'}
-            bytesPerSecond={props.UIStore.uploadingStore.totalUploadSpeed}
+          <BandwidthLabel tooltip={'Total upload speed'}
+                          isUp={true}
+                          bytesPerSecond={props.UIStore.uploadingStore.totalUploadSpeed}
             {...labelColorProps} />
 
         </LabelContainer>
