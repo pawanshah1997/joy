@@ -57,9 +57,12 @@ const Downloading = inject('UIStore')(observer((props) => {
 
         <LabelContainer>
 
-          <TorrentCountLabel count={props.UIStore.downloadingStore.torrentRowStores.length}
-                             {...labelColorProps}
-          />
+          { /**
+           <TorrentCountLabel count={props.UIStore.downloadingStore.torrentRowStores.length}
+           {...labelColorProps}
+           />
+           **/
+          }
 
           <CurrencyLabel labelText={"SPENDING"}
                          satoshies={props.UIStore.totalSpendingOnPieces}

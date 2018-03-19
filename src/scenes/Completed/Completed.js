@@ -38,9 +38,13 @@ const Completed = inject('UIStore')(observer((props) => {
         <MaxFlexSpacer />
 
         <LabelContainer>
-          <TorrentCountLabel
-            count={props.UIStore.completedStore.torrentRowStores.length}
-            {...labelColorProps} />
+          
+          { /**
+           <TorrentCountLabel
+           count={props.UIStore.completedStore.torrentRowStores.length}
+           {...labelColorProps} />
+           **/
+          }
 
           <CurrencyLabel
             labelText={'SPENDING'}
