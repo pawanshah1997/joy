@@ -64,7 +64,7 @@ var Started = new BaseMachine({
               Common.processPeerPluginStatuses(client, statuses)
 
               // Figure out if there are suitable sellers in sufficient amount
-              let viability = computeViabilityOfPaidDownloadInSwarm(statuses, client.buyerTerms.minNumberOfSellers)
+              let viability = computeViabilityOfPaidDownloadInSwarm(statuses, client.buyerTerms.minNumberOfSellers, client.torrentInfo.numPieces())
 
               // Hold on to viability for later
               client._setViabilityOfPaidDownloadInSwarm(viability)
@@ -77,17 +77,8 @@ var Started = new BaseMachine({
                   return fn(client.viabilityOfPaidDownloadInSwarm , null)
               }
 
-              let peerComparer = function (sellerA, sellerB) {
-                  const termsA = sellerA.connection.announcedModeAndTermsFromPeer.seller.terms
-                  const termsB = sellerB.connection.announcedModeAndTermsFromPeer.seller.terms
-                  return termsA.minPrice - termsB.minPrice
-              }
-
-              // Sort suitable sellers using `peerComparer` function
-              var sortedSellers = client.viabilityOfPaidDownloadInSwarm.suitableAndJoined.sort(peerComparer)
-
-              // Pick actual sellers to use
-              var pickedSellers = sortedSellers.slice(0, client.buyerTerms.minNumberOfSellers)
+              // Pick sellers to use
+              var pickedSellers = pickSellers(client.viabilityOfPaidDownloadInSwarm.suitableAndJoined, client.buyerTerms.minNumberOfSellers)
 
               // Iterate sellers to
               // 1) Allocate value
@@ -223,7 +214,7 @@ var Started = new BaseMachine({
 
 })
 
-function computeViabilityOfPaidDownloadInSwarm(statuses, minimumNumber) {
+function computeViabilityOfPaidDownloadInSwarm(statuses, minimumNumber, numPiecesInTorrent) {
 
     // Statuses for:
 
@@ -281,8 +272,60 @@ function computeViabilityOfPaidDownloadInSwarm(statuses, minimumNumber) {
         return new ViabilityOfPaidDownloadInSwarm.InSufficientNumberOfSellersInvited(invited)
     else if(joined.length < minimumNumber)
         return new ViabilityOfPaidDownloadInSwarm.InSufficientNumberOfSellersHaveJoined(joined, invited)
-    else // NB: Later add estimate here using same peer selection logic found in startPaidDownload input above
-        return new ViabilityOfPaidDownloadInSwarm.Viable(joined, 0)
+    else {
+      return new ViabilityOfPaidDownloadInSwarm.Viable(joined, estimateRequiredFundsForContract(joined, minimumNumber, numPiecesInTorrent))
+    }
+}
+
+// Estimate here using same peer selection logic found in startPaidDownload input above
+function estimateRequiredFundsForContract (suitableAndJoined, minNumberOfSellers, numPiecesInTorrent) {
+  const pickedSellers = pickSellers(suitableAndJoined, minNumberOfSellers)
+
+  let contractFeeRate = 0
+  let totalOutput = 0
+
+  for (var i in pickedSellers) {
+    const status = pickedSellers[i]
+
+    const sellerTerms = status.connection.announcedModeAndTermsFromPeer.seller.terms
+
+    // Pick how much to distribute among the sellers
+    const minimumRevenue = sellerTerms.minPrice * numPiecesInTorrent
+
+    // Set value to at least surpass dust
+    totalOutput = Math.max(minimumRevenue, 0)
+
+    // Update fee estimate
+    if(sellerTerms.minContractFeePerKb > contractFeeRate)
+        contractFeeRate = sellerTerms.minContractFeePerKb
+  }
+
+  /* TODO: Improve this estimation.
+    sizeOfP2HOutput = X
+    estimate = (sizeOfOneInputs + numSellers * sizeOfP2SHOutput) * contractFeeRate
+  */
+
+  // Just guestimating here
+  // assuming only one input, and two outputs (1 commitment + 1 change)
+  let feeEstimate = 1000 // satoshi
+
+  return totalOutput + feeEstimate
+
+}
+
+function pickSellers (suitableAndJoined, minNumberOfSellers) {
+
+  let peerComparer = function (sellerA, sellerB) {
+      const termsA = sellerA.connection.announcedModeAndTermsFromPeer.seller.terms
+      const termsB = sellerB.connection.announcedModeAndTermsFromPeer.seller.terms
+      return termsA.minPrice - termsB.minPrice
+  }
+
+  // Sort suitable sellers using `peerComparer` function
+  var sortedSellers = suitableAndJoined.sort(peerComparer)
+
+  // Pick actual sellers to use
+  return sortedSellers.slice(0, minNumberOfSellers)
 }
 
 module.exports = Started
