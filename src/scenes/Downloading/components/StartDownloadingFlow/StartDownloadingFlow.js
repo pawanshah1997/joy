@@ -13,11 +13,12 @@ import {
 } from '../../../../components/AlertDialog'
 
 const StartDownloadingFlow = observer((props) => {
-  
+
   return (
     <div>
       <InvalidTorrentFileAlertDialog
         open={props.downloadingStore.state === DownloadingStore.STATE.TorrentFileWasInvalid}
+        canRetry={props.downloadingStore.lastFilePickingMethodUsed === DownloadingStore.TORRENT_ADDING_METHOD.FILE_PICKER}
         onAcceptClicked={() => { props.downloadingStore.acceptTorrentFileWasInvalid() }}
         onRetryClicked={() => { props.downloadingStore.retryPickingTorrentFile() }} />
 
@@ -29,7 +30,7 @@ const StartDownloadingFlow = observer((props) => {
 })
 
 StartDownloadingFlow.propTypes = {
-  downloadingStore: PropTypes.instanceOf(DownloadingStore).isRequired
+  downloadingStore: PropTypes.object // HMR breaks instanceOf(DownloadingStore).isRequired
 }
 
 module.exports = StartDownloadingFlow

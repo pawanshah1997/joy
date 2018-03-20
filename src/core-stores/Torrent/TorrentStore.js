@@ -84,11 +84,20 @@ class TorrentStore {
      */
     @observable peerStores
 
+    /**
+     * {Number} The size in bytes of a piece
+     */
+    @observable pieceLength
+
+    @observable numberOfPieces
+
     constructor ({infoHash,
                  name,
                  savePath,
                  state,
                  totalSize,
+                 pieceLength,
+                 numberOfPieces,
                  progress,
                  viabilityOfPaidDownloadInSwarm,
                  downloadedSize,
@@ -112,6 +121,8 @@ class TorrentStore {
       this.setSavePath(savePath)
       this.setState(state)
       this.setTotalSize(totalSize)
+      this.setPieceLength(pieceLength)
+      this.setNumberOfPieces(numberOfPieces)
       this.setProgress(progress)
       this.setViabilityOfPaidDownloadInSwarm(viabilityOfPaidDownloadInSwarm)
       this.setDownloadedSize(downloadedSize)
@@ -157,6 +168,16 @@ class TorrentStore {
     @action.bound
     setTotalSize (totalSize) {
         this.totalSize = totalSize
+    }
+
+    @action.bound
+    setPieceLength (pieceLength) {
+      this.pieceLength = pieceLength
+    }
+
+    @action.bound
+    setNumberOfPieces (numPieces) {
+      this.numberOfPieces = numPieces
     }
 
     @action.bound

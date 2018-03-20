@@ -1,6 +1,8 @@
 import EventEmitter from 'events'
 import sinon from 'sinon'
 
+import Application from '../../../src/core/Application'
+
 class MockApplication extends EventEmitter {
   
   /**
@@ -63,6 +65,18 @@ class MockApplication extends EventEmitter {
   setState(state) {
     this.state = state
     this.emit('state', state)
+  }
+
+  startWallet(mockWallet) {
+
+    this.wallet = mockWallet
+    this.emit('resourceStarted', Application.RESOURCE.WALLET)
+
+  }
+
+  startPriceFeed(priceFeed) {
+    this.priceFeed = priceFeed
+    this.emit('resourceStarted', Application.RESOURCE.PRICE_FEED)
   }
 }
 

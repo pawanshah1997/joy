@@ -13,8 +13,7 @@ import WelcomeScreenContent from './WelcomeScreenContent'
 const WelcomeScreen = observer((props) => {
     
     return (
-        props.onBoardingStore &&
-        props.onBoardingStore.state === OnboardingStore.STATE.WelcomeScreen
+        props.show
             ?
         <FullScreenContainer>
             <WelcomeScreenContent onboardingStore={props.onBoardingStore} />
@@ -26,7 +25,8 @@ const WelcomeScreen = observer((props) => {
 })
 
 WelcomeScreen.propTypes = {
-    onBoardingStore : PropTypes.object
+  show : PropTypes.bool.isRequired,
+  onBoardingStore : PropTypes.object
 }
 
 export default WelcomeScreen

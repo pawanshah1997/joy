@@ -12,6 +12,8 @@ import CircularProgress from 'material-ui/CircularProgress'
 import ReactTooltip from 'react-tooltip'
 
 import { Payment } from '../../../../core/Wallet'
+import CashAddressFormat from '../../CashAddressFormat'
+import currencyFormatter from 'currency-formatter'
 
 const Field = (props) => {
 
@@ -143,7 +145,7 @@ function getStyles(props, state) {
     },
     descriptionField : {
       //flexGrow : '1',
-      flex : '0 0 385px',
+      flex : '0 0 350px', // 385
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
@@ -160,7 +162,7 @@ function getStyles(props, state) {
     },
     toAddressValue : {
       marginLeft : '4px',
-      color: 'hsla(220, 48%, 80%, 1)',
+      color: 'rgb(149, 149, 150)',
       userSelect: 'text',
       //backgroundColor: 'rgba(128, 156, 210, 0.1)',
       //paddingLeft: '4px',
@@ -174,16 +176,17 @@ function getStyles(props, state) {
       justifyContent : 'center'
     },
     circularProgress : {
-    
+      height: '32px',
+      width: '32px'
     },
     amountField : {
       //flex : '0 0 210px',
       //paddingLeft: '40px',
-
+      display: 'flex',
+      flexDirection: 'column',
       flex : '0 0 160px',
-      display : 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
+      alignItems: 'flex-end',
+      justifyContent: 'center',
       color : 'hsla(220, 48%, 45%, 1)',
     },
     amount : {
@@ -195,7 +198,13 @@ function getStyles(props, state) {
       fontSize : '14px',
       fontFamily: 'Arial',
       fontWeight: 'bold',
-      marginLeft: '10px'
+      marginRight: '5px',
+      color: 'rgb(180, 196, 229)'
+    },
+    amountFiat: {
+      color: 'rgb(149, 149, 150)',
+      fontSize: '14px',
+      marginTop: '-6px'
     },
     confirmationStatus : {
       backgroundColor : 'hsla(240, 0%, 79%, 1)',
@@ -223,6 +232,16 @@ const OpenIcon = (props) => {
     <SvgIcon viewBox="0 0 48 48" style={props.style}>
       <path fill="none" stroke={props.strokeColor} strokeWidth="2" strokeLinecap="square" strokeMiterlimit="10" d="M4,24c0,0,7.9-14,20-14 c12,0,20,14,20,14s-8.1,14-20,14C12,38,4,24,4,24z" strokeLinejoin="miter"></path>
       <circle fill="none" stroke={props.strokeColor} strokeWidth="2" strokeLinecap="square" strokeMiterlimit="10" cx="24" cy="24" r="7" strokeLinejoin="miter"></circle>
+    </SvgIcon>
+  )
+}
+
+const UnconfirmedTransactionIcon = (props) => {
+
+  return (
+    <SvgIcon viewBox="0 0 32 32" style={props.style}>
+      <path fill={props.strokeColor} d="M4,16C4,9.383,9.383,4,16,4c2.377,0,4.657,0.696,6.603,1.983l-3.724,3.724l10.3,1.472l-1.472-10.3l-3.672,3.672C21.693,2.903,18.911,2,16,2C8.28,2,2,8.28,2,16c0,0.552,0.448,1,1,1S4,16.552,4,16z"></path>
+      <path fill={props.strokeColor} d="M29,15c-0.552,0-1,0.448-1,1c0,6.617-5.383,12-12,12c-2.377,0-4.657-0.696-6.603-1.983l3.724-3.724l-10.3-1.472l1.472,10.3l3.672-3.672C10.307,29.097,13.089,30,16,30c7.72,0,14-6.28,14-14C30,15.448,29.552,15,29,15z"></path>
     </SvgIcon>
   )
 }
@@ -268,8 +287,6 @@ const Button = Radium((props) => {
   )
 })
 
-
-
 @observer
 class PaymentRow extends Component {
 
@@ -294,7 +311,7 @@ class PaymentRow extends Component {
     let date = this.props.paymentRowStore.date
     let paymentStore = this.props.paymentRowStore.paymentStore
 
-    let s = paymentStore.toAddress.toString()
+    let s = (new CashAddressFormat(paymentStore.toAddress)).toString()
 
     return (
       <div style={styles.root}
@@ -337,11 +354,11 @@ class PaymentRow extends Component {
           <div style={{display : 'flex', fontSize : '13px', color : 'rgb(129, 129, 130)'}}>
 
             <span>
-              to address
+              to
             </span>
 
             <span style={styles.toAddressValue}>
-              {paymentStore.toAddress.toString()}
+              {(new CashAddressFormat(paymentStore.toAddress)).toString().split(':')[1]}
             </span>
           </div>
 
@@ -360,12 +377,17 @@ class PaymentRow extends Component {
               <CompletedIcon style={{ height : '32px', width : '32px'}}
                              strokeColor={'rgb(180, 196, 229)'}/>
               :
+              <UnconfirmedTransactionIcon style={styles.circularProgress}
+                                          strokeColor={'hsla(220, 48%, 45%, 1)'}
+              />
+                /**
               <CircularProgress color={'hsla(220, 48%, 45%, 1)'}
                                 size={32}
                                 style={styles.circularProgress}
-              />
+              />**/
           }
 
+          { /*
           <ReactTooltip id={this.props.paymentId + "confirmationStatusField"}
                         place='top'
                         effect='solid'
@@ -378,16 +400,20 @@ class PaymentRow extends Component {
               "Pending payment"
             }
           </ReactTooltip>
+          */
+          }
 
         </div>
 
         <div style={styles.amountField}>
 
             <span style={styles.amount}>
+              <span style={styles.amountUnit}>BCH</span>
+              {(paymentStore.amount/100000000).toFixed(8)}
+            </span>
 
-              {paymentStore.amount/100000000}
-
-              <span style={styles.amountUnit}>BTC</span>
+            <span style={styles.amountFiat}>
+              { currencyFormatter.format(this.props.paymentRowStore.amountInFiat, { code: 'USD', precision: 4 }) }
             </span>
 
         </div>

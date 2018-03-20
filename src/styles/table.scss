@@ -38,6 +38,21 @@ $content-padding: 10px;
     //border-left-color: $grey-accent;
     //border-left-style: solid;
 
+    .table_row {
+      
+      .toolbar {
+        display: none;
+      }
+
+    }
+
+    .table_row:hover {
+      .toolbar {
+        display: block;
+      }
+      
+    }
+
     // Move this out, as its part of do
     .hint-row {
       background-color: #D9D9D9;

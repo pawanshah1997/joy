@@ -140,9 +140,17 @@ class Payment extends EventEmitter {
     this.note = note
   }
 
+  updateMinedDate(date) {
+    this.minedDate = date
+  }
+
+  updateSeenDate(date) {
+    this.seenDate = date
+  }
+
   updateConfirmed(confirmed) {
     this.confirmed = confirmed
-    this.emit('confirmedChanged', confirmed)
+    this.emit('confirmedChanged', confirmed, this.seenDate, this.minedDate)
   }
 
   /**

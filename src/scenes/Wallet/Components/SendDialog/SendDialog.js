@@ -80,7 +80,7 @@ const SendDialog = observer((props) => {
     <Dialog title={title}
             open={visibleSendDialog}
             onRequestClose={onRequestClose}
-            width="600px"
+            width="650px"
     >
       {form}
     </Dialog>
@@ -88,7 +88,7 @@ const SendDialog = observer((props) => {
 })
 
 SendDialog.propTypes = {
-  sendDialogStore : PropTypes.instanceOf(SendDialogStore)
+  sendDialogStore : PropTypes.object // HMR breaks => PropTypes.instanceOf(SendDialogStore)
 }
 
 export default SendDialog

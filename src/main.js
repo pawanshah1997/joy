@@ -5,6 +5,7 @@ const isDev = require('electron-is-dev')
 const updater = require('./updater')
 const protocol = require('./protocol')
 const assert = require('assert')
+const Migration = require('./migration')
 
 import {createTemplate} from './menu'
 import {enableLiveReload} from 'electron-compile'
@@ -12,6 +13,10 @@ import {enableLiveReload} from 'electron-compile'
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win = null
+
+// Prevent main window from being created by 'activate' event
+// Will be set to true after migration tasks are completed
+let preventMainWindowCreationOnActivate = true
 
 function showMainWindow () {
   if (win == null) return
@@ -25,8 +30,8 @@ function showMainWindow () {
 }
 
 // First thing to check for is if this is an instace of an update installation
-// using the squirell updater framework (Windows and MacOS)
-if(require('electron-squirrel-startup')) {
+// using the squirrel updater framework (Windows only)
+if(require('./electron-squirrel-startup')) {
   // This is were we handle tasks relavent to install/update/removal of the application
   app.quit()
 
@@ -35,6 +40,11 @@ if(require('electron-squirrel-startup')) {
 }
 
 function main () {
+  // capture and queue open-file and open-url events for MacOS
+  // When application is ready it should check if a queued event is available to consume
+  // The reason to queue the event is that the main window will not likely be ready in time to
+  // handle earliest occurance of these events (when app being launching as a protocol handler)
+  require('./queuedOpenEvent.js')
 
   /*
     This method makes your application a Single Instance Application -
@@ -51,8 +61,12 @@ function main () {
       // Someone tried to run a second instance, we should focus our window.
       showMainWindow()
 
-      // TODO: inform main application window of second instance and argv
+      // Inform main application window of second instance and arguments
       // This is where Windows and Linux will get arguments when launched for being a protocol handler
+      // As well as MacOS if being run from commandline (as opposed to from the finder by double clicking the app icon)
+      if (win) {
+        win.webContents.send('second-instance', 'argv', argv)
+      }
   })
 
   if (shouldQuit) {
@@ -60,22 +74,19 @@ function main () {
     return
   }
 
-  // For MacOS
-  // TODO: capture and queue these events here. Main window will not likely be ready in time to
-  // handle earliest occurance of these events (when app is launching as a protocol handler)
+  // Just open the window..
   app.on('open-file', showMainWindow)
   app.on('open-url', showMainWindow)
-
 
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  app.on('ready', createMainWindow)
+  app.on('ready', onAppReady)
 
   app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (win === null) {
+      if (win === null && !preventMainWindowCreationOnActivate) {
         createMainWindow()
       }
   })
@@ -137,6 +148,23 @@ function main () {
     })
 
   }
+}
+
+function onAppReady () {
+  // Do migrations ... before opening main window
+  let migration = Migration.run()
+
+  migration.then(function () {
+    preventMainWindowCreationOnActivate = false
+    createMainWindow()
+  })
+
+  migration.catch(function (err) {
+    require('electron').dialog.showErrorBox(
+      'JoyStream - Error',
+      'Error encountered while migrating the application data to a new version. More Info: ' + err.message)
+    process.exit(-1)
+  })
 }
 
 function createMainWindow () {

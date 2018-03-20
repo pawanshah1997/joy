@@ -6,10 +6,12 @@ import WalletSceneStore from './WalletSceneStore'
 import SendDialogStore from './SendDialogStore'
 import ReceiveDialogStore from './ReceiveDialogStore'
 import PaymentRowStore from './PaymentRowStore'
+import ClaimFreeBCHFlowStore from './ClaimFreeBCHFlowStore'
 
 export default WalletSceneStore
 export {
   SendDialogStore,
   ReceiveDialogStore,
-  PaymentRowStore
+  PaymentRowStore,
+  ClaimFreeBCHFlowStore
 }

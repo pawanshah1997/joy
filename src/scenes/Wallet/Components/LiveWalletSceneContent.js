@@ -4,6 +4,7 @@ import { inject, observer } from 'mobx-react'
 // Components
 import SendingDialog from './SendDialog'
 import ReceiveDialog from './ReceiveDialog'
+import ClaimFreeBCHFlowDialog from './ClaimFreeBCHFlowDialog'
 
 import {
   Label,
@@ -44,40 +45,10 @@ function getStyles(props) {
       flexGrow: 1,
       justifyContent : 'center',
       backgroundColor : props.uiConstantsStore.primaryColor
-    },
-    bottomNoticationBanner : {
-    
     }
   }
   
 }
-
-const NoticationBanner = (props) => {
-  
-  let styles = {
-    root : {
-      padding : '15px',
-      backgroundColor : '#dc3545'
-    },
-    container : {
-      fontFamily : 'Helvetica',
-      textAlign: 'center',
-      fontSize: '16px',
-      fontWeight: 'bold',
-      color : 'hsla(354, 70%, 89%, 1)'
-    }
-  }
-  
-  return (
-    <div style={styles.root}>
-      <div style={styles.container}>
-        {props.children}
-      </div>
-    </div>
-  )
-  
-}
-
 
 import SvgIcon from 'material-ui/SvgIcon'
 import LoadingWalletSceneContent from "./LoadingWalletSceneContent";
@@ -108,6 +79,18 @@ const ReceiveIcon = (props) => {
   )
   
 }
+
+const GetCoinsIcon = (props) => {
+
+  return (
+    <SvgIcon {...props}  viewBox={"0 0 24 24"}>
+      <path d="M23,4h-4.184C18.928,3.686,19,3.352,19,3c0-1.654-1.346-3-3-3c-1.974,0-3.238,1.303-4,2.545 C11.239,1.303,9.974,0,8,0C6.346,0,5,1.346,5,3c0,0.352,0.072,0.686,0.184,1H1C0.448,4,0,4.447,0,5v2c0,0.553,0.448,1,1,1h22 c0.552,0,1-0.447,1-1V5C24,4.447,23.552,4,23,4z M16,2c0.551,0,1,0.448,1,1s-0.449,1-1,1h-2.531C13.939,3.083,14.757,2,16,2z M7,3 c0-0.552,0.449-1,1-1c1.243,0,2.061,1.083,2.531,2H8C7.449,4,7,3.552,7,3z"></path>
+      <path d="M11,10H2v13c0,0.552,0.448,1,1,1h8V10z"></path>
+      <path d="M22,10h-9v14h8c0.552,0,1-0.448,1-1V10z"></path>
+    </SvgIcon>
+  )
+}
+
 
 const SeedIcon = (props) => {
   
@@ -159,7 +142,29 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
               height: '55px'
             }}>
             </div>
-            
+
+            {
+
+              /** Only display free coins button is the user can actually claim them **/
+
+              props.UIStore.walletSceneStore.allowAttemptToClaimFreeBCH
+              ?
+                <ToolbarButton title="free coins"
+                               onClick={props.UIStore.walletSceneStore.claimFreeBCH}
+                               iconNode={<GetCoinsIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>}
+                               colors={
+                                 {
+                                   normalColor: '#4caf50',
+                                   hoverColor: '#419544',
+                                   activeColor: '#2c632d',
+                                   borderBottomColor: '#3b873e'
+                                 }
+                               }
+                />
+              :
+                null
+            }
+
             { /**
              
              <ToolbarButton title="view seed"
@@ -175,15 +180,15 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
           <MaxFlexSpacer />
           
           <LabelContainer>
-            
+            {/* Disabled - high CPU utilization when animating circural progress
             <WalletStatusLabel synchronizationPercentage={props.UIStore.walletSceneStore.synchronizationPercentage}
                                {...labelColorProps}
-            />
+            />*/}
             
-            <CurrencyLabel labelText={"PENDING"}
+            {/*<CurrencyLabel labelText={"PENDING"}
                            satoshies={props.UIStore.walletSceneStore.pendingBalance}
                            {...labelColorProps}
-            />
+            />*/}
           
           </LabelContainer>
         
@@ -195,12 +200,9 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
         <PaymentsTable walletSceneStore={props.UIStore.walletSceneStore}/>
       </div>
       
-      <NoticationBanner>
-        This wallet does not use real Bitcoins, rather testnet coins, real coins are coming in the next release.
-      </NoticationBanner>
-      
       <SendingDialog sendDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'SendDialogStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
       <ReceiveDialog receiveDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'ReceiveDialogStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
+      <ClaimFreeBCHFlowDialog claimFreeBCHFlowDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'ClaimFreeBCHFlowStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
     
     </div>
   )

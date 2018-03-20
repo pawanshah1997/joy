@@ -7,6 +7,7 @@ import {observable, action, computed} from 'mobx'
 import PaymentStore from './PaymentStore'
 
 import bcoin from 'bcoin'
+import assert from 'assert'
 
 class WalletStore {
 
@@ -46,7 +47,7 @@ class WalletStore {
   @observable paymentStores
 
   constructor(state, totalBalance, confirmedBalance, receiveAddress, blockTipHeight, synchronizedBlockHeight, paymentStores, pay) {
-    
+
     this.setState(state)
     this.setTotalBalance(totalBalance)
     this.setConfirmedBalance(confirmedBalance)
@@ -54,14 +55,33 @@ class WalletStore {
     this.setBlockTipHeight(blockTipHeight)
     this.setSynchronizedBlockHeight(synchronizedBlockHeight)
     this.paymentStores = paymentStores
-    
+
     this._pay = pay
-    
+    this._pendingPaymnetStoreResolvers = new Map()
+
   }
 
   @action.bound
-  _addPaymentStore(paymentStore) {
+  addPaymentStore (paymentStore) {
     this.paymentStores.push(paymentStore)
+
+    // resolve pending promises
+    const paymentId = paymentStore.txId + ':' + paymentStore.outputIndex
+    const resolver = this._pendingPaymnetStoreResolvers.get(paymentId)
+
+    if (resolver) {
+      this._pendingPaymnetStoreResolvers.delete(paymentId)
+      resolver(paymentStore)
+    }
+  }
+
+
+  _awaitPaymentStoreAddition (payment) {
+    const paymentId = payment.txId + ':' + payment.outputIndex
+
+    return new Promise((resolve) => {
+      this._pendingPaymnetStoreResolvers.set(paymentId, resolve)
+    })
   }
 
   @action.bound
@@ -96,26 +116,30 @@ class WalletStore {
 
   /**
    * Make a payment
-   * @param {Hash} pubKeyHash - for destination
+   * @param {bcoin.Address} address - for destination
    * @param {Number} amount - number of satoshis
    * @param {Number} satsPrkBFee - number of satoshis per kB.
    * @param {String} note - note to be attached to the payment
    * @returns {Promise} - Returns {@link PaymentStore}
    */
   @action.bound
-  async pay(pubKeyHash, amount, satsPrkBFee, note) {
-    
+  async pay(address, amount, satsPrkBFee, note) {
+
     if(!bcoin.util.isNumber(satsPrkBFee))
       throw new Error('satsPrkBFee is not a valid number')
 
     // Pay
-    let payment = await this._pay(pubKeyHash, amount, satsPrkBFee, note)
+    let payment = await this._pay(address, amount, satsPrkBFee, note)
 
-    // create PaymentStore
-    let paymentStore = new PaymentStore(payment)
+    // By the time we get here the a paymentStore may have already been added to this.paymentStores,
+    // return it if found.
+    let paymentStore = this.paymentStores.find(function (store) {
+      return store.txId === payment.txId && store.outputIndex === payment.outputIndex
+    })
 
-    // add
-    this._addPaymentStore(paymentStore)
+    if (paymentStore) return paymentStore
+
+    paymentStore = await this._awaitPaymentStoreAddition(payment)
 
     return paymentStore
   }

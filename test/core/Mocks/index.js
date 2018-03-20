@@ -9,6 +9,8 @@ import MockTorrent from './Torrent'
 import MockApplication from './Application'
 import MockWallet from './Wallet'
 import MockJSNodeTorrent from './MockJSNodeTorrent'
+import MockApplicationSettings from './ApplicationSettings'
+import MockPriceFeed from './PriceFeed'
 
 // export all mocks
 export {
@@ -22,5 +24,7 @@ export {
   FileStorage,
   MockApplication,
   MockWallet,
-  MockJSNodeTorrent
+  MockJSNodeTorrent,
+  MockApplicationSettings,
+  MockPriceFeed
 }

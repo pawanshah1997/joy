@@ -7,7 +7,8 @@ import {
         getCompactBitcoinUnitsString,
         convenientHumanizeDuration,
         convenientBytes,
-        standardHumanizeDurationOptions
+        standardHumanizeDurationOptions,
+        satoshiPerMbToSatoshiPerPiece
 } from './common'
 
 export {
@@ -15,5 +16,6 @@ export {
         getCompactBitcoinUnitsString,
         convenientBytes,
         convenientHumanizeDuration,
-        standardHumanizeDurationOptions
+        standardHumanizeDurationOptions,
+        satoshiPerMbToSatoshiPerPiece
 }

@@ -5,7 +5,7 @@
 const Payment = require('./Payment').default
 const EventEmitter = require('events')
 const assert = require('assert')
-
+const safeBcoinEventHandlerShim = require('./safeEventHandler')
 const bcoin = require('bcoin')
 
 /**
@@ -167,7 +167,7 @@ class Wallet extends EventEmitter {
     /// guard them with our own state, no clear need as of yet.
 
     // Attach the walletdb plugin
-    this._spvNode.use(bcoin.walletplugin)
+    this._spvNode.use(bcoin.wallet.plugin)
 
     // Disable http/rpc - to avoid any port conflict issues. Also more secure option
     this._spvNode.http = null
@@ -175,8 +175,7 @@ class Wallet extends EventEmitter {
     // Ask for the mempool after syncing is done
     overrideBcoinPoolHandleTxInv(this._spvNode.pool)
 
-    this._spvNode.chain.on('block', (block, entry) => {
-
+    this._spvNode.chain.on('block', safeBcoinEventHandlerShim((block, entry) => {
       // Update height of chain
       this._setBlockTipHeight(this._spvNode.chain.height)
 
@@ -186,7 +185,7 @@ class Wallet extends EventEmitter {
 
       // _spvNode.pool.x?  what do peers report as the current tip of their longest chain?
       // it is sent in the version message when we connect to them
-    })
+    }), 'spvnode.chain.block')
 
     this._spvNode.on('error', (err) => {
       this._spvNodeError(err)
@@ -253,35 +252,35 @@ class Wallet extends EventEmitter {
 
     // Setup
 
-    this._wallet.on('tx', (tx, details) => {
+    this._wallet.on('tx', safeBcoinEventHandlerShim((tx, details) => {
 
       console.log('tx')
       console.log(tx)
       console.log(details)
 
       this._newTransaction(tx, details)
-    })
 
-    this._wallet.on('confirmed', (tx, details) => {
+    }), 'wallet.tx')
+
+    this._wallet.on('confirmed', safeBcoinEventHandlerShim((tx, details) => {
       this._transactionConfirmed(tx, details)
-    })
+    }), 'wallet.confirmed')
 
-    this._wallet.on('unconfirmed', (tx, details) => {
+    this._wallet.on('unconfirmed', safeBcoinEventHandlerShim((tx, details) => {
       this._transactionUnconfirmed(tx, details)
-    })
+    }), 'wallet.unconfirmed')
 
-    this._wallet.on('balance', (balance) => {
+    this._wallet.on('balance', safeBcoinEventHandlerShim((balance) => {
       this._setConfirmedBalance(balance.confirmed)
-      this._setTotalBalance(balance.confirmed + balance.unconfirmed)
-    })
+      this._setTotalBalance(balance.unconfirmed)
+    }), 'wallet.balance')
 
     // New receive address generated
-    this._wallet.on('address', (derived) => {
+    this._wallet.on('address', safeBcoinEventHandlerShim((derived) => {
+        let receiveAddress = derived[0].getAddress()
 
-      let receiveAddress = derived[0].getAddress()
-
-      this.emit('receiveAddressChanged', receiveAddress)
-    })
+        this.emit('receiveAddressChanged', receiveAddress)
+    }), 'wallet.address')
 
     /// Get balance
 
@@ -307,7 +306,7 @@ class Wallet extends EventEmitter {
     }
 
     this._setConfirmedBalance(balance.confirmed)
-    this._setTotalBalance(balance.confirmed + balance.unconfirmed)
+    this._setTotalBalance(balance.unconfirmed)
 
     /// Connect to peer network
 
@@ -381,24 +380,8 @@ class Wallet extends EventEmitter {
     }
   }
 
-  _spvNodeError(err) {
-
-    console.log('spvNodeError: ' + err)
-
-    if (err.code !== 'EADDRINUSE')
-      return
-    else
-      console.log('seems serious')
-
-    /**
-     if (error.handled)
-     return
-
-     code marked "temp" is workaround until http listen fix is merged into bcoin release
-
-     error.handled = true
-     this.node = null // to skip call to spvnode.close() in closeSpvNode() - because asyncobject might still be locked
-     */
+  _spvNodeError (err) {
+    console.error('spvNodeError:', err)
   }
 
   /**
@@ -482,24 +465,24 @@ class Wallet extends EventEmitter {
       throw new Error('createAndSendPaidDownloadingContract call interrupted by wallet state changing.')
     }
 
-    // // Process a transaction
-    // let payments = await this._processTx(tx)
-    //
-    // // There should be exactly one payment
-    // assert(payments.length === 1)
+    // Process a transaction
+    let payments = await this._processTx(tx)
+
+    // There should be exactly one payment
+    assert(payments.length === 1)
 
     return tx
   }
 
   /**
    * Make a payment
-   * @param {Hash} pubKeyHash - for destination
+   * @param {bcoin.Address} address - for destination
    * @param {Number} amount - number of satoshis
    * @param {Number} satsPrkBFee - number of satoshis per kB.
    * @param {String} note - note to be attached to the payment
    * @return {Promise} - Returns {@link Payment}
    */
-  async pay(pubKeyHash, amount, satsPrkBFee, note) {
+  async pay(address, amount, satsPrkBFee, note) {
 
     // Check that we are indeed started
     if(this.state !== Wallet.STATE.STARTED)
@@ -513,7 +496,7 @@ class Wallet extends EventEmitter {
     // Create transaction output
     let output = new bcoin.output({
       value : amount,
-      script : bcoin.script.fromPubkeyhash(pubKeyHash)
+      script : bcoin.script.fromAddress(address)
     })
 
     // Ask wallet to build a transaction, fill it with outputs and inputs,
@@ -565,7 +548,7 @@ class Wallet extends EventEmitter {
 
     return this._spvNode.broadcast(tx)
   }
-  
+
   /**
    * Process
    * @param {TX} tx
@@ -636,8 +619,8 @@ class Wallet extends EventEmitter {
       }
 
     } catch(err) {
-      console.log(err)
-      debugger
+      console.error(err)
+      return
     }
 
 
@@ -648,8 +631,8 @@ class Wallet extends EventEmitter {
        txRecord = await this._wallet.txdb.getTX(details.hash)
 
     } catch(err) {
-      console.log(err)
-      debugger
+      console.error(err)
+      return
     }
 
       // Make sure we are still started
@@ -666,8 +649,8 @@ class Wallet extends EventEmitter {
     return this._processTxRecord(txRecord, details)
 
     } catch(err) {
-      console.log(err)
-      debugger
+      console.error(err)
+      return
     }
   }
 
@@ -732,6 +715,8 @@ class Wallet extends EventEmitter {
 
           let confirmed = txRecord.height !== -1
 
+          payment.updateSeenDate(new Date(txRecord.ps * 1000))
+          payment.updateMinedDate(new Date(txRecord.ts * 1000))
           payment.updateConfirmed(confirmed)
           payment.updateBlockIdOfBlockHoldingTransaction(confirmed ? txRecord.block : undefined)
           payment.updateBlockHeightOfBlockHoldingTransaction(confirmed ? txRecord.height : undefined)
@@ -740,21 +725,21 @@ class Wallet extends EventEmitter {
       }
 
     } catch(err) {
-      console.log(err)
-      debugger
+      console.error(err)
+      return
     }
 
 
     return paymentsInTx
 
   }
-  
+
   _setState(state) {
-    
+
     this.state = state
     this.emit('state', this.state)
     this.emit(stateToString(this.state))
-    
+
     // Some helpful logging in case there was a serious error
     if(this.state === Wallet.STATE.CATASTROPHIC_ERROR)
       console.log(this.catastrophicErrorMessage)

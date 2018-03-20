@@ -13,14 +13,30 @@ const RemoveAndDeleteSection = observer((props) => {
     // Derive ButtonSection props
     let className = "trash"
     let tooltip = "Remove & delete data"
+    let onClick = props.onClick
+
+    if (props.enabled) {
+      onClick = props.onClick
+    } else {
+      onClick = () => {}
+
+      if (props.working) {
+        // show spinner
+        className = 'trash_working'
+      } else {
+        // show disabled
+        className = 'trash_disabled'
+      }
+    }
 
     return (
-        <ButtonSection className={className} tooltip={tooltip} onClick={props.onClick} />
+        <ButtonSection className={className} tooltip={tooltip} onClick={onClick} />
     )
 })
 
 RemoveAndDeleteSection.propTypes = {
-    onClick : PropTypes.func.isRequired
+    onClick : PropTypes.func.isRequired,
+    working : PropTypes.bool
 }
 
 export default RemoveAndDeleteSection

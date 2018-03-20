@@ -38,15 +38,9 @@ const TorrentRow = observer((props) => {
 
       <PeerCountField count={torrentStore.numberOfBuyers} />
 
-      {
-        props.torrentTableRowStore.showToolbar
-        ?
-        <AbsolutePositionChildren left={-250} top={3}>
-          <TorrentToolbar torrentTableRowStore={props.torrentTableRowStore}/>
-        </AbsolutePositionChildren>
-        :
-        null
-      }
+      <AbsolutePositionChildren left={-250} top={3}>
+        <TorrentToolbar torrentTableRowStore={props.torrentTableRowStore}/>
+      </AbsolutePositionChildren>
 
     </Row>
   )

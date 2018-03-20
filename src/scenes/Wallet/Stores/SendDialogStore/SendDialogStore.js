@@ -74,8 +74,11 @@ class SendDialogStore {
 
     this.setActiveForm(activeForm)
 
+    // Generous rough estimate for a payment tx fee
+    const totalFee = Math.ceil((350 / 1024) * this._satsPrKbFee)
+
     // Create sub stores
-    this.userProvidingAmountFormStore = new UserProvidingAmountFormStore(this, '', UserProvidingAmountFormStore.INPUT_CURRENCY.FIAT, cryptoToFiatExchangeRate, this._walletStore, this._satsPrKbFee, this._minimumPaymentAmount)
+    this.userProvidingAmountFormStore = new UserProvidingAmountFormStore(this, '', UserProvidingAmountFormStore.INPUT_CURRENCY.FIAT, cryptoToFiatExchangeRate, this._walletStore, totalFee, this._minimumPaymentAmount)
     this.userProvidingRecipientAddressFormStore = new UserProvidingRecipientAddressFormStore(this, '')
   }
 
@@ -136,9 +139,8 @@ class SendDialogStore {
 
     /// Recover params from forms
 
-    // pubKeyHash from address
+    // bcoin.Address from addressString
     let address = UserProvidingRecipientAddressFormStore.validatedAddress(addressString)
-    let pubKeyHash = address.hash
 
     // amount
 
@@ -152,7 +154,7 @@ class SendDialogStore {
     // If we get this far, update form
     this.setActiveForm(SendDialogStore.FORM.ATTEMPTING_TO_SEND_PAYMENT)
 
-    this._walletStore.pay(pubKeyHash, amount, this._satsPrKbFee, note)
+    this._walletStore.pay(address, amount, this._satsPrKbFee, note)
       .then((paymentStore) => {
 
         // We should still be in the same state

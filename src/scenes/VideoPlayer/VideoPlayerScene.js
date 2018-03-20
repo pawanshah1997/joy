@@ -11,7 +11,7 @@ import VideoPlayer from  '../../components/VideoPlayer'
 const VideoPlayerScene = observer((props) => {
     
     return (
-        props.activeMediaPlayerStore
+        props.show
       ?
         <FullScreenContainer>
             <VideoPlayer mediaPlayerStore={props.activeMediaPlayerStore}/>
@@ -23,6 +23,7 @@ const VideoPlayerScene = observer((props) => {
 })
 
 VideoPlayerScene.propTypes = {
+  show : PropTypes.bool.isRequired,
   activeMediaPlayerStore : PropTypes.object
 }
 

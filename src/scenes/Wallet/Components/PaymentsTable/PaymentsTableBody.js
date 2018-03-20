@@ -80,7 +80,7 @@ const PaymentsTableBody = observer((props) => {
 })
 
 PaymentsTableBody.propTypes = {
-  paymentRowStores : PropTypes.arrayOf(PropTypes.instanceOf(PaymentRowStore))
+  paymentRowStores : PropTypes.arrayOf(PropTypes.object) // inner should be instanceOf(PaymentRowStore)), but HMR breaks it
 }
 
 export default PaymentsTableBody

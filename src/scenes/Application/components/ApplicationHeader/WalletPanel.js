@@ -20,16 +20,14 @@ function getStyles(props) {
       justifyContent: 'center',
     },
     cryptoBalance : {
-      fontFamily: 'Helvetica neue',
-      fontSize: '30px',
-      color: 'white',
-      fontWeight: '400',
-      marginLeft : '3px'
+
     },
     cryptoUnit : {
-      paddingTop: '9px',
-      color : '#7d8b91',
-      fontSize: '12px'
+      fontSize: '14px',
+      fontFamily: 'Arial',
+      fontWeight: 'bold',
+      marginRight: '5px',
+      color : '#7d8b91'
     },
     subtitle : {
       color: props.subtitleColor,
@@ -40,11 +38,15 @@ function getStyles(props) {
     },
     fiatRow : {
       display : 'flex',
-      fontSize: '12px',
-      marginBottom: '-5px'
+      fontSize: '18px',
+      justifyContent: 'flex-end',
+      marginTop: '-10px'
     },
     cryptoRow : {
-      display : 'flex'
+      fontFamily: 'Helvetica', // neue
+      fontSize: '30px',
+      color: 'white',
+      fontWeight: '200',
     },
     fiatUnit : {
       color : '#7d8b91',
@@ -74,17 +76,19 @@ class BalancePanel extends Component {
 
         let prettyBalanceInFiat = currencyFormatter.format(this.props.applicationNavigationStore.balanceInFiat, { code: 'USD', symbol : '' });
 
-        let balanceInBTC = this.props.applicationNavigationStore.balanceInBTC
+        let balanceInBTC = '0.000000000'
+        if(this.props.applicationNavigationStore.balanceInBTC)
+          balanceInBTC = this.props.applicationNavigationStore.balanceInBTC.toFixed(8)
       
         return (
           <div style={style.root}>
-            <div style={style.fiatRow}>
-              <span style={style.fiatUnit}>USD</span>
-              <span style={style.fiatBalance}>{prettyBalanceInFiat}</span>
-            </div>
             <div style={style.cryptoRow}>
-              <span style={style.cryptoUnit}>BTC</span>
-              <span style={style.cryptoBalance}>{balanceInBTC}</span>
+              <span style={style.cryptoUnit}>BCH</span>
+              {balanceInBTC}
+            </div>
+            <div style={style.fiatRow}>
+              <span style={style.fiatUnit}>$</span>
+              <span style={style.fiatBalance}>{prettyBalanceInFiat}</span>
             </div>
           </div>
         )
@@ -155,7 +159,7 @@ const WalletPanel = observer((props) => {
     let styles = {
         root : {
             display: 'flex',
-            flex: '0 0 220px',
+            flex: '0 0 223px',
             //alignItems: 'center',
             //justifyContent: 'center',
             backgroundColor: props.backgroundColor

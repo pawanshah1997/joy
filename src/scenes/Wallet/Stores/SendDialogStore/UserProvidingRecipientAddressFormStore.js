@@ -5,6 +5,7 @@
 import {observable, action, computed} from 'mobx'
 
 import bcoin from 'bcoin'
+import CashAddressFormat from '../../CashAddressFormat'
 
 class UserProvidingRecipientAddressForm {
 
@@ -86,22 +87,14 @@ class UserProvidingRecipientAddressForm {
     if(!addressText || addressText.length === 0)
       throw UserProvidingRecipientAddressForm.ADDRESS_VALIDATION_RESULT_TYPE.EMPTY
 
-    // Try to recover address
+    // Try to recover bcoin address
     let address
 
     try {
-      address = new bcoin.address(addressText)
-    } catch(err) {
+      address = CashAddressFormat.fromString(addressText).bcoinAddress()
+    } catch (err) {
       throw UserProvidingRecipientAddressForm.ADDRESS_VALIDATION_RESULT_TYPE.INVALID_NON_EMPTY_FORMATTING
     }
-
-    // Bad network address test
-    if(address.network.type !== 'testnet')
-      throw UserProvidingRecipientAddressForm.ADDRESS_VALIDATION_RESULT_TYPE.INVALID_NON_EMPTY_FORMATTING
-
-    // Bad address type test
-    if(address.type !== bcoin.address.types.PUBKEYHASH)
-      throw UserProvidingRecipientAddressForm.ADDRESS_VALIDATION_RESULT_TYPE.INVALID_NON_EMPTY_FORMATTING
 
     return address
 

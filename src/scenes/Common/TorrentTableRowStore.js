@@ -19,12 +19,21 @@ class TorrentTableRowStore {
    */
   torrentStore
 
+  /**
+   * {Bool} Wether we are in the process of removing the torrent
+   */
+  @observable beingRemoved
+
+  @observable deletingData
+
   constructor(torrentStore, uiStore, showToolbar) {
 
     this.torrentStore = torrentStore
     this._uiStore = uiStore
     this._applicationStore = this._uiStore.applicationStore
     this.setShowToolbar(showToolbar)
+    this.setBeingRemoved(false)
+    this.setDeletingData(false)
   }
 
   @action.bound
@@ -42,11 +51,24 @@ class TorrentTableRowStore {
     this.setShowToolbar(false)
   }
 
-  remove() {
+  @action.bound
+  setBeingRemoved (beingRemoved) {
+    this.beingRemoved = beingRemoved
+  }
+
+  @action.bound
+  setDeletingData (deleting) {
+    this.deletingData = deleting
+  }
+
+  remove () {
+    this.setBeingRemoved(true)
     this._applicationStore.removeTorrent(this.torrentStore.infoHash, false, () => {})
   }
 
-  removeAndDeleteData() {
+  removeAndDeleteData () {
+    this.setBeingRemoved(true)
+    this.setDeletingData(true)
     this._applicationStore.removeTorrent(this.torrentStore.infoHash, true, () => {})
   }
 
@@ -71,6 +93,7 @@ class TorrentTableRowStore {
 
   @computed get
   canPlayMedia () {
+    if (this.beingRemoved) return false
     return this.playableMediaList.length > 0
   }
 
@@ -82,8 +105,9 @@ class TorrentTableRowStore {
   }
 
   beginPaidUploadWithDefaultTerms() {
+    if (this.beingRemoved) return
 
-    let defaultTerms = this._uiStore.applicationStore.applicationSettings.defaultSellerTerms()
+    let defaultTerms = this._uiStore.applicationStore.defaultSellerTerms(this.torrentStore.pieceLength, this.torrentStore.numberOfPieces)
 
     this.torrentStore.beginUploading(defaultTerms)
   }

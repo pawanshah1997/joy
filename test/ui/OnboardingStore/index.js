@@ -1,7 +1,3 @@
-
-// babel-polyfill for generator (async/await)
-import 'babel-polyfill'
-
 import OnboardingStore from '../../../src/scenes/Onboarding/Stores/'
 import UIStore from '../../../src/scenes/UIStore'
 import {MockApplication} from '../../core/Mocks'
@@ -18,9 +14,10 @@ describe('OnboardingStore', function () {
   
   it('constructor initializes observables', function () {
     
-    onboardingStore = new OnboardingStore(uiStore, OnboardingStore.STATE.WelcomeScreen)
+    onboardingStore = new OnboardingStore(uiStore, OnboardingStore.STATE.WelcomeScreen, true, null)
     
     assert.equal(onboardingStore.state, OnboardingStore.STATE.WelcomeScreen)
+    assert.equal(onboardingStore.showBCHNoticeInWallet, true)
   })
   
   /**
@@ -68,6 +65,13 @@ describe('OnboardingStore', function () {
     assert.isTrue(mockedApplication.stop.calledOnce)
     
   
+  })
+
+  it('accepts BCH information notice acceptance', function() {
+
+    onboardingStore.acceptBCHInformationNotice()
+
+    assert.isFalse(onboardingStore.showBCHNoticeInWallet)
   })
 
 })

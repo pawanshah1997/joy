@@ -16,8 +16,8 @@ function getStyles(state, props) {
 
       // backgroundColor: state.mouseIsOver ? 'hsl(120, 39%, 55%)' : 'hsl(120, 39%, 65%)',
 
-      backgroundColor: 'rgb(55, 83, 133)',
-      borderBottom: '3px solid rgb(45, 68, 108)',
+      backgroundColor: props.colors.normalColor,
+      borderBottom: '3px solid ' + props.colors.borderBottomColor,
       borderRadius: '6px',
 
       paddingLeft: '24px',
@@ -32,11 +32,11 @@ function getStyles(state, props) {
       //boxShadow: '1px 1px 2px hsla(219, 41%, 39%, 1)'
 
       ':hover' : {
-        backgroundColor: 'hsla(218, 41%, 33%, 1)'
+        backgroundColor: props.colors.hoverColor
       },
 
       ':active' :  {
-        backgroundColor: 'rgb(45, 68, 108)',
+        backgroundColor: props.colors.activeColor,
         borderBottomWidth: '1px'
       }
     },
@@ -51,7 +51,7 @@ function getStyles(state, props) {
 
 const ToolbarButton = Radium((props) => {
 
-  let styles = getStyles(props)
+  let styles = getStyles(null, props)
 
   return (
     <span onClick={props.onClick}
@@ -75,8 +75,18 @@ ToolbarButton.propTypes = {
   iconNode: PropTypes.node,
   title : PropTypes.string.isRequired,
   onClick : PropTypes.func.isRequired,
+  colors : PropTypes.object
   //backgroundColor : PropTypes.string.isRequired,
   //textColor : PropTypes.string.isRequired
+}
+
+ToolbarButton.defaultProps = {
+  colors : {
+    normalColor : 'rgb(55, 83, 133)',
+    hoverColor : 'hsla(218, 41%, 33%, 1)',
+    activeColor: 'rgb(45, 68, 108)',
+    borderBottomColor : 'rgb(45, 68, 108)'
+  }
 }
 
 export default ToolbarButton

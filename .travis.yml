@@ -7,6 +7,8 @@ matrix:
   include:
     - os: linux
       dist: trusty
+      # requiring sudo will trigger builds to run on a dedicated VM, which has more
+      # RAM. This is required for building boost from source successfully.
       sudo: required
       addons:
         apt:

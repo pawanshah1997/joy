@@ -11,7 +11,7 @@ import Dropzone from 'react-dropzone'
 import DownloadingStore from '../Stores'
 
 function getStyle(props) {
-  
+
   return {
     dropZoneStyle : {
       display: 'flex',
@@ -29,11 +29,11 @@ function getStyle(props) {
 }
 
 const TorrentTable = observer((props) => {
-  
+
   let styles = getStyle(props)
-  
+
   return (
-    <Dropzone disableClick style={styles.dropZoneStyle} onDrop={() => { props.downloadingStore.startDownloadWithTorrentFileFromDragAndDrop() }}>
+    <Dropzone disableClick style={styles.dropZoneStyle} onDrop={(files) => { props.downloadingStore.startDownloadWithTorrentFileFromDragAndDrop(files) }}>
       <Table column_titles={['', 'STATE', 'SIZE', 'PROGRESS', 'SPEED', 'ARRIVAL', 'MODE', 'SEEDERS', 'SELLERS']}>
         {
           props.downloadingStore.torrentRowStores.length === 0
@@ -41,7 +41,7 @@ const TorrentTable = observer((props) => {
           <Hint title='Drop torrent file here to start download' key={0} />
             :
             props.downloadingStore.torrentRowStores.map((t, index) => {
-            
+
               return (
                 <TorrentRow
                   key={t.torrentStore.infoHash}
@@ -55,11 +55,11 @@ const TorrentTable = observer((props) => {
       </Table>
     </Dropzone>
   )
-  
+
 })
 
 TorrentTable.propTypes = {
-  downloadingStore: PropTypes.object.isRequired // HMR breaks => PropTypes.instanceOf(DownloadingStore).isRequired
+  downloadingStore: PropTypes.object // HMR breaks => PropTypes.instanceOf(DownloadingStore).isRequired
 }
 
 export default TorrentTable

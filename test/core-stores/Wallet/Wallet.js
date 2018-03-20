@@ -1,6 +1,6 @@
-import 'babel-polyfill' //async-await
-
 import WalletStore from '../../../src/core-stores/Wallet/WalletStore'
+import PaymentStore from '../../../src/core-stores/Wallet/PaymentStore'
+
 import {assert} from 'chai'
 var PromiseMock = require('promise-mock')
 
@@ -75,16 +75,19 @@ describe('Wallet Store', function () {
 
       assert(!pay.called)
 
-      let paymentPromise = walletStore.pay('hash', 1, 10, 'note')
+      let paymentStorePromise = walletStore.pay('hash', 1, 10, 'note')
 
       assert(pay.called)
 
       pay.returnValues[0].resolve(payment)
 
+      // a payment store is created
+      walletStore.addPaymentStore(new PaymentStore(payment))
+
       Promise.runAll()
 
       // pay method returns a new payment store from the payment
-      assert.deepEqual(PromiseMock.getResult(paymentPromise), payment)
+      assert.deepEqual(PromiseMock.getResult(paymentStorePromise), payment)
 
       // ... and adds the new payment store to the array of paymentStores
       assert.equal(walletStore.paymentStores.length, numPaymentStores + 1)

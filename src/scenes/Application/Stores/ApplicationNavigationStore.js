@@ -62,7 +62,9 @@ class ApplicationNavigationStore {
 
     let balance = applicationStore.walletStore.totalBalance
 
-    return Math.floor((balance * applicationStore.priceFeedStore.cryptoToUsdExchangeRate) / this._numberOfUnitsPerCoin)
+    let fiatBalance = (balance * applicationStore.priceFeedStore.cryptoToUsdExchangeRate) / this._numberOfUnitsPerCoin
+
+    return fiatBalance
   }
 
   /**
@@ -80,6 +82,15 @@ class ApplicationNavigationStore {
     let balance = applicationStore.walletStore.totalBalance
 
     return balance / this._numberOfUnitsPerCoin
+  }
+
+  @computed get
+  onTorrentListingTab() {
+    return  (
+      this.activeTab === ApplicationNavigationStore.TAB.Downloading ||
+      this.activeTab === ApplicationNavigationStore.TAB.Uploading ||
+      this.activeTab === ApplicationNavigationStore.TAB.Completed
+    )
   }
   
   @action.bound

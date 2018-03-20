@@ -41,10 +41,9 @@ const ReceiveDialog = observer((props) => {
 
   return (
     <Dialog title={'Receive'}
-            // TODO: Add a subtitle/warning not to send real bitcoin to this address
             open={visibleDialog}
             onRequestClose={onRequestClose}
-            width={'600px'}
+            width={'650px'}
     >
       {form}
     </Dialog>
@@ -52,7 +51,7 @@ const ReceiveDialog = observer((props) => {
 })
 
 ReceiveDialog.propTypes = {
-  receiveDialogStore : PropTypes.instanceOf(ReceiveDialogStore)
+  receiveDialogStore : PropTypes.object // HMR breaks instanceOf(ReceiveDialogStore)
 }
 
 export default ReceiveDialog

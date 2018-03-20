@@ -35,6 +35,7 @@ const Row = (props) => {
           style={styles.root}
           onMouseEnter={props.onMouseEnter}
           onMouseLeave={props.onMouseLeave}
+          className="table_row"
         >
           {props.children}
         </div>

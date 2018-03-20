@@ -66,20 +66,7 @@ const VIDEO_PLAYER_STATE = {
  */
 
 
-
-const MEDIA_SOURCE_TYPE = {
-    DISK : 0,
-    STREAMING_TORRENT : 1,
-    HTTP : 2
-}
-
-
 class MediaPlayerStore {
-
-    /**
-     * {MEDIA_SOURCE_TYPE}
-     */
-    @observable mediaSourceType
 
     /**
      * {String}
@@ -110,14 +97,12 @@ class MediaPlayerStore {
 
     /**
      * Constructor
-     * @param mediaSourceType
      * @param torrent
-     * @param file
+     * @param fileIndex
      * @param loadedTimeRequiredForPlayback {Number} - seconds of media data required before playback is allowed
      */
-    constructor(mediaSourceType,
-                torrentStore,
-                file,
+    constructor(torrentStore,
+                streamUrl,
                 loadedTimeRequiredForPlayback,
                 autoPlay,
                 mediaPlayerWindowSizeFetcher,
@@ -125,9 +110,8 @@ class MediaPlayerStore {
                 onExit,
                 uiStore) {
 
-        this.mediaSourceType = mediaSourceType
         this.torrent = torrentStore
-        this.file = file
+        this.streamUrl = streamUrl
         this._loadedTimeRequiredForPlayback = loadedTimeRequiredForPlayback
         this.autoPlay = autoPlay
 
@@ -144,6 +128,7 @@ class MediaPlayerStore {
         this._windowSizePriorToResize = null
 
         this._uiStore = uiStore
+
     }
 
     @action.bound
@@ -203,7 +188,7 @@ class MediaPlayerStore {
 
         return
 
-        if(this.mediaSourceType !== MEDIA_SOURCE_TYPE.STREAMING_TORRENT)
+        if(!this.torrent.isDownloading)
             return
 
         let currentTime = videoDOMElement.currentTime
@@ -231,7 +216,7 @@ class MediaPlayerStore {
         // We will only ever show the stream progress if we have an incomplete download.
         // If we have a complete download and this event occurs users may be confused to see
         // The stream progress bar, and possibly a start paid download button.
-        if (this.mediaSourceType === MEDIA_SOURCE_TYPE.STREAMING_TORRENT && this.torrent.isDownloading) {
+        if (this.torrent.isDownloading) {
           this.setShowTorrentStreamProgress(true)
         }
     }
@@ -243,7 +228,7 @@ class MediaPlayerStore {
 
         return
 
-        if(this.mediaSourceType !== MEDIA_SOURCE_TYPE.STREAMING_TORRENT)
+        if(!this.torrent.isDownloading)
             return
 
         if(this.playbackTimeAvailable < this._loadedTimeRequiredForPlayback)
@@ -289,7 +274,7 @@ class MediaPlayerStore {
     @computed get
     torrentStreamProgress() {
 
-        if(this.mediaSourceType !== MEDIA_SOURCE_TYPE.STREAMING_TORRENT)
+        if(!this.torrent.isDownloading)
             return null
         else if(this.playbackTimeAvailable)
             return this.playbackTimeAvailable > this._loadedTimeRequiredForPlayback ? 1 : this.playbackTimeAvailable / this._loadedTimeRequiredForPlayback
@@ -317,4 +302,3 @@ function playbackTimeAvailable(currentTime, timeRanges) {
 }
 
 module.exports = MediaPlayerStore
-module.exports.MEDIA_SOURCE_TYPE = MEDIA_SOURCE_TYPE

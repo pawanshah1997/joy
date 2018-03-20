@@ -130,14 +130,6 @@ class Torrent extends EventEmitter {
    */
   viabilityOfPaidDownloadInSwarm
 
-  /**
-   * {FileSegmentStreamFactory} Current active file segment factory, only set iff
-   * a stream has been started.
-   *
-   * NB: Only one allowed at a time
-   */
-  fileSegmentStreamFactory
-
   constructor(settings, privateKeyGenerator, publicKeyHashGenerator, contractGenerator, broadcastRawTransaction) {
 
     super()
@@ -272,23 +264,8 @@ class Torrent extends EventEmitter {
     // Determine
     let completed = this.state.startsWith('Active.FinishedDownloading')
 
-    // Create factory and set
-    this.fileSegmentStreamFactory = new FileSegmentStreamFactory(this._joystreamNodeTorrent, fileIndex, completed)
-
-    return this.fileSegmentStreamFactory
-  }
-
-  /**
-   * End stream
-   */
-  endStream() {
-
-    if(!this.fileSegmentStreamFactory)
-      throw Error('Cannot end a stream, none started')
-
-    //this.fileSegmentStreamFactory.stop()
-
-    this.fileSegmentStreamFactory = null
+    // Create factory
+    return new FileSegmentStreamFactory(this._joystreamNodeTorrent, fileIndex, completed)
   }
 
   deepInitialState() {
