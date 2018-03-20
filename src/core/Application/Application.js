@@ -982,7 +982,7 @@ class Application extends EventEmitter {
   _totalWalletBalanceChanged (balance) {
 
     debug('new total balance: ' + balance)
-
+    
   }
 
   _onPriceFeedError = (err) => {

@@ -1,3 +1,47 @@
+1.0.0 Bitcoin Cash Mainnet release - March 19 2018
+  * Updated core native libraries to support Bitcoin Cash
+  * Updated Wallet to use Bitcoin Cash mainnet
+  * Added HTTP Server as backend for streaming Media Player
+  * Support for playing more video formats by dropping render-media and relying on HTTP stream
+  * Magnet Link support (finally)
+  * Fix broken Drag-and-Drop functionality
+  * Lowered all default transaction fee rates (payments, contracts and settlements)
+  * Wallet Bug fixes
+    - Add paid download contracts to payments list
+    - Fix chronological ordering of payments
+    - Updated send/receive dialogs to only display and accept Bitcoin CashAddress format
+    - Updated block explorer to bch.btc.com
+    - Display correct wallet total balance
+    - Removed pending balance on wallet scene
+    - Added notice during onboarding to indicate that wallet uses Bitcoin Cash
+    - Display fiat amount in payment rows
+    - Fixed issue with calculating max amount to send in send payment dialog
+    - Fixed issue with displaying duplicate payment in table when sending payments
+    - Added support to claim free Bitcoin Cash
+    - Replaced spinner (material-ui CircularProgress component) which was causing high CPU utilization
+    - Fixed incorrect date displayed next to new unconfirmed payments, and newly confirmed payments
+  * Added funding estimation for a contract before making paid download viable
+  * Torrent toolbar shows correctly after removing a torrent
+  * Introduced migration system
+  * On first run migration will clear saved torrent buyer/seller terms so new default terms are used
+  * Updated Price Feed to get bitcoin cash ticker
+  * Fixing issue with loading torrents from database without metadata
+  * Fix various startup/shutdown issues while loading/saving torrents in database
+  * Correctly display spending amount on downloading scene
+  * Made Spending and Revenue labels larger and added fiat amount
+  * Removed torrent count label
+  * Replaced BTC on labels to BCH
+  * Added Terms acceptance scene
+
+0.5.7 hotfix release - March 12th 2018
+
+  * Bug Fix - Sometimes playing media before wallet is ready causes assert failure
+  * Bug Fix - Wallet topup feature was not working
+
+0.5.6 hotfix release - March 5th 2018
+
+  * Hotfix - bug starting paid upload (improper access of Map)
+
 0.5.5 release - March 1st 2018
 
   * Wallet UI added
@@ -33,5 +77,3 @@
   * Bug Fixes - Connectivity issues in protocol_session and extension
   * Use new JoyStream Logo
   * Fix logo bug on Mac OSX
-
-
