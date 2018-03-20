@@ -33,8 +33,6 @@
   * Replaced BTC on labels to BCH
   * Added Terms acceptance scene
 
-
-
 0.5.7 hotfix release - March 12th 2018
 
   * Bug Fix - Sometimes playing media before wallet is ready causes assert failure
