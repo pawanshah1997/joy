@@ -14,7 +14,7 @@ const ButtonSection = (props) => {
       justifyContent : 'center',
       padding : '26px',
       paddingRight: '36px',
-      backgroundColor : 'rgb(33, 50, 80)' //'hsla(210, 100%, 80%, 1)' //'#EAEAEA'
+      backgroundColor : '#39f', //rgb(33, 50, 80)' //'hsla(210, 100%, 80%, 1)' //'#EAEAEA'
     }
   }
 
