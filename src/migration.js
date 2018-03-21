@@ -35,6 +35,8 @@ function run () {
 
     migrations.push(runTorrentDatabaseMigrations(lastRanAppVersion, currentAppVersion, torrentDbPath))
 
+    migrations.push(runApplicationSettingsMigrations(lastRanAppVersion, currentAppVersion, appSettings))
+
     Promise.all(migrations)
       .then(function () {
         appSettings.setLastRanVersionOfApp(currentAppVersion)
@@ -49,12 +51,26 @@ function run () {
   })
 }
 
+function runApplicationSettingsMigrations (lastVersion, currentVersion, appSettings) {
+  return new Promise(function (resolve, reject) {
+
+    if(!lastVersion || lastVersion === '1.0.0') {
+      // In initial migration to v1.0.0 we forgot to clear the default buyer/seller terms
+      // from the application settings.
+      debug('deleteing default terms from application settings')
+      appSettings.deleteDefaultTerms()
+    }
+
+    resolve()
+  })
+}
+
 function runTorrentDatabaseMigrations (lastVersion, currentVersion, torrentDbPath) {
   return new Promise(function (resolve, reject) {
 
     // First migration on release of v0.6.0. Clears buyer/seller terms so they can be
     // reset to new standard default terms
-    if(!lastVersion) {
+    if(!lastVersion || lastVersion === '1.0.0') {
       debug('Running torrent database migration - clearing saved terms')
       transformTorrentSettings(torrentDbPath, function (torrent) {
         // Torrent statemachine will not expect for there to be any terms set yet

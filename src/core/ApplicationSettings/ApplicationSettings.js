@@ -214,6 +214,18 @@ class ApplicationSettings extends EventEmitter {
     this._set(CLAIMED_FREE_BCH, claimedFreeBCH)
   }
 
+  deleteDefaultTerms () {
+    this._delete(DEFAULT_BUYER_TERMS)
+    this._delete(DEFAULT_SELLER_TERMS)
+  }
+
+  _delete (key) {
+    if(this.state !== ApplicationSettings.STATE.OPENED)
+      throw Error('Must be opened')
+
+    this._electronConfigStore.delete(key)
+  }
+
   _get(key) {
 
     if(this.state !== ApplicationSettings.STATE.OPENED)
