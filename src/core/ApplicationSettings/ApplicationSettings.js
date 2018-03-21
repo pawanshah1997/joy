@@ -165,6 +165,10 @@ class ApplicationSettings extends EventEmitter {
     this._set(BITTORRENT_PORT, bittorrentPort)
   }
 
+  deleteBitTorrentPort() {
+    this._delete(BITTORRENT_PORT)
+  }
+
   defaultSellerTerms() {
     return this._get(DEFAULT_SELLER_TERMS)
   }

@@ -59,6 +59,9 @@ function runApplicationSettingsMigrations (lastVersion, currentVersion, appSetti
       // from the application settings.
       debug('deleteing default terms from application settings')
       appSettings.deleteDefaultTerms()
+
+      debug('resetting bitTorrentPort')
+      appSettings.deleteBitTorrentPort()
     }
 
     resolve()
