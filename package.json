@@ -1,7 +1,7 @@
 {
   "name": "joystream",
   "productName": "Joystream",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A blockchain powered decentralized media distribution, curation, discovery and monetization platform.",
   "homepage": "https://joystream.co",
   "main": "src/main.js",
@@ -101,6 +101,7 @@
     "react-tooltip": "^3.3.0",
     "render-media": "^2.10.0",
     "request": "^2.82.0",
+    "semver": "^5.5.0",
     "tether": "^1.4.0",
     "version_compare": "0.0.3"
   },

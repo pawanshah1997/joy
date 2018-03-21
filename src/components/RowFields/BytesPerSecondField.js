@@ -30,7 +30,7 @@ const BytesPerSecondField = (props) => {
     let styles = getStyles(props)
     let representation
 
-    if(props.bytes)
+    if(props.bytes && props.bytes > 3000)
         representation = convenientBytes(props.bytes, {decimalPlaces : props.decimalPlaces})
     else
         representation = {
