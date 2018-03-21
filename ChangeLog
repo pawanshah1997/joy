@@ -1,4 +1,10 @@
+1.0.1 release March 21 2018
+
+  * Fix migration of default buyer/seller terms
+  * Use port 6881 as default listening port for libtorrent
+
 1.0.0 Bitcoin Cash Mainnet release - March 19 2018
+
   * Updated core native libraries to support Bitcoin Cash
   * Updated Wallet to use Bitcoin Cash mainnet
   * Added HTTP Server as backend for streaming Media Player
