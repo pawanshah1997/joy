@@ -5,6 +5,7 @@ import { inject, observer } from 'mobx-react'
 import SendingDialog from './SendDialog'
 import ReceiveDialog from './ReceiveDialog'
 import ClaimFreeBCHFlowDialog from './ClaimFreeBCHFlowDialog'
+import ViewHDSeedDialog from './ViewHDSeedDialog'
 
 import {
   Label,
@@ -135,13 +136,18 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
                            onClick={() => { props.UIStore.walletSceneStore.receiveClicked()}}
                            iconNode={<ReceiveIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>}
             />
-            
+
             <div style={{
               width: '10px',
               //backgroundColor: '#49a749',
               height: '55px'
             }}>
             </div>
+
+            <ToolbarButton title="backup"
+                           onClick={() => { props.UIStore.walletSceneStore.viewWalletSeedClicked()}}
+                           iconNode={<SeedIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>}
+            />
 
             {
 
@@ -203,6 +209,7 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
       <SendingDialog sendDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'SendDialogStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
       <ReceiveDialog receiveDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'ReceiveDialogStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
       <ClaimFreeBCHFlowDialog claimFreeBCHFlowDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'ClaimFreeBCHFlowStore' ? props.UIStore.walletSceneStore.visibleDialog : null} />
+      <ViewHDSeedDialog viewHDSeedDialogStore={props.UIStore.walletSceneStore.visibleDialog && props.UIStore.walletSceneStore.visibleDialog.constructor.name === 'ViewHDSeedDialogStore' ? props.UIStore.walletSceneStore.visibleDialog : null}/>
     
     </div>
   )
