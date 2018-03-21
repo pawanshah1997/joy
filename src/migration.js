@@ -4,6 +4,7 @@ import os from 'os'
 import path from 'path'
 import mkdirp from 'mkdirp'
 import db from './db'
+import semver from 'semver'
 
 import Application from './core/Application'
 import ApplicationSettings from './core/ApplicationSettings'
@@ -29,11 +30,20 @@ function run () {
 
     appSettings.open()
 
-    const lastRanAppVersion = appSettings.lastRanVersionOfApp()
+    // versions of application prior to v1.0.0 did not store the last ran app version
+    // so we will treat them all as version 0.0.0
+    const lastRanAppVersion = appSettings.lastRanVersionOfApp() || '0.0.0'
 
     let migrations = []
 
-    migrations.push(runTorrentDatabaseMigrations(lastRanAppVersion, currentAppVersion, torrentDbPath))
+    // Only run migrations when installing newer versions
+    if(semver.gt(currentAppVersion, lastRanAppVersion)) {
+      migrations.push(runTorrentDatabaseMigrations(lastRanAppVersion, currentAppVersion, torrentDbPath))
+      migrations.push(runApplicationSettingsMigrations(lastRanAppVersion, currentAppVersion, appSettings))
+    } else {
+      // Running an older or same version of the app.. don't do any migration
+      return resolve()
+    }
 
     Promise.all(migrations)
       .then(function () {
@@ -49,12 +59,28 @@ function run () {
   })
 }
 
+function runApplicationSettingsMigrations (lastVersion, currentVersion, appSettings) {
+  return new Promise(function (resolve, reject) {
+    if (semver.satisfies(lastVersion, '>=0.0.0') &&
+        semver.satisfies(lastVersion, '<1.0.1')) {
+      // In initial migration to v1.0.0 we forgot to clear the default buyer/seller terms
+      // from the application settings.
+      debug('deleteing default terms from application settings')
+      appSettings.deleteDefaultTerms()
+
+      debug('resetting bitTorrentPort')
+      appSettings.deleteBitTorrentPort()
+    }
+    resolve()
+  })
+}
+
 function runTorrentDatabaseMigrations (lastVersion, currentVersion, torrentDbPath) {
   return new Promise(function (resolve, reject) {
-
-    // First migration on release of v0.6.0. Clears buyer/seller terms so they can be
-    // reset to new standard default terms
-    if(!lastVersion) {
+    if (semver.satisfies(lastVersion, '>=0.0.0') &&
+        semver.satisfies(lastVersion, '<1.0.1')) {
+      // First migration on release of v1.0.0 clears buyer/seller terms so they can be
+      // reset to new standard default terms
       debug('Running torrent database migration - clearing saved terms')
       transformTorrentSettings(torrentDbPath, function (torrent) {
         // Torrent statemachine will not expect for there to be any terms set yet

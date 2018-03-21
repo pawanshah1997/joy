@@ -48,8 +48,14 @@ const DEFAULT_APPLICATION_SETTINGS = {
 
   useAssistedPeerDiscovery : true,
 
-  // 0 means libtorrent picks whatever it wants?
-  bittorrentPort : 0,
+  /*
+    Binding to port 0 will make the operating system pick the port.
+    Libtorrent will attempt to open both a UDP and a TCP listen socket, to allow accepting
+    uTP connections as well as TCP. If using the DHT, this will also make the DHT use the same UDP ports.
+    See https://www.libtorrent.org/reference-Settings.html#settings-pack outgoing_interfaces/incoming_interfaces for details
+    We are picking a fixed default port to make it easier to do manual port mapping.
+  */
+  bittorrentPort : 6881,
 
   makeDefaultSavePathFromBaseFolder : (baseFolder) => {
     return path.join(baseFolder, FOLDER_NAME.DEFAULT_SAVE_PATH_BASE)
@@ -982,7 +988,7 @@ class Application extends EventEmitter {
   _totalWalletBalanceChanged (balance) {
 
     debug('new total balance: ' + balance)
-    
+
   }
 
   _onPriceFeedError = (err) => {
