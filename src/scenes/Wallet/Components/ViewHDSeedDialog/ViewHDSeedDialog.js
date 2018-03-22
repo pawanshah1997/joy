@@ -70,27 +70,30 @@ const ViewHDSeedDialog = observer((props) => {
 
     let styles = getStyles(props)
 
+    const explainerText = `Write down, and safely and privately store, the recovery phrase below. \
+                           In the future the phrase can be used to restore your JoyStream wallet.`
+
     form = (
       <div>
 
         <div style={styles.explainerContainer}>
-          Write down, and safely and privately store, the two items below. They can be used to recover your JoyStream wallet in any BIP44 compliant wallet.
+          {explainerText}
         </div>
 
         <div style={styles.formRoot}>
 
-          <span style={styles.subtitle}>SEED</span>
+          <span style={styles.subtitle}>Recovery Phrase</span>
           <div style={styles.seedContainer}>
             {props.viewHDSeedDialogStore.masterKey.mnemonic.phrase}
           </div>
 
           <div style={styles.spacer}> </div>
-
+          {/*
           <span style={styles.subtitle}>DERIVATION PATH</span>
           <div style={styles.pathContainer}>
             {"m/44/0'/0'"}
           </div>
-
+          */}
         </div>
 
       </div>
