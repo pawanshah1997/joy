@@ -8,11 +8,17 @@ import {Field} from './../Table'
 
 const NameField = (props) => {
 
-    return (
-        <Field>
-            {props.name}
-        </Field>
-    )
+  let styles = {
+    root : {
+      fontSize : '18px',
+    }
+  }
+
+  return (
+      <Field style={styles.root}>
+          {props.name}
+      </Field>
+  )
 }
 
 NameField.propTypes = {
