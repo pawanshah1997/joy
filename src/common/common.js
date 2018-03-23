@@ -7,16 +7,40 @@ import bytes from 'bytes'
 import humanizeDuration from 'humanize-duration'
 import assert from 'assert'
 
-function satoshiPerMbToSatoshiPerPiece (satoshiPerMb, pieceLengthBytes) {
-  assert (pieceLengthBytes > 0)
-  assert (satoshiPerMb > 0)
+function computeOptimumPricePerPiece (alpha, pieceLength, numPieces, satoshiPerMb, settlementFee) {
+  if (alpha > 1 || alpha < 0) {
+    throw new Error('alpha must be a number between 0 and 1')
+  }
 
-  const pieceSizeMB = pieceLengthBytes / (1024 * 1024)
+  if (pieceLength < 0 || numPieces < 0) {
+    throw new Error('invalid pieceLength or numPieces')
+  }
 
-  const piecePriceSatoshi = satoshiPerMb * pieceSizeMB
+  if (satoshiPerMb < 0) {
+    throw new Error('invalid satoshiPerMb rate')
+  }
 
-  // Round up to nearest integer value
-  return Math.ceil(piecePriceSatoshi)
+  if (settlementFee < 0) {
+    throw new Error('invalid settlementFee')
+  }
+
+  const DUST = 547
+
+  const fileSizeMB = (pieceLength * numPieces) / (1024 * 1024)
+
+  const revenueAtAlpha = alpha * fileSizeMB * satoshiPerMb
+
+  let pMin
+
+  if (revenueAtAlpha < DUST) {
+    // For small files a low price/MB will not result in large enough output to seller to surpass DUST
+    // So we will ensure on full transfer seller will get just above DUST
+    pMin = (DUST + settlementFee + 1) / numPieces
+  } else {
+    pMin = (revenueAtAlpha + settlementFee) / (numPieces * alpha)
+  }
+
+  return Math.ceil(pMin) + 1
 }
 
 /**
@@ -331,5 +355,5 @@ export {
     convenientBytes,
     convenientHumanizeDuration,
     standardHumanizeDurationOptions,
-    satoshiPerMbToSatoshiPerPiece
+    computeOptimumPricePerPiece
 }

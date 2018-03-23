@@ -1,5 +1,5 @@
 import { observable, action, computed} from 'mobx'
-import {satoshiPerMbToSatoshiPerPiece} from '../../common/'
+import {computeOptimumPricePerPiece} from '../../common/'
 
 class ApplicationStore {
 
@@ -283,42 +283,6 @@ class ApplicationStore {
 
     return convertedTerms
   }
-}
-
-function computeOptimumPricePerPiece (alpha, pieceLength, numPieces, satoshiPerMb, settlementFee) {
-  if (alpha > 1 || alpha < 0) {
-    throw new Error('alpha must be a number between 0 and 1')
-  }
-
-  if (pieceLength < 0 || numPieces < 0) {
-    throw new Error('invalid pieceLength or numPieces')
-  }
-
-  if (satoshiPerMb < 0) {
-    throw new Error('invalid satoshiPerMb rate')
-  }
-
-  if (settlementFee < 0) {
-    throw new Error('invalid settlementFee')
-  }
-
-  const DUST = 547
-
-  const fileSizeMB = (pieceLength * numPieces) / (1024 * 1024)
-
-  const revenueAtAlpha = alpha * fileSizeMB * satoshiPerMb
-
-  let pMin
-
-  if (revenueAtAlpha < DUST) {
-    // For small files a low price/MB will not result in large enough output to seller to surpass DUST
-    // So we will ensure on full transfer seller will get just above DUST
-    pMin = (DUST + settlementFee + 1) / numPieces
-  } else {
-    pMin = (revenueAtAlpha + settlementFee) / (numPieces * alpha)
-  }
-
-  return Math.ceil(pMin) + 1
 }
 
 export default ApplicationStore

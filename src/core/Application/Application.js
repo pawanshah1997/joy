@@ -16,7 +16,7 @@ import db from '../../db'
 import request from 'request'
 import magnet from 'magnet-uri'
 import StreamServer from '../StreamServer/StreamServer'
-import {satoshiPerMbToSatoshiPerPiece} from '../../common/'
+import {computeOptimumPricePerPiece} from '../../common/'
 
 var debug = require('debug')('application')
 import {shell} from 'electron'
@@ -658,11 +658,15 @@ class Application extends EventEmitter {
 
   defaultBuyerTerms (pieceLength, numPieces) {
     let defaultTerms = this.applicationSettings.defaultBuyerTerms()
+    const settlementFee = this.applicationSettings.defaultSellerTerms().settlementFee
     let convertedTerms = {...defaultTerms}
 
-    convertedTerms.maxPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.maxPrice, pieceLength)
+    // what chunk of the data needs to be delivered before seller will get non dust output
+    const alpha = 0.2
 
-    convertedTerms.maxPrice = Math.ceil(Math.max(convertedTerms.maxPrice, 547 / numPieces))
+    const satoshiPerMb = defaultTerms.maxPrice
+
+    convertedTerms.maxPrice = computeOptimumPricePerPiece(alpha, pieceLength, numPieces, satoshiPerMb, settlementFee)
 
     return convertedTerms
   }
