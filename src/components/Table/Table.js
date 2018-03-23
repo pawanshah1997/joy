@@ -10,6 +10,11 @@ import Field from "./Field"
 function to_header_elements(titles) {
 
     return titles.map((title) => {
+
+      // silent title check
+      if(title.charAt(0) === '*')
+        return <Field key={title}> </Field>
+      else
         return <Field key={title}> {title} </Field>
     })
 }
