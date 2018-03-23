@@ -18,9 +18,12 @@ const TorrentToolbar = observer((props) => {
                    play={() => { props.torrentTableRowStore.playMedia() }}
       />
 
-      <StartUploadingSection canBeginPaidUploadWidthDefaultTerms={props.torrentTableRowStore.torrentStore.canBeginUploading && !props.torrentTableRowStore.beingRemoved}
-                             onClick={() => { props.torrentTableRowStore.beginPaidUploadWithDefaultTerms() }}
-      />
+      { /**
+       <StartUploadingSection canBeginPaidUploadWidthDefaultTerms={props.torrentTableRowStore.torrentStore.canBeginUploading && !props.torrentTableRowStore.beingRemoved}
+       onClick={() => { props.torrentTableRowStore.beginPaidUploadWithDefaultTerms() }}
+       />
+       **/
+      }
 
       <RemoveSection enabled={true /** !props.torrentTableRowStore.beingRemoved **/}
                      working={false /** props.torrentTableRowStore.beingRemoved && !props.torrentTableRowStore.deletingData **/}

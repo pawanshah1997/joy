@@ -9,6 +9,7 @@ import {
   IsUploading,
   PeerCountField
 } from '../../../components/RowFields'
+import ControlUploadingButtonField from './ControlUploadingButtonField'
 import TorrentToolbar from './TorrentToolbar'
 import AbsolutePositionChildren from '../../../components/AbsolutePositionChildren/AbsolutePositionChildren'
 
@@ -23,8 +24,10 @@ const TorrentRow = observer((props) => {
       backgroundColor={props.backgroundColor}
     >
       <NameField name={torrentStore.name} />
-      
-      <IsUploading uploading={torrentStore.canEndUploading} />
+
+      <ControlUploadingButtonField torrentTableRowStore={props.torrentTableRowStore} />
+
+      {/** <IsUploading uploading={torrentStore.canEndUploading} /> **/}
       
       <BytesField bytes={torrentStore.totalSize} />
       

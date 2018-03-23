@@ -22,7 +22,7 @@ const TorrentsTable = observer((props) => {
   let styles = getStyle(props)
   
   return (
-    <Table column_titles={['', 'UPLOADING', 'SIZE', 'BUYERS']}>
+    <Table column_titles={['', '*ACTION', 'SIZE', 'BUYERS']}>
       {
         props.completedStore.torrentRowStores.map((t, index) => {
           
