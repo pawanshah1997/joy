@@ -28,17 +28,9 @@ function computeOptimumPricePerPiece (alpha, pieceLength, numPieces, satoshiPerM
 
   const fileSizeMB = (pieceLength * numPieces) / (1024 * 1024)
 
-  const revenueAtAlpha = alpha * fileSizeMB * satoshiPerMb
+  const totalPaidAtAlpha = Math.max(alpha * fileSizeMB * satoshiPerMb, DUST)
 
-  let pMin
-
-  if (revenueAtAlpha < DUST) {
-    // For small files a low price/MB will not result in large enough output to seller to surpass DUST
-    // So we will ensure on full transfer seller will get just above DUST
-    pMin = (DUST + settlementFee + 1) / numPieces
-  } else {
-    pMin = (revenueAtAlpha + settlementFee) / (numPieces * alpha)
-  }
+  let pMin = (totalPaidAtAlpha + settlementFee) / (numPieces * alpha)
 
   return Math.ceil(pMin) + 1
 }
