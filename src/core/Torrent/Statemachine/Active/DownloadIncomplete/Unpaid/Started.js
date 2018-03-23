@@ -95,7 +95,8 @@ var Started = new BaseMachine({
                   var minimumRevenue = sellerTerms.minPrice * client.torrentInfo.numPieces()
 
                   // Set value to at least surpass dust
-                  var value = Math.max(minimumRevenue, 0)
+                  const DUST = 600
+                  var value = minimumRevenue + DUST
 
                   // Update fee estimate
                   if(sellerTerms.minContractFeePerKb > contractFeeRate)
@@ -289,7 +290,8 @@ function estimateRequiredFundsForContract (suitableAndJoined, minNumberOfSellers
     const minimumRevenue = sellerTerms.minPrice * numPiecesInTorrent
 
     // Set value to at least surpass dust
-    totalOutput = Math.max(minimumRevenue, 0)
+    const DUST = 600
+    totalOutput = minimumRevenue + DUST
 
     // Update fee estimate
     if(sellerTerms.minContractFeePerKb > contractFeeRate)

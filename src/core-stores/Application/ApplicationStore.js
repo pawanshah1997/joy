@@ -253,11 +253,15 @@ class ApplicationStore {
    */
   defaultBuyerTerms(pieceLength, numPieces) {
     let defaultTerms = this.applicationSettings.defaultBuyerTerms()
+    const settlementFee = this.applicationSettings.defaultSellerTerms().settlementFee
     let convertedTerms = {...defaultTerms}
 
-    convertedTerms.maxPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.maxPrice, pieceLength)
+    // what chunk of the data needs to be delivered before seller will get non dust output
+    const alpha = 0.2
 
-    convertedTerms.maxPrice = Math.ceil(Math.max(convertedTerms.maxPrice, 547 / numPieces))
+    const satoshiPerMb = defaultTerms.maxPrice
+
+    convertedTerms.maxPrice = computeOptimumPricePerPiece(alpha, pieceLength, numPieces, satoshiPerMb, settlementFee)
 
     return convertedTerms
   }
@@ -267,14 +271,54 @@ class ApplicationStore {
    */
   defaultSellerTerms(pieceLength, numPieces) {
     let defaultTerms = this.applicationSettings.defaultSellerTerms()
+    const settlementFee = defaultTerms.settlementFee
     let convertedTerms = {...defaultTerms}
 
-    convertedTerms.minPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.minPrice, pieceLength)
+    // what chunk of the data needs to be delivered before seller will get non dust output
+    const alpha = 0.2
 
-    convertedTerms.minPrice = Math.ceil(Math.max(convertedTerms.minPrice, 547 / numPieces))
+    const satoshiPerMb = defaultTerms.minPrice
+
+    convertedTerms.minPrice = computeOptimumPricePerPiece(alpha, pieceLength, numPieces, satoshiPerMb, settlementFee)
 
     return convertedTerms
   }
+}
+
+function computeOptimumPricePerPiece (alpha, pieceLength, numPieces, satoshiPerMb, settlementFee) {
+  if (alpha > 1 || alpha < 0) {
+    throw new Error('alpha must be a number between 0 and 1')
+  }
+
+  if (pieceLength < 0 || numPieces < 0) {
+    throw new Error('invalid pieceLength or numPieces')
+  }
+
+  if (satoshiPerMb < 0) {
+    throw new Error('invalid satoshiPerMb rate')
+  }
+
+  if (settlementFee < 0) {
+    throw new Error('invalid settlementFee')
+  }
+
+  const DUST = 547
+
+  const fileSizeMB = (pieceLength * numPieces) / (1024 * 1024)
+
+  const revenueAtAlpha = alpha * fileSizeMB * satoshiPerMb
+
+  let pMin
+
+  if (revenueAtAlpha < DUST) {
+    // For small files a low price/MB will not result in large enough output to seller to surpass DUST
+    // So we will ensure on full transfer seller will get just above DUST
+    pMin = (DUST + settlementFee + 1) / numPieces
+  } else {
+    pMin = (revenueAtAlpha + settlementFee) / (numPieces * alpha)
+  }
+
+  return Math.ceil(pMin) + 1
 }
 
 export default ApplicationStore
