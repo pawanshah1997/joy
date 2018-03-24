@@ -44,6 +44,7 @@ import UIStore from './scenes'
 import assert from 'assert'
 import mkdirp from 'mkdirp'
 import getCoins from './core/Application/faucet'
+import DefaultAppDirectory from './defaultAppDirectory'
 
 /**
  * Some Components use react-tap-event-plugin to listen for touch events because onClick is not
@@ -176,10 +177,7 @@ loadedRenderer()
 if(process.env.FORCE_ONBOARDING)
   config.skipLoadingExistingTorrents = true
 
-// Root path that will contain the wallets, application database and downloaded torrents
-const appDirectory = path.join(os.homedir(), '.joystream')
-
-mkdirp.sync(appDirectory)
+const appDirectory = DefaultAppDirectory()
 
 application.start(config, appDirectory)
 

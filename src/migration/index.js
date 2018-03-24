@@ -2,24 +2,23 @@
 import 'babel-polyfill'
 import os from 'os'
 import path from 'path'
-import mkdirp from 'mkdirp'
-import db from './db'
+import db from '../db'
 import semver from 'semver'
 
-import Application from './core/Application'
-import ApplicationSettings from './core/ApplicationSettings'
-import DeepInitialState from './core/Torrent/Statemachine/DeepInitialState'
+import Application from '../core/Application'
+import ApplicationSettings from '../core/ApplicationSettings'
+import DeepInitialState from '../core/Torrent/Statemachine/DeepInitialState'
+import DefaultAppDirectory from '../defaultAppDirectory'
 
 const debug = require('debug')('application-migration')
 
 function getRunningAppVersion () {
-  return require('../package.json').version
+  return require('../../package.json').version
 }
 
-function run () {
+function runMigrationTasks () {
   // NOTE: Should match app directory used by the application (in renderer process)
-  const appDirectory = path.join(os.homedir(), '.joystream')
-  mkdirp.sync(appDirectory)
+  const appDirectory = DefaultAppDirectory()
 
   return new Promise(function (resolve, reject) {
 
@@ -124,4 +123,4 @@ function transformTorrentSettings (torrentDbPath, transform) {
       })
     })
 }
-module.exports.run = run
+module.exports.runMigrationTasks = runMigrationTasks

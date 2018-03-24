@@ -152,7 +152,7 @@ function main () {
 
 function onAppReady () {
   // Do migrations ... before opening main window
-  let migration = Migration.run()
+  let migration = Migration.runMigrationTasks()
 
   migration.then(function () {
     preventMainWindowCreationOnActivate = false
