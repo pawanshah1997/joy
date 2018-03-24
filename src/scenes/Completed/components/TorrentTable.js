@@ -1,7 +1,14 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
-import Table from '../../../components/Table'
+import Table,
+{
+  TableHeader,
+  TableBody,
+  StringHeaderLabel,
+  ExplainedHeaderLabel,
+  Hint
+} from '../../../components/Table/index'
 import TorrentRow from './TorrentRow'
 import CompletedStore from '../Stores'
 
@@ -22,7 +29,14 @@ const TorrentsTable = observer((props) => {
   let styles = getStyle(props)
   
   return (
-    <Table column_titles={['', '*ACTION', 'SIZE', 'BUYERS']}>
+    <Table>
+      <TableHeader>
+        <StringHeaderLabel title=""/>
+        <StringHeaderLabel title="UPLOADING"/>
+        <StringHeaderLabel title="SIZE"/>
+        <StringHeaderLabel title="BUYERS"/>
+      </TableHeader>
+      <TableBody>
       {
         props.completedStore.torrentRowStores.map((t, index) => {
           
@@ -34,6 +48,7 @@ const TorrentsTable = observer((props) => {
           )
         })
       }
+      </TableBody>
     </Table>
   )
 })
