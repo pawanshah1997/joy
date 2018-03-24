@@ -1,10 +1,11 @@
 import os from 'os'
 import path from 'path'
 import mkdirp from 'mkdirp'
+import isDev from 'electron-is-dev'
 
 // Root path that will contain the wallets, application database and downloaded torrents
-// TODO: use a different path for app running in dev mode
-const appDirectory = path.join(os.homedir(), '.joystream')
+
+const appDirectory = path.join(os.homedir(), isDev ? '.joystream_development' : '.joystream')
 
 mkdirp.sync(appDirectory)
 
