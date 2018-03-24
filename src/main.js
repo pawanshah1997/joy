@@ -151,20 +151,28 @@ function main () {
 }
 
 function onAppReady () {
-  // Do migrations ... before opening main window
-  let migration = Migration.runMigrationTasks()
-
-  migration.then(function () {
+  function launchMainWindow () {
     preventMainWindowCreationOnActivate = false
     createMainWindow()
-  })
+  }
 
-  migration.catch(function (err) {
-    require('electron').dialog.showErrorBox(
-      'JoyStream - Error',
-      'Error encountered while migrating the application data to a new version. More Info: ' + err.message)
-    process.exit(-1)
-  })
+  if (!isDev) {
+    // Do migrations ... before opening main window
+    let migration = Migration.runMigrationTasks()
+
+    migration.then(function () {
+      launchMainWindow()
+    })
+
+    migration.catch(function (err) {
+      require('electron').dialog.showErrorBox(
+        'JoyStream - Error',
+        'Error encountered while migrating the application data to a new version. More Info: ' + err.message)
+      process.exit(-1)
+    })
+  } else {
+    launchMainWindow()
+  }
 }
 
 function createMainWindow () {
