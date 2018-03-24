@@ -62,14 +62,14 @@ const DEFAULT_APPLICATION_SETTINGS = {
   },
 
   buyerTerms : {
-    maxPrice: 10,
+    maxPrice: 2,
     maxLock: 20,
     minNumberOfSellers: 1,
     maxContractFeePerKb: 1024
   },
 
   sellerTerms : {
-    minPrice: 10,
+    minPrice: 2,
     minLock: 10,
     maxNumberOfSellers: 5,
     minContractFeePerKb: 1024,
