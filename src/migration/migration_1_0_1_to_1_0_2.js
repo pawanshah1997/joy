@@ -3,6 +3,7 @@ import transformTorrentSettings from './transformTorrentSettings'
 import DeepInitialState from '../core/Torrent/Statemachine/DeepInitialState'
 
 module.exports = async function migration_1_0_1_to_1_0_2 (appSettings, torrentDbPath) {
+  // In initial mainnet release we forgot to clear the old testnet terms saved in application settings
   appSettings.setDefaultBuyerTerms(DEFAULT_APPLICATION_SETTINGS.buyerTerms)
 
   appSettings.setDefaultSellerTerms(DEFAULT_APPLICATION_SETTINGS.sellerTerms)
