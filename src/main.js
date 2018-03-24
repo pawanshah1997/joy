@@ -1,3 +1,6 @@
+// babel-polyfill for generator (async/await)
+import 'babel-polyfill'
+
 const {app, BrowserWindow, ipcMain, crashReporter, Menu} = require('electron')
 const path = require('path')
 const url = require('url')

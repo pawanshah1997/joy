@@ -1,5 +1,3 @@
-// babel-polyfill for generator (async/await)
-import 'babel-polyfill'
 import os from 'os'
 import path from 'path'
 import db from '../db'
@@ -7,7 +5,6 @@ import semver from 'semver'
 
 import Application from '../core/Application'
 import ApplicationSettings from '../core/ApplicationSettings'
-import DeepInitialState from '../core/Torrent/Statemachine/DeepInitialState'
 import DefaultAppDirectory from '../defaultAppDirectory'
 
 const debug = require('debug')('application-migration')
@@ -16,111 +13,67 @@ function getRunningAppVersion () {
   return require('../../package.json').version
 }
 
-function runMigrationTasks () {
-  // NOTE: Should match app directory used by the application (in renderer process)
+// Array of migration tasks (assuming we will only ever need a single path migration,
+// for complex migration paths we would need a graph structure)
+import MIGRATIONS from './migrations'
+
+/**
+ * constructs sequence of migration tasks required to be run when updating from one version to the next
+ */
+function getMigrationTaskSequence (fromVersion, toVersion) {
+
+  if(semver.gt(toVersion, fromVersion)) {
+    // Find index of the first migration task
+    let tasks = []
+
+    for (let i in MIGRATIONS) {
+
+      if (MIGRATIONS[i].from === fromVersion) {
+        return MIGRATIONS.slice(i)
+      }
+    }
+
+    return tasks
+
+  } else if (semver.lt(toVersion, fromVersion)) {
+    // User has installed an older version of the app
+    // We currently do not support backward migration
+    return []
+
+  } else {
+    // Running same version.. no migration tasks to run
+    return []
+  }
+}
+
+async function runMigrationTasks () {
+
   const appDirectory = DefaultAppDirectory()
+  let appSettings = Application.createApplicationSettings()
+  let torrentDbPath = Application.torrentDatabasePath(appDirectory)
 
-  return new Promise(function (resolve, reject) {
+  const currentAppVersion = getRunningAppVersion()
 
-    let appSettings = Application.createApplicationSettings()
-    let torrentDbPath = Application.torrentDatabasePath(appDirectory)
+  appSettings.open()
 
-    const currentAppVersion = getRunningAppVersion()
+  // versions of application prior to v1.0.0 did not store the last ran app version
+  // so we will treat them all as version 0.0.0
+  const lastRanAppVersion = appSettings.lastRanVersionOfApp() || '0.0.0'
 
-    appSettings.open()
+  let migrations = getMigrationTaskSequence(lastRanAppVersion, currentAppVersion)
 
-    // versions of application prior to v1.0.0 did not store the last ran app version
-    // so we will treat them all as version 0.0.0
-    const lastRanAppVersion = appSettings.lastRanVersionOfApp() || '0.0.0'
+  console.log('lastRan=', lastRanAppVersion, 'current=', currentAppVersion)
+  console.log('running migration tasks', migrations)
 
-    let migrations = []
+  for (let i in migrations) {
+    let runTask = migrations[i].task
 
-    // Only run migrations when installing newer versions
-    if(semver.gt(currentAppVersion, lastRanAppVersion)) {
-      migrations.push(runTorrentDatabaseMigrations(lastRanAppVersion, currentAppVersion, torrentDbPath))
-      migrations.push(runApplicationSettingsMigrations(lastRanAppVersion, currentAppVersion, appSettings))
-    } else {
-      // Running an older or same version of the app.. don't do any migration
-      return resolve()
-    }
+    await runTask(appSettings, torrentDbPath)
+  }
 
-    Promise.all(migrations)
-      .then(function () {
-        appSettings.setLastRanVersionOfApp(currentAppVersion)
-        appSettings.close()
-      })
-      .catch(function (err) {
-        reject(err)
-      })
-      .finally(function () {
-        resolve()
-      })
-  })
+  appSettings.setLastRanVersionOfApp(currentAppVersion)
+  appSettings.close()
 }
 
-function runApplicationSettingsMigrations (lastVersion, currentVersion, appSettings) {
-  return new Promise(function (resolve, reject) {
-    if (semver.satisfies(lastVersion, '>=0.0.0') &&
-        semver.satisfies(lastVersion, '<1.0.1')) {
-      // In initial migration to v1.0.0 we forgot to clear the default buyer/seller terms
-      // from the application settings.
-      debug('deleteing default terms from application settings')
-      appSettings.deleteDefaultTerms()
 
-      debug('resetting bitTorrentPort')
-      appSettings.deleteBitTorrentPort()
-    }
-    resolve()
-  })
-}
-
-function runTorrentDatabaseMigrations (lastVersion, currentVersion, torrentDbPath) {
-  return new Promise(function (resolve, reject) {
-    if (semver.satisfies(lastVersion, '>=0.0.0') &&
-        semver.satisfies(lastVersion, '<1.0.1')) {
-      // First migration on release of v1.0.0 clears buyer/seller terms so they can be
-      // reset to new standard default terms
-      debug('Running torrent database migration - clearing saved terms')
-      transformTorrentSettings(torrentDbPath, function (torrent) {
-        // Torrent statemachine will not expect for there to be any terms set yet
-        torrent.deepInitialState = DeepInitialState.PASSIVE
-
-        // Forces new standard terms to be used
-        delete torrent.extensionSettings
-
-        return torrent
-      })
-      .catch(reject)
-      .then(resolve)
-    } else {
-      debug('No torrent database migration tasks to run')
-      resolve()
-    }
-  })
-}
-
-// Updates torrent settings in Database
-// by applying a transformation function to each torrent
-function transformTorrentSettings (torrentDbPath, transform) {
-  let torrentsDB
-
-  return db.open(torrentDbPath)
-    .then((torrentDatabase) => {
-      torrentsDB = torrentDatabase
-      return torrentDatabase.getAll('torrents')
-    })
-    .then(function (torrents) {
-      return torrents.map(transform)
-    })
-    .then(function (torrents) {
-      return Promise.all(torrents.map(torrent => torrentsDB.save('torrents', torrent.infoHash, torrent)))
-    })
-    .then(function () {
-      return new Promise(function (resolve, reject) {
-        torrentsDB.close((err) => {
-          resolve()
-        })
-      })
-    })
-}
 module.exports.runMigrationTasks = runMigrationTasks
