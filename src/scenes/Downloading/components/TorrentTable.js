@@ -20,10 +20,10 @@ function getStyle(props) {
       borderStyle: 'none'
     },
     evenRow : {
-      backgroundColor : 'hsla(0, 0%, 93%, 1)'
+      backgroundColor : 'rgba(222, 222, 222, 0.2)', //'hsla(0, 0%, 93%, 1)',
     },
     oddRow : {
-      backgroundColor : 'white'
+      backgroundColor : 'transparent'
     }
   }
 }
@@ -34,7 +34,7 @@ const TorrentTable = observer((props) => {
 
   return (
     <Dropzone disableClick style={styles.dropZoneStyle} onDrop={(files) => { props.downloadingStore.startDownloadWithTorrentFileFromDragAndDrop(files) }}>
-      <Table column_titles={['', 'STATE', 'SIZE', 'PROGRESS', 'SPEED', 'ARRIVAL', 'MODE', 'SEEDERS', 'SELLERS']}>
+      <Table column_titles={['', '*ACTION', 'SIZE', 'PROGRESS', 'SPEED', 'ARRIVAL', 'SEEDERS', 'SELLERS']}>
         {
           props.downloadingStore.torrentRowStores.length === 0
             ?

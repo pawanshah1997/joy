@@ -30,9 +30,9 @@ $content-padding: 10px;
     padding-bottom: $content-padding;
     background-color: $grey-background;
 
-    border-top-width: 3px;
-    border-top-color: $grey-accent;
-    border-top-style: solid;
+    //border-top-width: 3px;
+    //border-top-color: $grey-accent;
+    //border-top-style: solid;
 
     //border-left-width: 2px;
     //border-left-color: $grey-accent;
@@ -70,9 +70,8 @@ $content-padding: 10px;
     justify-content: center;
 
     //flex-grow: 0.05;
-    flex: 0 0 80px;
+    flex: 0 0 90px;
     margin-left: 30px;
-    width: 80px;
     text-align: center;
 
     .label {
