@@ -73,7 +73,7 @@ const CurrencyLabel = (props) => {
   let styles = getStyles(props)
 
   let value = (
-    <div style={styles.root} data-tip ={props.tooltip}>
+    <div style={styles.root} data-tip data-for={"currencyLabel"}>
 
       <span style={styles.amount}>
         <span style={styles.amountUnit}>BCH</span>
@@ -90,7 +90,10 @@ const CurrencyLabel = (props) => {
           <ReactTooltip place='top'
                         effect='solid'
                         className="torrent_table_toolbar_tooltip"
-          />
+                        id="currencyLabel"
+          >
+            {props.tooltip}
+          </ReactTooltip>
           :
           null
       }

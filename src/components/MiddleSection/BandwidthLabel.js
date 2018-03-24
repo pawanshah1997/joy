@@ -52,7 +52,7 @@ const BandwidthLabel = (props) => {
     let representation = convenientBytes(props.bytesPerSecond)
 
     let value = (
-        <div style={styles.root} data-tip ={props.tooltip}>
+        <div style={styles.root} data-tip data-for={"BandwidthLabel"}>
             <span style={styles.value}>{representation.value}</span>
             <span style={styles.unit}>{representation.unit ? representation.unit + '/s' : null}</span>
 
@@ -62,7 +62,10 @@ const BandwidthLabel = (props) => {
                 <ReactTooltip place='top'
                               effect='solid'
                               className="torrent_table_toolbar_tooltip"
-                />
+                              id="BandwidthLabel"
+                >
+                  {props.tooltip}
+                </ReactTooltip>
                 :
                 null
             }
