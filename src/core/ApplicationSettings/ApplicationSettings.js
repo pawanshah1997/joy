@@ -165,10 +165,6 @@ class ApplicationSettings extends EventEmitter {
     this._set(BITTORRENT_PORT, bittorrentPort)
   }
 
-  deleteBitTorrentPort() {
-    this._delete(BITTORRENT_PORT)
-  }
-
   defaultSellerTerms() {
     return this._get(DEFAULT_SELLER_TERMS)
   }
@@ -216,11 +212,6 @@ class ApplicationSettings extends EventEmitter {
 
   setClaimedFreeBCH(claimedFreeBCH) {
     this._set(CLAIMED_FREE_BCH, claimedFreeBCH)
-  }
-
-  deleteDefaultTerms () {
-    this._delete(DEFAULT_BUYER_TERMS)
-    this._delete(DEFAULT_SELLER_TERMS)
   }
 
   _delete (key) {
