@@ -11,7 +11,8 @@ module.exports = async function migration_1_0_1_to_1_0_2 (appSettings, torrentDb
   appSettings.setBittorrentPort(DEFAULT_APPLICATION_SETTINGS.bitTorrentPort)
 
   // Clear terms from saved torrents
-  transformTorrentSettings(torrentDbPath, function (torrent) {
+  await transformTorrentSettings(torrentDbPath, function (torrent) {
+
     // Torrent statemachine will not expect for there to be any terms set yet
     torrent.deepInitialState = DeepInitialState.PASSIVE
 

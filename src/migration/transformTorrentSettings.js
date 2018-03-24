@@ -6,7 +6,7 @@ async function transformTorrentSettings (torrentDbPath, transform) {
 
   let torrentsDB = await db.open(torrentDbPath)
 
-  let torrents = await torrentDatabase.getAll('torrents')
+  let torrents = await torrentsDB.getAll('torrents')
 
   let transformedTorrents = torrents.map(transform)
 
