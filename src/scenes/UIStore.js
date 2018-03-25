@@ -948,7 +948,7 @@ class UIStore {
       if(err) {
 
         if(dialogVisible) {
-          this.walletSceneStore.visibleDialog.error = err.code
+          this.walletSceneStore.visibleDialog.error = err
           this.walletSceneStore.visibleDialog.setStage(ClaimFreeBCHFlowStore.STAGE.DISPLAY_FAILURE_MESSAGE)
         } else {
           debug('Ignored error result of claiming free BCH, dialog abandoned')

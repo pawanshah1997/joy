@@ -14,13 +14,53 @@ import SvgIcon from 'material-ui/SvgIcon'
 
 import {ErrorCodes} from '../../../../core/Application/faucet'
 
+import Application from '../../../../core/Application/Application'
+
 import assert from 'assert'
 
-function errorMessageFromErrorCode(errorCode) {
+const CLAIM_FREE_BCH_ERROR = Application.CLAIM_FREE_BCH_ERROR
+
+function errorMessageFromClaimFreeBchErrorCode(errorCode) {
 
   let message
 
   switch(errorCode) {
+    case CLAIM_FREE_BCH_ERROR.APPLICATION_IN_WRONG_STATE:
+      message = 'Application in wrong state'
+      break
+
+    case CLAIM_FREE_BCH_ERROR.RECEIVE_ADDRESS_NOT_READY:
+      message = 'Receive Address not ready'
+      break
+
+    case CLAIM_FREE_BCH_ERROR.WALLET_NOT_STARTED:
+      message = 'Wallet Not Ready'
+      break
+
+    case CLAIM_FREE_BCH_ERROR.SETTINS_MUST_BE_OPEN:
+      message = 'Application settings are closed'
+      break
+
+    case CLAIM_FREE_BCH_ERROR.ALREADY_CLAIMED:
+      message = 'Free coins already claimed!'
+      break
+
+    default:
+      assert(false)
+  }
+
+  return message
+}
+
+function errorMessageFromFaucetErrorCode(errorCode) {
+
+  let message
+
+  switch(errorCode) {
+
+    case ErrorCodes.NO_FAUCET_FOR_NETWORK:
+      message = 'No Faucet configured for network'
+      break
 
     case ErrorCodes.NETWORK_ERROR:
       message = 'Network request failed'
@@ -113,7 +153,13 @@ const FailedForm = (props) => {
 
   let styles = getStyles(props)
 
-  let errorMessage = errorMessageFromErrorCode(props.errorCode)
+  let errorMessage = 'Unknown Error'
+
+  if (props.error.code === CLAIM_FREE_BCH_ERROR.FAUCET_ERROR) {
+    errorMessage = errorMessageFromFaucetErrorCode(props.error.faucetError.code)
+  } else {
+    errorMessage = errorMessageFromClaimFreeBchErrorCode(props.error.code)
+  }
 
   return (
     <div style={styles.root}>

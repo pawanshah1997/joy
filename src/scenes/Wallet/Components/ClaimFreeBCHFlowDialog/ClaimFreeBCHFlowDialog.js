@@ -36,7 +36,7 @@ const ClaimFreeBCHFlowDialog = observer((props) => {
     }
     else if(props.claimFreeBCHFlowDialogStore.stage === ClaimFreeBCHFlowStore.STAGE.DISPLAY_FAILURE_MESSAGE) {
       title = "Couldn't get your coins"
-      form = <FailedForm errorCode={props.claimFreeBCHFlowDialogStore.error}
+      form = <FailedForm error={props.claimFreeBCHFlowDialogStore.error}
                          onClick={props.claimFreeBCHFlowDialogStore.close}
       />
     }
