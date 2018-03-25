@@ -173,10 +173,10 @@ function createMainWindow () {
 
   // Create the browser window.
   win = new BrowserWindow({
-      width: 1200,
+      width: 1240,
       height: 800,
       minHeight: 700,
-      minWidth: 1200,
+      minWidth: 1240,
       frame: true,
       backgroundColor: '#1C262B', // same as rgb(28, 38, 43)
       show : true
