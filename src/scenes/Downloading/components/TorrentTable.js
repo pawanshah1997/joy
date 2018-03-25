@@ -5,7 +5,14 @@
 import React from 'react'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
-import Table, { Hint } from '../../../components/Table/index'
+import Table,
+{
+  TableHeader,
+  TableBody,
+  StringHeaderLabel,
+  ExplainedHeaderLabel,
+  Hint
+} from '../../../components/Table/index'
 import TorrentRow from './TorrentRow'
 import Dropzone from 'react-dropzone'
 import DownloadingStore from '../Stores'
@@ -34,7 +41,20 @@ const TorrentTable = observer((props) => {
 
   return (
     <Dropzone disableClick style={styles.dropZoneStyle} onDrop={(files) => { props.downloadingStore.startDownloadWithTorrentFileFromDragAndDrop(files) }}>
-      <Table column_titles={['', '*ACTION', 'SIZE', 'PROGRESS', 'SPEED', 'ARRIVAL', 'SEEDERS', 'SELLERS']}>
+      <Table>
+        <TableHeader>
+          <StringHeaderLabel title=""/>
+
+          <StringHeaderLabel title="STATE"/>
+          <StringHeaderLabel title="SIZE"/>
+          <StringHeaderLabel title="PROGRESS"/>
+          <StringHeaderLabel title="SPEED"/>
+          <StringHeaderLabel title="ARRIVAL"/>
+          <StringHeaderLabel title="MODE"/>
+          <StringHeaderLabel title="SEEDERS"/>
+          <StringHeaderLabel title="SELLERS"/>
+        </TableHeader>
+        <TableBody>
         {
           props.downloadingStore.torrentRowStores.length === 0
             ?
@@ -52,6 +72,7 @@ const TorrentTable = observer((props) => {
 
             })
         }
+        </TableBody>
       </Table>
     </Dropzone>
   )

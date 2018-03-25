@@ -6,24 +6,6 @@ $content-padding: 10px;
 
 .my_table {
 
-  .column-headers {
-    display: flex;
-    flex-direction: row;
-
-    // Lateral padding must match total offset on row field
-    padding-left: 20px;
-    padding-right: 20px + $scrollbar-width;
-
-    flex : 0 0 45px;
-
-    font-family: $major-font-family;
-    font-size: 11px;
-    font-weight: bold;
-    color: hsl(219, 41%, 76%);//#fcd9cf;
-
-    background-color: #496daf;
-  }
-
   .content {
     display: flex;
     flex-direction: column;
