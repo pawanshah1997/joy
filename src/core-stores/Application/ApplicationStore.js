@@ -1,5 +1,4 @@
 import { observable, action, computed} from 'mobx'
-import {computeOptimumPricePerPiece} from '../../common/'
 
 class ApplicationStore {
 
@@ -253,41 +252,6 @@ class ApplicationStore {
     this._stopper()
   }
 
-  /**
-   * Converts application default settings to protocol settings
-   */
-  defaultBuyerTerms(pieceLength, numPieces) {
-    let defaultTerms = this.applicationSettings.defaultBuyerTerms()
-    const settlementFee = this.applicationSettings.defaultSellerTerms().settlementFee
-    let convertedTerms = {...defaultTerms}
-
-    // what chunk of the data needs to be delivered before seller will get non dust output
-    const alpha = 0.2
-
-    const satoshiPerMb = defaultTerms.maxPrice
-
-    convertedTerms.maxPrice = computeOptimumPricePerPiece(alpha, pieceLength, numPieces, satoshiPerMb, settlementFee)
-
-    return convertedTerms
-  }
-
-  /**
-   * Converts application default settings to protocol settings
-   */
-  defaultSellerTerms(pieceLength, numPieces) {
-    let defaultTerms = this.applicationSettings.defaultSellerTerms()
-    const settlementFee = defaultTerms.settlementFee
-    let convertedTerms = {...defaultTerms}
-
-    // what chunk of the data needs to be delivered before seller will get non dust output
-    const alpha = 0.2
-
-    const satoshiPerMb = defaultTerms.minPrice
-
-    convertedTerms.minPrice = computeOptimumPricePerPiece(alpha, pieceLength, numPieces, satoshiPerMb, settlementFee)
-
-    return convertedTerms
-  }
 }
 
 export default ApplicationStore
