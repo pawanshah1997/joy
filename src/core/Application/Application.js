@@ -846,6 +846,26 @@ class Application extends EventEmitter {
 
     })
 
+    joystreamNodeTorrent.on('dhtGetPeersReply', (peers) => {
+
+      if(this.state !== Application.STATE.STARTED)
+        return
+
+      // a call to connect_peer will throw if torrent is "uninitialized or in queued or checking mode"
+      if(torrent.isTerminating() || torrent.state.startsWith('Loading'))
+        return
+
+      debug('discovered joystream peers. Adding ', peers.length, ' peers to peer list')
+
+      // Note: A call to connectPeer only adds the endpoint to the list of peers libtorrent
+      // will attempt to connect to. The priority of which peers from the set to connect to
+      // and in which order is hard coded.
+      for (let i in peers) {
+        joystreamNodeTorrent.connectPeer(peers[i])
+      }
+
+    })
+
     // Add to torrents map
 
     // where it obviously should not already be
