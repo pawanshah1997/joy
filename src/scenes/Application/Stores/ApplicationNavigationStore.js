@@ -15,7 +15,8 @@ class ApplicationNavigationStore {
     Community: 4,
     Livestream: 5,
     New: 6,
-    Publish: 7
+    Publish: 7,
+    Settings: 8
   }
   
   /**
@@ -119,6 +120,8 @@ class ApplicationNavigationStore {
       case ApplicationNavigationStore.TAB.New:
         break
       case ApplicationNavigationStore.TAB.Publish:
+        break
+      case ApplicationNavigationStore.TAB.Settings:
         break
       default:
         assert(false) // Invalid scene passed

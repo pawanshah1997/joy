@@ -3,9 +3,22 @@
  */
 
 import Table from './Table'
+import TableHeader from './TableHeader'
+import TableBody from './TableBody'
 import Field, {ObserverField} from './Field'
 import Row from './Row'
 import Hint from './Hint'
+import ExplainedHeaderLabel from './ExplainedHeaderLabel'
+import StringHeaderLabel from './StringHeaderLabel'
 
 export default Table
-export {Field, ObserverField, Row, Hint}
+export {
+  TableHeader,
+  TableBody,
+  Field,
+  ObserverField,
+  Row,
+  Hint,
+  ExplainedHeaderLabel,
+  StringHeaderLabel
+}

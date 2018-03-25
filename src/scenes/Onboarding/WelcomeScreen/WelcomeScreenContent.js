@@ -96,6 +96,7 @@ const WelcomeScreenContent = (props) => {
                                     {...imageDimensionProps}
                     />
 
+                    <ExampleSpacer />
 
                     <ExampleTorrent title={"Big Buck Bunny"}
                         byteSize={1024*1024*264}

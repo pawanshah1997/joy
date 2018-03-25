@@ -8,6 +8,7 @@ import SendDialogStore from './SendDialogStore/SendDialogStore'
 import ReceiveDialogStore from './ReceiveDialogStore'
 import PaymentRowStore from './PaymentRowStore'
 import ClaimFreeBCHFlowStore from './ClaimFreeBCHFlowStore'
+import ViewHDSeedDialogStore from './ViewHDSeedDialogStore'
 
 /**
  * Model for wallet scene.
@@ -110,7 +111,9 @@ class WalletSceneStore {
     if(this.visibleDialog !== null)
       throw new Error('Dialog already visible')
 
+    let store = new ViewHDSeedDialogStore(this, this._walletStore.masterKey)
 
+    this.setVisibleDialog(store)
   }
 
   @action.bound

@@ -272,5 +272,4 @@ function checkForUpdates () {
  * us to interrogate the object from the browser window
  * console.
  */
-if(isDev)
-  module.exports = rootUIStore
+module.exports = rootUIStore

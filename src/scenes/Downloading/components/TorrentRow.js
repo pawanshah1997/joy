@@ -17,6 +17,7 @@ import {
   ModeField,
   PeerCountField
 } from '../../../components/RowFields/index'
+import StartPaidDownloadField from './StartPaidDownloadingField'
 import TorrentToolbar from './TorrentToolbar'
 import AbsolutePositionChildren from '../../../components/AbsolutePositionChildren/AbsolutePositionChildren'
 import {TorrentTableRowStore} from '../../Common/index'
@@ -33,7 +34,9 @@ const TorrentRow = observer((props) => {
     >
       <NameField name={torrentStore.name} />
 
-      <StatusField paused={torrentStore.canStart} />
+      <StartPaidDownloadField torrentTableRowStore={props.torrentTableRowStore}/>
+      
+      {/** <StatusField paused={torrentStore.canStart} /> **/ }
 
       <BytesField bytes={torrentStore.totalSize} />
 
@@ -46,13 +49,13 @@ const TorrentRow = observer((props) => {
         bytes_per_second={torrentStore.downloadSpeed}
       />
 
-      <ModeField isPaid={torrentStore.hasStartedPaidDownloading} />
+      {/** <ModeField isPaid={torrentStore.hasStartedPaidDownloading} /> **/ }
 
       <PeerCountField count={torrentStore.numberOfSeeders} />
 
       <PeerCountField count={torrentStore.numberOfSellers} />
 
-      <AbsolutePositionChildren left={-310} top={3}>
+      <AbsolutePositionChildren left={-250} top={13}>
         <TorrentToolbar torrentTableRowStore={props.torrentTableRowStore} />
       </AbsolutePositionChildren>
 

@@ -9,25 +9,11 @@ const FAUCET_URLS = {
   'bitcoincash': 'http://45.79.102.125:7097/withdraw/'
 }
 
-/**
-  * Makes a request to testnet faucet to get some free coins
-  * @address - address to send coins to (bcoin.Address)
-  */
-function getCoins (address, callback = () => {}) {
-  // Determine faucet service to use from network
-  const url = FAUCET_URLS[address.network.type]
-
-  if (!url) {
-    return callback('unsupported network')
-  }
-
-  _getCoins(url, address.toString(), callback)
-}
-
 const ErrorCodes = {
   // Errors generated locally
   NETWORK_ERROR: 10, // network request failed
   RESPONSE_PARSE_ERROR: 11, // failed to parse the response from faucet
+  NO_FAUCET_FOR_NETWORK: 12,
 
   // Error codes from faucet
   RATE_LIMIT_SERVER: 1,  // server withdrawl limit reached
@@ -37,6 +23,21 @@ const ErrorCodes = {
   ADDRESS_MISSING: 5,
   ADDRESS_INVALID: 6,
   SERVER_INTERNAL_ERROR: 7 // internal error sending coins
+}
+
+/**
+  * Makes a request to testnet faucet to get some free coins
+  * @address - address to send coins to (bcoin.Address)
+  */
+function getCoins (address, callback = () => {}) {
+  // Determine faucet service to use from network
+  const url = FAUCET_URLS[address.network.type]
+
+  if (!url) {
+    return callback({code: ErrorCodes.NO_FAUCET_FOR_NETWORK, message: 'unsupported network'})
+  }
+
+  _getCoins(url, address.toString(), callback)
 }
 
 /**

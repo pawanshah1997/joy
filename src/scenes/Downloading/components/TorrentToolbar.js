@@ -27,7 +27,7 @@ const TorrentToolbar = observer((props) => {
                    play={() => { props.torrentTableRowStore.playMedia() }}
       />
 
-      <StartPaidDownloadingSection row={props.torrentTableRowStore} />
+      {/** <StartPaidDownloadingSection row={props.torrentTableRowStore} /> **/ }
 
       <ToggleStatusSection canStart={props.torrentTableRowStore.torrentStore.canStart && !props.torrentTableRowStore.beingRemoved}
                            canStop={props.torrentTableRowStore.torrentStore.canStop && !props.torrentTableRowStore.beingRemoved}

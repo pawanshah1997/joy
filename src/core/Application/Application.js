@@ -16,7 +16,7 @@ import db from '../../db'
 import request from 'request'
 import magnet from 'magnet-uri'
 import StreamServer from '../StreamServer/StreamServer'
-import {satoshiPerMbToSatoshiPerPiece} from '../../common/'
+import {computeOptimumPricePerPiece} from '../../common/'
 
 var debug = require('debug')('application')
 import {shell} from 'electron'
@@ -55,21 +55,21 @@ const DEFAULT_APPLICATION_SETTINGS = {
     See https://www.libtorrent.org/reference-Settings.html#settings-pack outgoing_interfaces/incoming_interfaces for details
     We are picking a fixed default port to make it easier to do manual port mapping.
   */
-  bittorrentPort : 6881,
+  bittorrentPort : 7881,
 
   makeDefaultSavePathFromBaseFolder : (baseFolder) => {
     return path.join(baseFolder, FOLDER_NAME.DEFAULT_SAVE_PATH_BASE)
   },
 
   buyerTerms : {
-    maxPrice: 20,
+    maxPrice: 2,
     maxLock: 20,
     minNumberOfSellers: 1,
     maxContractFeePerKb: 1024
   },
 
   sellerTerms : {
-    minPrice: 20,
+    minPrice: 2,
     minLock: 10,
     maxNumberOfSellers: 5,
     minContractFeePerKb: 1024,
@@ -658,11 +658,15 @@ class Application extends EventEmitter {
 
   defaultBuyerTerms (pieceLength, numPieces) {
     let defaultTerms = this.applicationSettings.defaultBuyerTerms()
+    const settlementFee = this.applicationSettings.defaultSellerTerms().settlementFee
     let convertedTerms = {...defaultTerms}
 
-    convertedTerms.maxPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.maxPrice, pieceLength)
+    // what chunk of the data needs to be delivered before seller will get non dust output
+    const alpha = 0.2
 
-    convertedTerms.maxPrice = Math.ceil(Math.max(convertedTerms.maxPrice, 547 / numPieces))
+    const satoshiPerMb = defaultTerms.maxPrice
+
+    convertedTerms.maxPrice = computeOptimumPricePerPiece(alpha, pieceLength, numPieces, satoshiPerMb, settlementFee)
 
     return convertedTerms
   }
@@ -839,6 +843,26 @@ class Application extends EventEmitter {
 
       // change name
       torrent.provideMissingBuyerTerms(terms)
+
+    })
+
+    joystreamNodeTorrent.on('dhtGetPeersReply', (peers) => {
+
+      if(this.state !== Application.STATE.STARTED)
+        return
+
+      // a call to connect_peer will throw if torrent is "uninitialized or in queued or checking mode"
+      if(torrent.isTerminating() || torrent.state.startsWith('Loading'))
+        return
+
+      debug('discovered joystream peers. Adding ', peers.length, ' peers to peer list')
+
+      // Note: A call to connectPeer only adds the endpoint to the list of peers libtorrent
+      // will attempt to connect to. The priority of which peers from the set to connect to
+      // and in which order is hard coded.
+      for (let i in peers) {
+        joystreamNodeTorrent.connectPeer(peers[i])
+      }
 
     })
 

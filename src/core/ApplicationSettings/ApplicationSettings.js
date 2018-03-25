@@ -6,6 +6,10 @@ import ElectronConfig from 'electron-config'
 import { ipcRenderer, shell } from 'electron'
 import EventEmitter from 'events'
 
+
+/**
+ * Be aware that
+ */
 const NUMBER_OF_PRIOR_SESSIONS = 'numberOfPriorSessions'
 const DOWNLOAD_FOLDER = 'downloadFolder'
 const USE_ASSISTED_PEER_DISCOVERY = 'useAssistedPeerDiscovery'
@@ -138,7 +142,7 @@ class ApplicationSettings extends EventEmitter {
   }
 
   setNumberOfPriorSessions(numberOfPriorSessions) {
-    this._set(NUMBER_OF_PRIOR_SESSIONS, numberOfPriorSessions)
+    this._set(NUMBER_OF_PRIOR_SESSIONS, numberOfPriorSessions, 'numberOfPriorSessions')
   }
 
   downloadFolder () {
@@ -146,7 +150,7 @@ class ApplicationSettings extends EventEmitter {
   }
 
   setDownloadFolder (downloadFolder) {
-    this._set(DOWNLOAD_FOLDER, downloadFolder)
+    this._set(DOWNLOAD_FOLDER, downloadFolder, 'downloadFolder')
   }
 
   useAssistedPeerDiscovery() {
@@ -154,7 +158,7 @@ class ApplicationSettings extends EventEmitter {
   }
 
   setUseAssistedPeerDiscovery(useAssistedPeerDiscovery) {
-    this._set(USE_ASSISTED_PEER_DISCOVERY, useAssistedPeerDiscovery)
+    this._set(USE_ASSISTED_PEER_DISCOVERY, useAssistedPeerDiscovery, 'useAssistedPeerDiscovery')
   }
 
   bittorrentPort() {
@@ -162,7 +166,7 @@ class ApplicationSettings extends EventEmitter {
   }
 
   setBittorrentPort(bittorrentPort) {
-    this._set(BITTORRENT_PORT, bittorrentPort)
+    this._set(BITTORRENT_PORT, bittorrentPort, 'bitTorrentPort')
   }
 
   defaultSellerTerms() {
@@ -170,7 +174,7 @@ class ApplicationSettings extends EventEmitter {
   }
 
   setDefaultSellerTerms(sellerTerms) {
-    this._set(DEFAULT_SELLER_TERMS, sellerTerms)
+    this._set(DEFAULT_SELLER_TERMS, sellerTerms, 'defaultSellerTerms')
   }
 
   defaultBuyerTerms() {
@@ -178,7 +182,7 @@ class ApplicationSettings extends EventEmitter {
   }
 
   setDefaultBuyerTerms(buyerTerms) {
-    this._set(DEFAULT_BUYER_TERMS, buyerTerms)
+    this._set(DEFAULT_BUYER_TERMS, buyerTerms, 'defaultBuyerTerms')
   }
 
   termsAccepted() {
@@ -186,7 +190,7 @@ class ApplicationSettings extends EventEmitter {
   }
 
   setTermsAccepted(termsAccepted) {
-    this._set(TERMS_ACCEPTED, termsAccepted)
+    this._set(TERMS_ACCEPTED, termsAccepted, 'termsAccepted')
   }
 
   defaultClientPreference() {
@@ -194,12 +198,12 @@ class ApplicationSettings extends EventEmitter {
   }
 
   setDefaultClientPreference(preference) {
-    this._set(DEFAULT_CLIENT_PREFERENCE, preference)
+    this._set(DEFAULT_CLIENT_PREFERENCE, preference, 'defaultClientPreference')
   }
 
 
   setLastRanVersionOfApp (version) {
-    this._set(LAST_RAN_VERSION, version)
+    this._set(LAST_RAN_VERSION, version, 'lastRanVersionOfApp')
   }
 
   lastRanVersionOfApp () {
@@ -211,7 +215,7 @@ class ApplicationSettings extends EventEmitter {
   }
 
   setClaimedFreeBCH(claimedFreeBCH) {
-    this._set(CLAIMED_FREE_BCH, claimedFreeBCH)
+    this._set(CLAIMED_FREE_BCH, claimedFreeBCH, 'claimedFreeBCH')
   }
 
   _delete (key) {
@@ -229,12 +233,14 @@ class ApplicationSettings extends EventEmitter {
     return this._electronConfigStore.get(key)
   }
 
-  _set(key, value) {
+  _set(key, value, eventName) {
 
     if(this.state !== ApplicationSettings.STATE.OPENED)
       throw Error('Must be opened')
 
     this._electronConfigStore.set(key, value)
+
+    this.emit(eventName, value)
 
   }
 }

@@ -21,7 +21,11 @@ class VideoPlayer extends Component {
   }
 
   componentDidMount () {
-
+    // Despite autoPlay attribute being set on the video element, if no data is yet available
+    // from the stream, the video player just stalls and gets paused. It will not try to fetch additional
+    // data from the stream unless we invoke play() again on the element
+    // Also we want to always force playing so the torrent progress dialog will appear
+    getVideoDOMElement().play()
   }
 
   handleMouseEnter () {
