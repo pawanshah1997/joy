@@ -87,8 +87,8 @@ const ViewHDSeedDialog = observer((props) => {
             {props.viewHDSeedDialogStore.masterKey.mnemonic.phrase}
           </div>
 
-          <div style={styles.spacer}> </div>
           {/*
+          <div style={styles.spacer}> </div>
           <span style={styles.subtitle}>DERIVATION PATH</span>
           <div style={styles.pathContainer}>
             {"m/44/0'/0'"}
