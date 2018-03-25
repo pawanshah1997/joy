@@ -44,13 +44,10 @@ const TorrentTable = observer((props) => {
       <Table>
         <TableHeader>
           <StringHeaderLabel title=""/>
-
-          <StringHeaderLabel title="STATE"/>
           <StringHeaderLabel title="SIZE"/>
           <StringHeaderLabel title="PROGRESS"/>
           <StringHeaderLabel title="SPEED"/>
           <StringHeaderLabel title="ARRIVAL"/>
-          <StringHeaderLabel title="MODE"/>
           <StringHeaderLabel title="SEEDERS"/>
           <StringHeaderLabel title="SELLERS"/>
         </TableHeader>
