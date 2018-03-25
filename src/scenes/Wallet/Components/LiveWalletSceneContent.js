@@ -149,6 +149,13 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
                            iconNode={<SeedIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>}
             />
 
+            <div style={{
+              width: '10px',
+              //backgroundColor: '#49a749',
+              height: '55px'
+            }}>
+            </div>
+
             {
 
               /** Only display free coins button is the user can actually claim them **/
