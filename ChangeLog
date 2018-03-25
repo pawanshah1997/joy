@@ -1,3 +1,24 @@
+1.0.2 release March 25 2018
+
+  * Added settings UI to allow customization of default save path - #928
+  * Added more visible  “Boost" for speedup button for each torrent on downloading scene - #919
+  * Added more visible “Make Money” button for each torrent on finished scene - #919
+  * Changed default libtorrent port to 7881 - #921
+  * Revised default price to account for dust and fees - #915
+  * Minor refactor to default terms routines - #933
+  * Show correct error when claiming free coins - #912
+  * Added export wallet seed feature - #911
+  * Fixed media player to always play even if no data is yet available - #898
+  * Connect to joystream peers discovered through secondary infohash - #929
+  * Adjusted minimum window size constraint to fit settings tab - #930, #937
+  * Fixed misplaced label tooltip - #927
+  * Fix missing spacer on welcome screen #926
+  * Update Explainers - #924
+  * Blocked ‘Add Torrent’ button until last add operation completes - #920
+  * Improved migration runner - #923
+  * Make rootUIStore available in dev console for debugging - #906
+  * Fix column names, #935, #938
+
 1.0.1 release March 21 2018
 
   * Fix migration of default buyer/seller terms
