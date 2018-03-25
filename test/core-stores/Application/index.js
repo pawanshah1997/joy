@@ -9,7 +9,7 @@ const createInitialValues = () => {
     startedResources: new Set(),
     onboardingTorrents: ['a', 'b', 'c'],
     onboardingIsEnabled: true,
-    applicationSettings: {'a': 1},
+    applicationSettingsStore: {'a': 1},
     walletStore: {'b': 2},
     priceFeedStore: {'c': 3},
     starter: sinon.spy(),
@@ -41,7 +41,7 @@ describe('Application Store', function () {
       check('startedResources')
       check('onboardingTorrents')
       check('onboardingIsEnabled')
-      check('applicationSettings')
+      check('applicationSettingsStore')
       check('walletStore')
       check('priceFeedStore')
     })
