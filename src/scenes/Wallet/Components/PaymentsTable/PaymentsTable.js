@@ -18,7 +18,7 @@ function getStyles(props) {
       width : '930px' //'100%'
     },
     footer :{
-      height : '5px',
+      flex: '0 0 5px',
       backgroundColor: '#89a2d5', //'white',
       borderRadius : '0px 0px 7px 7px',
       marginBottom : '40px'

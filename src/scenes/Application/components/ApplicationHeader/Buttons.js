@@ -105,6 +105,22 @@ const PublishButton = (props) => {
     )
 }
 
+const SettingsButton = (props) => {
+
+  return (
+    <Button title="Settings" {...props}
+            viewBox={'0 0 24 24'}>
+      <path d="M5,13L5,1c0-0.552-0.448-1-1-1S3,0.448,3,1l0,12H5z"></path>
+      <path d="M7,15H1c-0.552,0-1,0.448-1,1v4c0,0.552,0.448,1,1,1h2v2c0,0.552,0.448,1,1,1s1-0.448,1-1v-2h2 c0.552,0,1-0.448,1-1v-4C8,15.448,7.552,15,7,15z"></path>
+      <path d="M13,3l0-2c0-0.552-0.448-1-1-1s-1,0.448-1,1l0,2H13z"></path>
+      <path d="M16,6c0-0.552-0.448-1-1-1H9C8.448,5,8,5.448,8,6v4c0,0.552,0.448,1,1,1h2v12 c0,0.552,0.448,1,1,1s1-0.448,1-1V11h2c0.552,0,1-0.448,1-1V6z"></path>
+      <path d="M21,13l0-12c0-0.552-0.448-1-1-1s-1,0.448-1,1l0,12H21z"></path>
+      <path d="M23,15h-6c-0.552,0-1,0.448-1,1v4c0,0.552,0.448,1,1,1h2v2c0,0.552,0.448,1,1,1s1-0.448,1-1v-2h2 c0.552,0,1-0.448,1-1v-4C24,15.448,23.552,15,23,15z"></path>
+    </Button>
+  )
+
+}
+
 export {
     UploadButton,
     DowloadButton,
@@ -113,5 +129,6 @@ export {
     CommunityButton,
     LivestreamButton,
     NewButton,
-    PublishButton
+    PublishButton,
+    SettingsButton
 }

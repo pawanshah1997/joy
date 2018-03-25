@@ -279,7 +279,15 @@ class UploadingStore {
       savePath: savePath,
       deepInitialState: DeepInitialState.UPLOADING.STARTED,
       extensionSettings : {
-        sellerTerms: this._uiStore.applicationStore.defaultSellerTerms(torrentInfo.pieceLength(), torrentInfo.numPieces())
+
+        /***
+         * ALERT ALERT:
+         * The below is a horrible hack in order to get this out the door
+         * without braking anything, needs to be refactored and removed!
+         * Only instances in `Application` should be around.
+         */
+
+        sellerTerms: this._uiStore._application.defaultSellerTerms(torrentInfo.pieceLength(), torrentInfo.numPieces())
       }
     }
 

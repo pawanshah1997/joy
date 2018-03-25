@@ -8,7 +8,7 @@ import {
         convenientHumanizeDuration,
         convenientBytes,
         standardHumanizeDurationOptions,
-        satoshiPerMbToSatoshiPerPiece
+        computeOptimumPricePerPiece
 } from './common'
 
 export {
@@ -17,5 +17,5 @@ export {
         convenientBytes,
         convenientHumanizeDuration,
         standardHumanizeDurationOptions,
-        satoshiPerMbToSatoshiPerPiece
+        computeOptimumPricePerPiece
 }

@@ -1,3 +1,6 @@
+// babel-polyfill for generator (async/await)
+import 'babel-polyfill'
+
 const {app, BrowserWindow, ipcMain, crashReporter, Menu} = require('electron')
 const path = require('path')
 const url = require('url')
@@ -151,20 +154,28 @@ function main () {
 }
 
 function onAppReady () {
-  // Do migrations ... before opening main window
-  let migration = Migration.run()
-
-  migration.then(function () {
+  function launchMainWindow () {
     preventMainWindowCreationOnActivate = false
     createMainWindow()
-  })
+  }
 
-  migration.catch(function (err) {
-    require('electron').dialog.showErrorBox(
-      'JoyStream - Error',
-      'Error encountered while migrating the application data to a new version. More Info: ' + err.message)
-    process.exit(-1)
-  })
+  if (!isDev) {
+    // Do migrations ... before opening main window
+    let migration = Migration.runMigrationTasks()
+
+    migration.then(function () {
+      launchMainWindow()
+    })
+
+    migration.catch(function (err) {
+      require('electron').dialog.showErrorBox(
+        'JoyStream - Error',
+        'Error encountered while migrating the application data to a new version. More Info: ' + err.message)
+      process.exit(-1)
+    })
+  } else {
+    launchMainWindow()
+  }
 }
 
 function createMainWindow () {
@@ -173,10 +184,10 @@ function createMainWindow () {
 
   // Create the browser window.
   win = new BrowserWindow({
-      width: 1200,
+      width: 1280,
       height: 800,
       minHeight: 700,
-      minWidth: 1200,
+      minWidth: 1280,
       frame: true,
       backgroundColor: '#1C262B', // same as rgb(28, 38, 43)
       show : true

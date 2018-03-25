@@ -1,7 +1,14 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
-import Table from '../../../components/Table'
+import Table,
+{
+  TableHeader,
+  TableBody,
+  StringHeaderLabel,
+  ExplainedHeaderLabel,
+  Hint
+} from '../../../components/Table/index'
 import TorrentRow from './TorrentRow'
 import CompletedStore from '../Stores'
 
@@ -9,10 +16,10 @@ function getStyle(props) {
   
   return {
     evenRow : {
-      backgroundColor : 'hsla(0, 0%, 93%, 1)'
+      backgroundColor : 'rgba(222, 222, 222, 0.2)', //'hsla(0, 0%, 93%, 1)',
     },
     oddRow : {
-      backgroundColor : 'white'
+      backgroundColor : 'transparent'
     }
   }
 }
@@ -22,7 +29,13 @@ const TorrentsTable = observer((props) => {
   let styles = getStyle(props)
   
   return (
-    <Table column_titles={['', 'UPLOADING', 'SIZE', 'BUYERS']}>
+    <Table>
+      <TableHeader>
+        <StringHeaderLabel title=""/>
+        <StringHeaderLabel title="SIZE"/>
+        <StringHeaderLabel title="BUYERS"/>
+      </TableHeader>
+      <TableBody>
       {
         props.completedStore.torrentRowStores.map((t, index) => {
           
@@ -34,6 +47,7 @@ const TorrentsTable = observer((props) => {
           )
         })
       }
+      </TableBody>
     </Table>
   )
 })

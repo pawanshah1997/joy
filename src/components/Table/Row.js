@@ -13,12 +13,13 @@ function getStyles(props) {
             flexDirection: 'row',
 
             backgroundColor: props.backgroundColor,
-            color: 'hsla(0, 0%, 40%, 1)',
+            color: 'hsla(0, 0%, 60%, 1)',
+            //borderBottom: '1px solid #ededed',
 
-            fontSize: '16px',
+            fontSize: '18px',
 
             // Prevent growing or shrinking, and start out at 60px tall
-            flex: '0 0 60px',
+            flex: '0 0 80px', // 70px
 
             paddingLeft: '20px',
             paddingRight: '20px'

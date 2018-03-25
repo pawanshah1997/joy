@@ -1,6 +1,6 @@
 import {observable, action, computed} from 'mobx'
 import assert from 'assert'
-import {shell} from 'electron'
+import {shell, remote} from 'electron'
 import open from 'open'
 var debug = require('debug')('UIStore')
 
@@ -18,7 +18,9 @@ import {
   TorrentStore,
   PeerStore,
   WalletStore,
-  PriceFeedStore} from '../core-stores'
+  PriceFeedStore,
+  ApplicationSettingsStore
+} from '../core-stores'
 import {PaymentStore} from '../core-stores/Wallet'
 
 // UI stores
@@ -92,7 +94,7 @@ class UIStore {
     OnboardingWelcome : 1,
     OnboardingDeparture : 2,
     VideoPlayer : 3,
-    Terms : 4,
+    Terms : 4
   }
 
   /**
@@ -296,8 +298,19 @@ class UIStore {
       let applicationSettings = this._application.applicationSettings
       assert(applicationSettings)
 
-      assert(!this.applicationStore.applicationSettings)
-      this.applicationStore.applicationSettings = applicationSettings
+      // Create store
+      let applicationSettingsStore = new ApplicationSettingsStore(
+        applicationSettings.state,
+        applicationSettings.downloadFolder(),
+        applicationSettings.bittorrentPort()
+      )
+
+      assert(!this.applicationStore.applicationSettingsStore)
+      this.applicationStore.setApplicationSettingsStore(applicationSettingsStore)
+
+      applicationSettings.on('downloadFolder', this._onNewDownloadFolderAction)
+
+      // ** Hook into other events later ** //
 
       // When terms have not been accepted by the user, then we must
       // display the terms scene
@@ -346,7 +359,21 @@ class UIStore {
         wallet.blockTipHeight,
         wallet.synchronizedBlockHeight,
         [],
-        wallet.pay.bind(wallet)
+        wallet.pay.bind(wallet),
+
+        /**
+         * HACK due to broken annouce paradigm in application,
+         * see https://github.com/JoyStream/joystream-desktop/issues/897
+         * Must be fixed
+         */
+
+        wallet.state === Wallet.STATE.GETTING_BALANCE ||
+        wallet.state === Wallet.STATE.CONNECTING_TO_NETWORK ||
+        wallet.state === Wallet.STATE.STARTED
+        ?
+          wallet.getMasterKey()
+        :
+          null
       )
 
       this.applicationStore.setWalletStore(walletStore)
@@ -684,6 +711,13 @@ class UIStore {
     let walletStore = this.applicationStore.walletStore
     assert(walletStore)
     walletStore.setState(newState)
+
+    // When the wallet has gotten the balance, then we know it
+    // has completed loading the preceeding state, Wallet.STATE.GETTING_WALLET,
+    // which means we can
+    if(newState === Wallet.STATE.GETTING_BALANCE)
+      walletStore.setMasterKey(wallet.getMasterKey())
+
   })
 
   _onWalletTotalBalanceChanged = action((totalBalance) => {
@@ -766,6 +800,22 @@ class UIStore {
     payment.on('noteChanged', action((note) => {
       paymentStore.setNote(note)
     }))
+
+  })
+
+  // Hooks for {@link ApplicationSettings}
+
+  /**
+   * Handler for when download folder is changed in application settings
+   * @param downloadFolder
+   */
+  _onNewDownloadFolderAction = action((downloadFolder) => {
+
+    let applicationSettingsStore = this.applicationStore.applicationSettingsStore
+
+    assert(this.applicationStore.applicationSettingsStore)
+
+    applicationSettingsStore.setDownloadFolder(downloadFolder)
 
   })
 
@@ -927,7 +977,7 @@ class UIStore {
       if(err) {
 
         if(dialogVisible) {
-          this.walletSceneStore.visibleDialog.error = err.code
+          this.walletSceneStore.visibleDialog.error = err
           this.walletSceneStore.visibleDialog.setStage(ClaimFreeBCHFlowStore.STAGE.DISPLAY_FAILURE_MESSAGE)
         } else {
           debug('Ignored error result of claiming free BCH, dialog abandoned')
@@ -945,6 +995,32 @@ class UIStore {
       }
 
     })
+
+  }
+
+  @action.bound
+  choseNewDownloadFolder = () => {
+
+    // Make sure the main phase scene is active
+    if(this.alivePhaseScene !== UIStore.ALIVE_PHASE_SCENE.Main)
+      throw Error('Must be in the main alive phase scene.')
+
+    // Make sure we are on the right tab
+    if(this.applicationNavigationStore.activeTab !== ApplicationNavigationStore.TAB.Settings)
+      throw Error('Must be on the settings tab.')
+
+    // Allow user to picke folder using native dialog
+    let folderPicked = remote.dialog.showOpenDialog({
+      title: 'Pick folder where torrents will be stored',
+      properties: ['openDirectory']}
+    )
+
+    if (!folderPicked || folderPicked.length === 0) {
+      return
+    }
+
+    // Update download folder
+    this._application.applicationSettings.setDownloadFolder(folderPicked[0])
 
   }
 

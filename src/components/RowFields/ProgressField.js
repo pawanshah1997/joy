@@ -10,12 +10,12 @@ import LinearProgress from 'material-ui/LinearProgress'
 const ProgressIndicator = (props) => {
 
     let style = {
-        height : '15px',
+        height : '10px',
         borderRadius: 10000,
-        backgroundColor : 'rgba(84, 187, 135, 0.5)'
+        backgroundColor : 'rgba(255, 152, 0, 0.38)' //'rgba(84, 187, 135, 0.5)'
     }
 
-    return <LinearProgress color="#54bb87"
+    return <LinearProgress color="rgba(255, 152, 0, 0.780392)" // "#54bb87"
                            style={style}
                            mode="determinate"
                            value={props.progress}
