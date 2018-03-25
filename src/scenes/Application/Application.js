@@ -33,6 +33,7 @@ import OnBoardingStore from '../Onboarding/Stores'
 import Livestream from '../Livestream'
 import New from '../New'
 import Publish from '../Publish'
+import Settings from '../Settings'
 
 
 function getStyles (props) {
@@ -183,6 +184,10 @@ const StartedApp = observer((props) => {
     case ApplicationNavigationStore.TAB.Publish:
 
       elm = <Publish />
+      break
+
+    case ApplicationNavigationStore.TAB.Settings:
+      elm = <Settings/>
       break
 
     default:
