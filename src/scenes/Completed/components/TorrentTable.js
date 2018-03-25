@@ -16,10 +16,10 @@ function getStyle(props) {
   
   return {
     evenRow : {
-      backgroundColor : 'hsla(0, 0%, 93%, 1)'
+      backgroundColor : 'rgba(222, 222, 222, 0.2)', //'hsla(0, 0%, 93%, 1)',
     },
     oddRow : {
-      backgroundColor : 'white'
+      backgroundColor : 'transparent'
     }
   }
 }
