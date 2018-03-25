@@ -32,12 +32,12 @@ function getStyles(state, props) {
       //boxShadow: '1px 1px 2px hsla(219, 41%, 39%, 1)'
 
       ':hover' : {
-        backgroundColor: props.colors.hoverColor
+        backgroundColor: props.enabled ? props.colors.hoverColor : props.colors.normalColor,
       },
 
       ':active' :  {
-        backgroundColor: props.colors.activeColor,
-        borderBottomWidth: '1px'
+        backgroundColor: props.enabled ? props.colors.activeColor : props.colors.normalColor,
+        borderBottomWidth: props.enabled ? '1px' : '3px'
       }
     },
     iconContainer : {
@@ -53,8 +53,13 @@ const ToolbarButton = Radium((props) => {
 
   let styles = getStyles(null, props)
 
+  let guardedOnClick = () => {
+    if(props.enabled)
+      props.onClick()
+  }
+
   return (
-    <span onClick={props.onClick}
+    <span onClick={guardedOnClick}
           style={styles.root}>
       {
         props.iconNode
@@ -72,6 +77,7 @@ const ToolbarButton = Radium((props) => {
 })
 
 ToolbarButton.propTypes = {
+  enabled: PropTypes.bool,
   iconNode: PropTypes.node,
   title : PropTypes.string.isRequired,
   onClick : PropTypes.func.isRequired,
@@ -81,6 +87,7 @@ ToolbarButton.propTypes = {
 }
 
 ToolbarButton.defaultProps = {
+  enabled : true,
   colors : {
     normalColor : 'rgb(55, 83, 133)',
     hoverColor : 'hsla(218, 41%, 33%, 1)',

@@ -7,6 +7,7 @@ import DownloadingStore from './Stores'
 // Components
 import TorrentTable from './components/TorrentTable'
 import StartDownloadingFlow from './components/StartDownloadingFlow'
+import CircularProgress from 'material-ui/CircularProgress'
 
 import {
     LabelContainer,
@@ -26,7 +27,9 @@ function getStyles (props) {
       display: 'flex',
       flexDirection: 'column',
       flexGrow: 1
-    }
+    },
+    circularProgress : {
+    },
   }
 }
 
@@ -39,6 +42,8 @@ const Downloading = inject('UIStore')(observer((props) => {
     backgroundColorRight : props.middleSectionHighlightColor
   }
 
+  let allowUserToAddTorrent = props.UIStore.downloadingStore.state === DownloadingStore.STATE.InitState
+
   return (
     <div style={styles.root}>
 
@@ -47,8 +52,18 @@ const Downloading = inject('UIStore')(observer((props) => {
         <Toolbar>
 
           <ToolbarButton title="add download"
-                         onClick={() => { props.UIStore.downloadingStore.startDownloadWithTorrentFileFromFilePicker()}}
-                         iconNode={<AddTorrentIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>}
+                         onClick={() => { props.UIStore.downloadingStore.startDownloadWithTorrentFileFromFilePicker() }}
+                         iconNode={
+                           allowUserToAddTorrent
+                             ?
+                           <AddTorrentIcon color={"#ffffff"} style={{ height : '16px', width: '16px'}}/>
+                             :
+                           <CircularProgress color={'rgba(255,255,255, 1)'}
+                                             size={16}
+                                             style={styles.circularProgress}
+                           />
+                         }
+                         enabled={allowUserToAddTorrent}
           />
 
         </Toolbar>
