@@ -19,6 +19,7 @@
   * Make rootUIStore available in dev console for debugging - #906
   * Fix column names, #935, #938
 
+
 1.0.1 release March 21 2018
 
   * Fix migration of default buyer/seller terms
