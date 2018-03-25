@@ -671,6 +671,21 @@ class Application extends EventEmitter {
     return convertedTerms
   }
 
+  defaultSellerTerms(pieceLength, numPieces) {
+    let defaultTerms = this.applicationSettings.defaultSellerTerms()
+    const settlementFee = defaultTerms.settlementFee
+    let convertedTerms = {...defaultTerms}
+
+    // what chunk of the data needs to be delivered before seller will get non dust output
+    const alpha = 0.2
+
+    const satoshiPerMb = defaultTerms.minPrice
+
+    convertedTerms.minPrice = computeOptimumPricePerPiece(alpha, pieceLength, numPieces, satoshiPerMb, settlementFee)
+
+    return convertedTerms
+  }
+
   /**
    * Add torrent with given settings
    *
