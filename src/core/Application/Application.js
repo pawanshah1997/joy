@@ -1292,3 +1292,6 @@ function encodeTorrentSettings(torrent) {
 
 
 export default Application
+export {
+  DEFAULT_APPLICATION_SETTINGS
+}
