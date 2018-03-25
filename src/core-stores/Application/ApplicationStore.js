@@ -24,10 +24,10 @@ class ApplicationStore {
   @observable onboardingIsEnabled
 
   /**
-   * {ApplicationSettings}
+   * {ApplicationSettingsStore}
    * NB: Not a store yet, do later perhaps? wait and see, may turn into complex database of some sort
    */
-  applicationSettings
+  @observable applicationSettingsStore
 
   /**
    * @propety {WalletStore} Store for wallet
@@ -51,7 +51,7 @@ class ApplicationStore {
    * @param startedResources - set of currently started resouces
    * @param onboardingTorrents - torrents to be outoloaded during onboarding
    * @param onboardingIsEnabled -  whether there should be onboarding as part of startup flow of app
-   * @param applicationSettings - settings for application
+   * @param applicationSettingsStore - settings for application
    * @param walletStore - {WalletStore}
    * @param priceFeedStore - {PriceFeedStore}
    * @param torrentStores - {Map.<String, TorrentStore>}
@@ -65,7 +65,7 @@ class ApplicationStore {
     startedResources,
     onboardingTorrents,
     onboardingIsEnabled,
-    applicationSettings,
+    applicationSettingsStore,
     walletStore,
     priceFeedStore,
     starter,
@@ -77,7 +77,7 @@ class ApplicationStore {
     this.setStartedResources(startedResources)
     this.onboardingTorrents = onboardingTorrents
     this.setOnboardingIsEnabled(onboardingIsEnabled)
-    this.applicationSettings = applicationSettings
+    this.setApplicationSettingsStore(applicationSettingsStore)
     this.walletStore = walletStore
     this.setPriceFeedStore(priceFeedStore)
     this._setTorrentStores(new Map())
@@ -116,6 +116,11 @@ class ApplicationStore {
   @action.bound
   setOnboardingIsEnabled(onboardingIsEnabled) {
     this.onboardingIsEnabled = onboardingIsEnabled
+  }
+
+  @action.bound
+  setApplicationSettingsStore(applicationSettingsStore) {
+    this.applicationSettingsStore = applicationSettingsStore
   }
 
   @action.bound

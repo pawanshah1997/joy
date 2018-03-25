@@ -219,7 +219,7 @@ class DownloadingStore {
       metadata : torrentInfo,
       resumeData : null,
       name: torrentInfo.name(),
-      savePath: this._uiStore.applicationStore.applicationSettings.downloadFolder(),
+      savePath: this._uiStore.applicationStore.applicationSettingsStore.downloadFolder,
       deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
       extensionSettings : {
         buyerTerms: this._uiStore.applicationStore.defaultBuyerTerms(torrentInfo.pieceLength(), torrentInfo.numPieces())

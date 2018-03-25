@@ -12,7 +12,8 @@ import {
   CommunityButton,
   LivestreamButton,
   NewButton,
-  PublishButton
+  PublishButton,
+  SettingsButton
 } from './Buttons'
 
 import UIStore from '../../../UIStore'
@@ -21,6 +22,23 @@ import ApplicationNavigationStore from '../../Stores'
 /**
  * ApplicationHeader
  */
+
+const dot = (props) => {
+
+  return (
+    <div style={{ display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: '0 0 10px'}}>
+      <div style={{
+        backgroundColor: 'rgba(125, 139, 145, 0.5)',
+        width: '6px',
+        height: '6px',
+        borderRadius: '11px'
+      }}></div>
+    </div>
+  )
+}
 
 function getStyle (props) {
   return {
@@ -122,6 +140,13 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
         <PublishButton
           selected={activeTab === ApplicationNavigationStore.TAB.Publish}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Publish)}}
+          style={style.button}
+          {...buttonColorProps}
+        />
+
+        <SettingsButton
+          selected={activeTab === ApplicationNavigationStore.TAB.Settings}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Settings)}}
           style={style.button}
           {...buttonColorProps}
         />

@@ -1,6 +1,6 @@
 import {observable, action, computed} from 'mobx'
 import assert from 'assert'
-import {shell} from 'electron'
+import {shell, remote} from 'electron'
 import open from 'open'
 var debug = require('debug')('UIStore')
 
@@ -18,7 +18,9 @@ import {
   TorrentStore,
   PeerStore,
   WalletStore,
-  PriceFeedStore} from '../core-stores'
+  PriceFeedStore,
+  ApplicationSettingsStore
+} from '../core-stores'
 import {PaymentStore} from '../core-stores/Wallet'
 
 // UI stores
@@ -92,7 +94,7 @@ class UIStore {
     OnboardingWelcome : 1,
     OnboardingDeparture : 2,
     VideoPlayer : 3,
-    Terms : 4,
+    Terms : 4
   }
 
   /**
@@ -296,8 +298,19 @@ class UIStore {
       let applicationSettings = this._application.applicationSettings
       assert(applicationSettings)
 
-      assert(!this.applicationStore.applicationSettings)
-      this.applicationStore.applicationSettings = applicationSettings
+      // Create store
+      let applicationSettingsStore = new ApplicationSettingsStore(
+        applicationSettings.state,
+        applicationSettings.downloadFolder(),
+        applicationSettings.bittorrentPort()
+      )
+
+      assert(!this.applicationStore.applicationSettingsStore)
+      this.applicationStore.setApplicationSettingsStore(applicationSettingsStore)
+
+      applicationSettings.on('downloadFolder', this._onNewDownloadFolderAction)
+
+      // ** Hook into other events later ** //
 
       // When terms have not been accepted by the user, then we must
       // display the terms scene
@@ -790,6 +803,22 @@ class UIStore {
 
   })
 
+  // Hooks for {@link ApplicationSettings}
+
+  /**
+   * Handler for when download folder is changed in application settings
+   * @param downloadFolder
+   */
+  _onNewDownloadFolderAction = action((downloadFolder) => {
+
+    let applicationSettingsStore = this.applicationStore.applicationSettingsStore
+
+    assert(this.applicationStore.applicationSettingsStore)
+
+    applicationSettingsStore.setDownloadFolder(downloadFolder)
+
+  })
+
   @action.bound
   setCurrentPhase(currentPhase) {
     this.currentPhase = currentPhase
@@ -966,6 +995,32 @@ class UIStore {
       }
 
     })
+
+  }
+
+  @action.bound
+  choseNewDownloadFolder = () => {
+
+    // Make sure the main phase scene is active
+    if(this.alivePhaseScene !== UIStore.ALIVE_PHASE_SCENE.Main)
+      throw Error('Must be in the main alive phase scene.')
+
+    // Make sure we are on the right tab
+    if(this.applicationNavigationStore.activeTab !== ApplicationNavigationStore.TAB.Settings)
+      throw Error('Must be on the settings tab.')
+
+    // Allow user to picke folder using native dialog
+    let folderPicked = remote.dialog.showOpenDialog({
+      title: 'Pick folder where torrents will be stored',
+      properties: ['openDirectory']}
+    )
+
+    if (!folderPicked || folderPicked.length === 0) {
+      return
+    }
+
+    // Update download folder
+    this._application.applicationSettings.setDownloadFolder(folderPicked[0])
 
   }
 
