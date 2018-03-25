@@ -18,7 +18,9 @@ import {
   TorrentStore,
   PeerStore,
   WalletStore,
-  PriceFeedStore} from '../core-stores'
+  PriceFeedStore,
+  ApplicationSettingsStore
+} from '../core-stores'
 import {PaymentStore} from '../core-stores/Wallet'
 
 // UI stores
@@ -92,7 +94,7 @@ class UIStore {
     OnboardingWelcome : 1,
     OnboardingDeparture : 2,
     VideoPlayer : 3,
-    Terms : 4,
+    Terms : 4
   }
 
   /**
@@ -296,8 +298,19 @@ class UIStore {
       let applicationSettings = this._application.applicationSettings
       assert(applicationSettings)
 
-      assert(!this.applicationStore.applicationSettings)
-      this.applicationStore.applicationSettings = applicationSettings
+      // Create store
+      let applicationSettingsStore = new ApplicationSettingsStore(
+        applicationSettings.state,
+        applicationSettings.downloadFolder(),
+        applicationSettings.bittorrentPort()
+      )
+
+      assert(!this.applicationStore.applicationSettingsStore)
+      this.applicationStore.setApplicationSettingsStore(applicationSettingsStore)
+
+      applicationSettings.on('downloadFolder', this._onNewDownloadFolderAction)
+
+      // ** Hook into other events later ** //
 
       // When terms have not been accepted by the user, then we must
       // display the terms scene
