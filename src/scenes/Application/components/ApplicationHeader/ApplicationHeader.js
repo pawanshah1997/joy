@@ -12,7 +12,8 @@ import {
   CommunityButton,
   LivestreamButton,
   NewButton,
-  PublishButton
+  PublishButton,
+  SettingsButton
 } from './Buttons'
 
 import UIStore from '../../../UIStore'
@@ -122,6 +123,13 @@ const ApplicationHeader = inject('UIStore')(observer((props) => {
         <PublishButton
           selected={activeTab === ApplicationNavigationStore.TAB.Publish}
           onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Publish)}}
+          style={style.button}
+          {...buttonColorProps}
+        />
+
+        <SettingsButton
+          selected={activeTab === ApplicationNavigationStore.TAB.Settings}
+          onClick={() => { applicationNavigationStore.setActiveTab(ApplicationNavigationStore.TAB.Settings)}}
           style={style.button}
           {...buttonColorProps}
         />
