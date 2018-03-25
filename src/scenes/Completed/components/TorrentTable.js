@@ -32,7 +32,6 @@ const TorrentsTable = observer((props) => {
     <Table>
       <TableHeader>
         <StringHeaderLabel title=""/>
-        <StringHeaderLabel title="UPLOADING"/>
         <StringHeaderLabel title="SIZE"/>
         <StringHeaderLabel title="BUYERS"/>
       </TableHeader>
