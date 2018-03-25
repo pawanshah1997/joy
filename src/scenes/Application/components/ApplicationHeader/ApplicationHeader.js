@@ -23,6 +23,23 @@ import ApplicationNavigationStore from '../../Stores'
  * ApplicationHeader
  */
 
+const dot = (props) => {
+
+  return (
+    <div style={{ display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: '0 0 10px'}}>
+      <div style={{
+        backgroundColor: 'rgba(125, 139, 145, 0.5)',
+        width: '6px',
+        height: '6px',
+        borderRadius: '11px'
+      }}></div>
+    </div>
+  )
+}
+
 function getStyle (props) {
   return {
     root: {
