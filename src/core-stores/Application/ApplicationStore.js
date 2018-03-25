@@ -1,5 +1,5 @@
 import { observable, action, computed} from 'mobx'
-import {satoshiPerMbToSatoshiPerPiece} from '../../common/'
+import {computeOptimumPricePerPiece} from '../../common/'
 
 class ApplicationStore {
 
@@ -253,11 +253,15 @@ class ApplicationStore {
    */
   defaultBuyerTerms(pieceLength, numPieces) {
     let defaultTerms = this.applicationSettings.defaultBuyerTerms()
+    const settlementFee = this.applicationSettings.defaultSellerTerms().settlementFee
     let convertedTerms = {...defaultTerms}
 
-    convertedTerms.maxPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.maxPrice, pieceLength)
+    // what chunk of the data needs to be delivered before seller will get non dust output
+    const alpha = 0.2
 
-    convertedTerms.maxPrice = Math.ceil(Math.max(convertedTerms.maxPrice, 547 / numPieces))
+    const satoshiPerMb = defaultTerms.maxPrice
+
+    convertedTerms.maxPrice = computeOptimumPricePerPiece(alpha, pieceLength, numPieces, satoshiPerMb, settlementFee)
 
     return convertedTerms
   }
@@ -267,11 +271,15 @@ class ApplicationStore {
    */
   defaultSellerTerms(pieceLength, numPieces) {
     let defaultTerms = this.applicationSettings.defaultSellerTerms()
+    const settlementFee = defaultTerms.settlementFee
     let convertedTerms = {...defaultTerms}
 
-    convertedTerms.minPrice = satoshiPerMbToSatoshiPerPiece(defaultTerms.minPrice, pieceLength)
+    // what chunk of the data needs to be delivered before seller will get non dust output
+    const alpha = 0.2
 
-    convertedTerms.minPrice = Math.ceil(Math.max(convertedTerms.minPrice, 547 / numPieces))
+    const satoshiPerMb = defaultTerms.minPrice
+
+    convertedTerms.minPrice = computeOptimumPricePerPiece(alpha, pieceLength, numPieces, satoshiPerMb, settlementFee)
 
     return convertedTerms
   }
