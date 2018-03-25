@@ -46,7 +46,13 @@ class WalletStore {
    */
   @observable paymentStores
 
-  constructor(state, totalBalance, confirmedBalance, receiveAddress, blockTipHeight, synchronizedBlockHeight, paymentStores, pay) {
+  /**
+   * {Object} HD master key object of wallet,
+   * see `Wallet.getMasterKey` for when this is set
+   */
+  @observable masterKey
+
+  constructor(state, totalBalance, confirmedBalance, receiveAddress, blockTipHeight, synchronizedBlockHeight, paymentStores, pay, masterKey) {
 
     this.setState(state)
     this.setTotalBalance(totalBalance)
@@ -58,6 +64,7 @@ class WalletStore {
 
     this._pay = pay
     this._pendingPaymnetStoreResolvers = new Map()
+    this.setMasterKey(masterKey)
 
   }
 
@@ -112,6 +119,11 @@ class WalletStore {
   @action.bound
   setSynchronizedBlockHeight(synchronizedBlockHeight) {
     this.synchronizedBlockHeight = synchronizedBlockHeight
+  }
+
+  @action.bound
+  setMasterKey(masterKey) {
+    this.masterKey = masterKey
   }
 
   /**

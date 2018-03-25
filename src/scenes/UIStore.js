@@ -346,7 +346,21 @@ class UIStore {
         wallet.blockTipHeight,
         wallet.synchronizedBlockHeight,
         [],
-        wallet.pay.bind(wallet)
+        wallet.pay.bind(wallet),
+
+        /**
+         * HACK due to broken annouce paradigm in application,
+         * see https://github.com/JoyStream/joystream-desktop/issues/897
+         * Must be fixed
+         */
+
+        wallet.state === Wallet.STATE.GETTING_BALANCE ||
+        wallet.state === Wallet.STATE.CONNECTING_TO_NETWORK ||
+        wallet.state === Wallet.STATE.STARTED
+        ?
+          wallet.getMasterKey()
+        :
+          null
       )
 
       this.applicationStore.setWalletStore(walletStore)
@@ -684,6 +698,13 @@ class UIStore {
     let walletStore = this.applicationStore.walletStore
     assert(walletStore)
     walletStore.setState(newState)
+
+    // When the wallet has gotten the balance, then we know it
+    // has completed loading the preceeding state, Wallet.STATE.GETTING_WALLET,
+    // which means we can
+    if(newState === Wallet.STATE.GETTING_BALANCE)
+      walletStore.setMasterKey(wallet.getMasterKey())
+
   })
 
   _onWalletTotalBalanceChanged = action((totalBalance) => {

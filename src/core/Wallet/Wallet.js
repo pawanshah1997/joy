@@ -550,6 +550,31 @@ class Wallet extends EventEmitter {
   }
 
   /**
+   * Provides wallet master HD key.
+   * Requires that underlying wallet has been recovered from wallet database
+   * i.e. `STATE.GETTING_WALLET` has been reached, but stopping has not been
+   * initiated, i.e. `STATE.STOPPING` and there is no error. Hence only allowed
+   * in state
+   * `STATE.GETTING_BALANCE`
+   * `STATE.CONNECTING_TO_NETWORK`
+   * `STATE.STARTED`
+   *
+   * @return {Object} - wallet master key with metadata, e.g. mnemonic
+   */
+  getMasterKey() {
+
+    // Make sure we are in an acceptable state
+    if(!(
+      this.state === Wallet.STATE.GETTING_BALANCE ||
+      this.state === Wallet.STATE.CONNECTING_TO_NETWORK ||
+      this.state === Wallet.STATE.STARTED
+      ))
+      throw Error('Wallet must be started')
+
+    return this._wallet.master
+  }
+
+  /**
    * Process
    * @param {TX} tx
    * @param {Details} details
