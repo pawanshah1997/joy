@@ -222,7 +222,15 @@ class DownloadingStore {
       savePath: this._uiStore.applicationStore.applicationSettingsStore.downloadFolder,
       deepInitialState: DeepInitialState.DOWNLOADING.UNPAID.STARTED,
       extensionSettings : {
-        buyerTerms: this._uiStore.applicationStore.defaultBuyerTerms(torrentInfo.pieceLength(), torrentInfo.numPieces())
+
+        /***
+         * ALERT ALERT:
+         * The below is a horrible hack in order to get this out the door
+         * without braking anything, needs to be refactored and removed!
+         * Only instances in `Application` should be around.
+         */
+
+        buyerTerms: this._uiStore._application.defaultBuyerTerms(torrentInfo.pieceLength(), torrentInfo.numPieces())
       }
     }
 
