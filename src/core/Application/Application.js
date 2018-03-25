@@ -55,7 +55,7 @@ const DEFAULT_APPLICATION_SETTINGS = {
     See https://www.libtorrent.org/reference-Settings.html#settings-pack outgoing_interfaces/incoming_interfaces for details
     We are picking a fixed default port to make it easier to do manual port mapping.
   */
-  bittorrentPort : 6881,
+  bittorrentPort : 7881,
 
   makeDefaultSavePathFromBaseFolder : (baseFolder) => {
     return path.join(baseFolder, FOLDER_NAME.DEFAULT_SAVE_PATH_BASE)
