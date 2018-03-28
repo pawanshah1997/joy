@@ -36,6 +36,8 @@ const Seeding = inject('UIStore')(observer((props) => {
     backgroundColorLeft: props.middleSectionDarkBaseColor
   }
 
+  let displayedSpeed = props.UIStore.uploadingStore.totalUploadSpeed > 3000 ? props.UIStore.uploadingStore.totalUploadSpeed : null
+
   return (
     <div style={styles.root}>
 
@@ -67,7 +69,7 @@ const Seeding = inject('UIStore')(observer((props) => {
 
           <BandwidthLabel tooltip={'Total upload speed'}
                           isUp={true}
-                          bytesPerSecond={props.UIStore.uploadingStore.totalUploadSpeed}
+                          bytesPerSecond={displayedSpeed}
             {...labelColorProps} />
 
         </LabelContainer>
