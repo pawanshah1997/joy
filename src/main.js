@@ -218,8 +218,11 @@ function createMainWindow () {
     win.webContents.openDevTools()
 
   } else {
+
+    /**
     // Maximize window
     win.maximize()
+     */
 
     // Show Updater window and check for updates after main application window finished loading
     win.webContents.once("did-frame-finish-load", function (event) {
