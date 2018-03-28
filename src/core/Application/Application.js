@@ -656,7 +656,10 @@ class Application extends EventEmitter {
     this.streamServer.stop()
   }
 
-  defaultBuyerTerms (pieceLength, numPieces) {
+  /**
+   * `distortPrice` is part of hack security fix in 1.0.3
+   */
+  defaultBuyerTerms (pieceLength, numPieces, distortPrice = true) {
     let defaultTerms = this.applicationSettings.defaultBuyerTerms()
     const settlementFee = this.applicationSettings.defaultSellerTerms().settlementFee
     let convertedTerms = {...defaultTerms}
@@ -666,7 +669,7 @@ class Application extends EventEmitter {
 
     const satoshiPerMb = defaultTerms.maxPrice
 
-    convertedTerms.maxPrice = computeOptimumPricePerPiece(alpha, pieceLength, numPieces, satoshiPerMb, settlementFee)
+    convertedTerms.maxPrice = computeOptimumPricePerPiece(alpha, pieceLength, numPieces, satoshiPerMb, settlementFee, distortPrice)
 
     return convertedTerms
   }
