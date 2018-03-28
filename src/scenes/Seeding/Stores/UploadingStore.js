@@ -388,7 +388,7 @@ class UploadingStore {
 
     assert(this._torrentInfoSelected)
 
-    this._uiStore.applicationStore.removeTorrent(this._torrentInfoSelected.infoHash, false)
+    this._uiStore.applicationStore.removeTorrent(this._torrentInfoSelected.infoHash(), false, () => {
 
     this.setState(UploadingStore.STATE.InitState)
   }
