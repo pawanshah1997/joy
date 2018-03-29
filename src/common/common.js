@@ -7,7 +7,7 @@ import bytes from 'bytes'
 import humanizeDuration from 'humanize-duration'
 import assert from 'assert'
 
-function computeOptimumPricePerPiece (alpha, pieceLength, numPieces, satoshiPerMb, settlementFee) {
+function computeOptimumPricePerPiece (alpha, pieceLength, numPieces, satoshiPerMb, settlementFee, distortPMin = true) {
   if (alpha > 1 || alpha < 0) {
     throw new Error('alpha must be a number between 0 and 1')
   }
@@ -32,7 +32,14 @@ function computeOptimumPricePerPiece (alpha, pieceLength, numPieces, satoshiPerM
 
   let pMin = (totalPaidAtAlpha + settlementFee) / (numPieces * alpha)
 
-  return Math.ceil(pMin) + 1
+  /**
+   * `distortPrice` is part of hack security fix in 1.0.3
+   */
+
+  if(distortPMin)
+    return Math.ceil(pMin) + 1
+  else
+    return pMin
 }
 
 /**

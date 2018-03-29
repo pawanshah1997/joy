@@ -37,7 +37,8 @@ module.exports = {
       "zip"
     ],
     "linux": [
-      "deb"
+      "deb",
+      "rpm"
     ]
   },
   "electronPackagerConfig": {

@@ -10,6 +10,7 @@ import FullScreenDialog from '../../../../components/FullScreenDialog'
 import LoadingTorrentForUploading from './LoadingTorrentForUploading'
 import UserPickingSavePath from './UserPickingSavePath'
 import IncompleteDownloadWarning from './IncompleteDownloadWarning'
+import DroppingPriorAutoStartedDownload from './DroppingPriorAutoStartedDownload'
 
 import UploadingStore from '../../Stores/UploadingStore'
 
@@ -29,7 +30,8 @@ const StartUploadingFlow = observer((props) => {
   // state === 'Started.OnUploadingScene.TorrentAlreadyAdded' ||
   state === UploadingStore.STATE.UserPickingSavePath ||
   state === UploadingStore.STATE.AddingTorrent ||
-  state === UploadingStore.STATE.TellUserAboutIncompleteDownload
+  state === UploadingStore.STATE.TellUserAboutIncompleteDownload ||
+  state === UploadingStore.STATE.DroppingPriorAutoStartedDownload
 
   switch (state) {
     case UploadingStore.STATE.UserPickingSavePath:
@@ -40,6 +42,9 @@ const StartUploadingFlow = observer((props) => {
       break
     case UploadingStore.STATE.TellUserAboutIncompleteDownload:
       fullScreenDialogContent = <IncompleteDownloadWarning uploadingStore={props.uploadingStore} />
+      break
+    case UploadingStore.STATE.DroppingPriorAutoStartedDownload:
+      fullScreenDialogContent = <DroppingPriorAutoStartedDownload uploadingStore={props.uploadingStore} />
       break
     default:
       fullScreenDialogContent = null

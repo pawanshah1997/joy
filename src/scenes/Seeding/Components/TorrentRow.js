@@ -28,7 +28,7 @@ const TorrentRow = observer((props) => {
 
       <NameField name={torrentStore.name} />
 
-      <StatusField paused={torrentStore.canStart} />
+      {/** <StatusField paused={torrentStore.canStart} /> **/}
 
       <BytesPerSecondField bytes={torrentStore.uploadSpeed} />
 

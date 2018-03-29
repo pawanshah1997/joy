@@ -35,6 +35,10 @@ import MediaPlayerStore from './VideoPlayer/Stores/MediaPlayerStore'
 
 import {computeViabilityOfPaidDownloadingTorrent} from './Common/utils'
 
+//
+import {InViable} from './Common/ViabilityOfPaidDownloadingTorrent'
+import {NoJoyStreamPeerConnections} from '../core/Torrent/ViabilityOfPaidDownloadingSwarm'
+
 /**
  * Root user interface model
  *
@@ -1081,10 +1085,51 @@ class UIStore {
       walletStarted = walletStore.state === Wallet.STATE.STARTED
     }
 
-    return new Map(this.torrentStoresArray.map(function (torrent) {
-      const viability = computeViabilityOfPaidDownloadingTorrent(torrent.state, walletStarted, balance, torrent.viabilityOfPaidDownloadInSwarm)
+    return new Map(this.torrentStoresArray.map((torrentStore) => {
 
-      return [torrent.infoHash, viability]
+      let viability = computeViabilityOfPaidDownloadingTorrent(torrentStore.state, walletStarted, balance, torrentStore.viabilityOfPaidDownloadInSwarm)
+
+      /**
+       * -- Complete hack!!! --
+       *
+       * PROBLEM:
+       * https://github.com/JoyStream/joystream-desktop/issues/955
+       * The core issue is that the 1 sat (actually 2 sat due to bug) floor allows
+       * malicious torrent distributor to make piece length arbitrarily short,
+       * which artificially elevates to the total cost for the torrent. In fact,
+       * by adjusting the total length and piece length, the cost can be made arbitrarily high,
+       * and with the current uncapped automatic allocation, with the only constraint
+       * being protocol terms comparison (which is distorted by 1 sat|2 sat floor),
+       * can allow an arbitrarily large amount to be allocated to the channel and even spent.
+       *
+       * SOLUTION:
+       * There are many ways to fix it, the fundamental fix at the protocol level will take time.
+       * There are many fixes at the protocol level, however the one which is most forward compatible
+       * and requiring no migration of prior terms (which is always a complicated mess), is the one below.
+       * Namely, we just detect the case where our buyer side price calculation is making the truncation
+       * mistake, and then pretend as if there are no seller peers around. The result of this is that any
+       * malicious torrent will appear as having no peers to the user, which
+       * is the same user experience the user will face once the fundamental fix is made.
+       */
+
+      let pieceLength = torrentStore.pieceLength
+      let numPieces = torrentStore.numberOfPieces
+
+      if(pieceLength && numPieces) {
+
+        // distortPrice = true
+        let convertedTerms = this._application.defaultBuyerTerms(pieceLength, numPieces, false)
+
+        if(convertedTerms.maxPrice < 1) {
+
+          viability = InViable(new NoJoyStreamPeerConnections())
+
+          console.log('Hotfix: censoring any usage of this torrent, real piece price: ' + convertedTerms.maxPrice)
+        }
+
+      }
+
+      return [torrentStore.infoHash, viability]
     }))
   }
 

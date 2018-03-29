@@ -47,7 +47,6 @@ const TorrentTable = observer((props) => {
          <TableHeader>
             <StringHeaderLabel title=""/>
 
-            <StringHeaderLabel title="STATE"/>
             <StringHeaderLabel title="SPEED"/>
             <ExplainedHeaderLabel title={"PRICE"}
                                   tooltip={
