@@ -31,7 +31,7 @@ class UploadingStore {
     UserPickingSavePath: 4,
     AddingTorrent: 5,
     TellUserAboutIncompleteDownload: 6,
-
+    DroppingPriorAutoStartedDownload: 7
   }
 
   static TORRENT_ADDING_METHOD = {
@@ -388,9 +388,14 @@ class UploadingStore {
 
     assert(this._torrentInfoSelected)
 
-    this._uiStore.applicationStore.removeTorrent(this._torrentInfoSelected.infoHash, false)
+    this.setState(UploadingStore.STATE.DroppingPriorAutoStartedDownload)
 
-    this.setState(UploadingStore.STATE.InitState)
+    this._uiStore.applicationStore.removeTorrent(this._torrentInfoSelected.infoHash(), false, () => {
+
+      this.setState(UploadingStore.STATE.InitState)
+    })
+
+
   }
 
   keepDownloadingClicked () {

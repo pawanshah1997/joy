@@ -873,7 +873,7 @@ class Application extends EventEmitter {
       if(torrent.isTerminating() || torrent.state.startsWith('Loading'))
         return
 
-      debug('discovered joystream peers. Adding ', peers.length, ' peers to peer list')
+      //debug('discovered joystream peers. Adding ', peers.length, ' peers to peer list')
 
       // Note: A call to connectPeer only adds the endpoint to the list of peers libtorrent
       // will attempt to connect to. The priority of which peers from the set to connect to
