@@ -1,3 +1,11 @@
+1.0.3 release March 29 2018
+  * Fixed security issue caused by small piece sizes - #959
+  * Fixed broken seeding flow on uploading scene - #962
+  * Removed timing out of sellers causing abrupt ending of paid downloads
+    extension-cpp #54, joystream-node #106
+  * Various UI tweaks - #963
+  * Updated dependency on joystream-node to v0.2.2, extension v0.3.1
+
 1.0.2 release March 25 2018
 
   * Added settings UI to allow customization of default save path - #928
