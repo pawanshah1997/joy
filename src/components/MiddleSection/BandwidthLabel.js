@@ -49,7 +49,15 @@ const BandwidthLabel = (props) => {
 
     let styles = getStyles(props)
 
-    let representation = convenientBytes(props.bytesPerSecond)
+    let representation
+
+    if(!props.bytesPerSecond)
+      representation = {
+        value : null,
+        unit: null
+      }
+    else
+      representation = convenientBytes(props.bytesPerSecond)
 
     let value = (
         <div style={styles.root} data-tip data-for={"BandwidthLabel"}>
@@ -93,7 +101,7 @@ const BandwidthLabel = (props) => {
 BandwidthLabel.propTypes = {
     tooltip : PropTypes.string.isRequired,
     isUp : PropTypes.bool.isRequired,
-    bytesPerSecond : PropTypes.number.isRequired,
+    bytesPerSecond : PropTypes.number,
     backgroundColorLeft : PropTypes.string.isRequired,
     backgroundColorRight : PropTypes.string.isRequired
 }

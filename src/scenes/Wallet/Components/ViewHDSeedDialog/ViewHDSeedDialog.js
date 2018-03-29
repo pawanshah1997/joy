@@ -81,8 +81,7 @@ const ViewHDSeedDialog = observer((props) => {
         </div>
 
         <div style={styles.formRoot}>
-
-          <span style={styles.subtitle}>Recovery Phrase</span>
+          
           <div style={styles.seedContainer}>
             {props.viewHDSeedDialogStore.masterKey.mnemonic.phrase}
           </div>

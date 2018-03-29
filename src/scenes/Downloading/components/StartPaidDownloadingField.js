@@ -87,9 +87,9 @@ function getStyles(props, state) {
     },
     subtext: {
       //display: 'none',
-      fontSize : '12px',
+      fontSize : '11px',
       fontWeight: '100',
-      marginTop: '-3px',
+      marginTop: '-2px',
       color: color.subTextColor,
       textTransform: 'uppercase'
     },
