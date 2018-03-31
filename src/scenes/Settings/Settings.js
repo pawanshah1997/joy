@@ -109,13 +109,13 @@ const ChooseSetting = inject('UIStore')(observer(Radium((props) => {
       <div style={styles.inputField}>
         <span>{props.UIStore.applicationStore.applicationSettingsStore.downloadFolder}</span>
       </div>
-      <button style={styles.button} onClick={props.UIStore.choseNewDownloadFolder}>
+      <button style={styles.button} onClick={props.UIStore.chooseNewDownloadFolder}>
 
         <div style={styles.iconContainer}>
           <FolderIcon color={'white'}/>
         </div>
 
-        CHOSE FOLDER
+        CHOOSE FOLDER
       </button>
     </div>
   )

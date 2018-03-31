@@ -1003,7 +1003,7 @@ class UIStore {
   }
 
   @action.bound
-  choseNewDownloadFolder = () => {
+  chooseNewDownloadFolder = () => {
 
     // Make sure the main phase scene is active
     if(this.alivePhaseScene !== UIStore.ALIVE_PHASE_SCENE.Main)
