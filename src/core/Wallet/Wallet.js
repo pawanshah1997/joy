@@ -454,9 +454,16 @@ class Wallet extends EventEmitter {
     if(!bcoin.util.isNumber(satsPrkBFee))
       throw new Error('satsPrkBFee is not a valid number')
 
+    // Mark the contract as coming from joystream without revealing anything about the torrent
+    // it pertains to, using an OP_RETURN output. This should be removed in the future, it
+    // is only for analytics early on to look for any problems in contract construction.
+
+    const markerScript = bcoin.script.fromNulldata(Buffer.from('js'))
+    const markerOutput = bcoin.output.fromScript(markerScript, 0)
+
     const tx = await this._wallet.send({
       sort: false,
-      outputs: outputs,
+      outputs: [...outputs, markerOutput],
       rate: satsPrkBFee
     })
 
