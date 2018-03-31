@@ -255,6 +255,8 @@ class Payment extends EventEmitter {
           paymentType = Payment.TYPE.INBOUND
 
       } else {
+        // if OP_RETURN output ignore
+        if (detailsMember.value === 0) continue
 
         // Is this non-wallet output part of a transaction
         // which spends wallet outputs? If so, then we have
