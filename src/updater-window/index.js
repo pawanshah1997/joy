@@ -11,37 +11,24 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 
 import UpdaterWindow from './components'
 import UpdaterStore from './UpdaterStore.js'
-import pjson from '../../package.json'
 
 var store = new UpdaterStore()
 
 var blockClosingWindow = true
 
-// NB: These should be in store really...
-
-function checkForUpdate () {
-  store.setState('checking')
-  ipcRenderer.send('auto-updater-channel', 'check-for-update')
-}
-
-function downloadUpdate () {
-  store.setState('downloading')
-  ipcRenderer.send('auto-updater-channel', 'download-update')
-}
-
-function quitAndInstall () {
-  store.setState('installing')
-  ipcRenderer.send('auto-updater-channel', 'install')
-}
-
 // Listen to events from the auto-updater running in the main process
-ipcRenderer.on('auto-updater-channel', function (event, command, arg) {
+ipcRenderer.on('auto-updater-channel', function (event, command, arg) { // <=== ?
   switch (command) {
+    case 'checking-for-update':
+      store.setState('checking')
+      break
     case 'quit':
       blockClosingWindow = false
       break
     case 'update-available':
-      store.setMostRecentVersion(arg) // releaseName
+      debugger
+      store.setInstalledVersionString(arg.appVersion)
+      store.setMostRecentVersion(arg.releaseName)
       store.setState('waiting-to-start-download')
       break
     case 'no-update-available':
@@ -61,14 +48,34 @@ ipcRenderer.on('auto-updater-channel', function (event, command, arg) {
 ReactDOM.render(
     <MuiThemeProvider>
       <UpdaterWindow store={store}
-                     installedVersionString={pjson.version}
-                     onUseOldVersionClicked={() => { window.close() }}
+                     onUseOldVersionClicked={handleUseOldVersionClick}
                      onUpdateClicked={downloadUpdate}
                      onInstallClicked={quitAndInstall}
-                     onErrorCloseClicked={() => { window.close() }}
+                     onErrorCloseClicked={handleErrorCloseClick}
       />
     </MuiThemeProvider>,
   document.getElementById('root'))
+
+function downloadUpdate () {
+  store.setState('downloading')
+  ipcRenderer.send('auto-updater-channel', 'download-update')
+}
+
+function quitAndInstall () {
+  store.setState('installing')
+  ipcRenderer.send('auto-updater-channel', 'install')
+}
+
+function handleUseOldVersionClick() {
+
+  ipcRenderer.send('auto-updater-channel', 'user-skipped-update')
+  window.close()
+}
+
+function handleErrorCloseClick() {
+  window.close()
+}
+
 
 // Prevent window closing while downloading an update unless main app is exiting
 window.onbeforeunload = function (e) {
@@ -76,5 +83,3 @@ window.onbeforeunload = function (e) {
     e.returnValue = false
   }
 }
-
-checkForUpdate()
