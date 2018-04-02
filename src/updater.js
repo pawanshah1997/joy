@@ -23,7 +23,7 @@ const constants = require('./constants')
  * the actual download through the Electron Auto update mechanism when the user has decided affirmatively.
  */
 
-const APP_VERSION = '1.0.2'//require('../package.json').version
+const APP_VERSION = require('../package.json').version
 const AUTO_UPDATE_FEED_URL = constants.AUTO_UPDATE_BASE_URL + process.platform + '/' + APP_VERSION
 
 /**
