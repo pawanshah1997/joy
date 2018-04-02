@@ -17,7 +17,7 @@ var store = new UpdaterStore()
 var blockClosingWindow = true
 
 // Listen to events from the auto-updater running in the main process
-ipcRenderer.on('auto-updater-channel', function (event, command, arg) { // <=== ?
+ipcRenderer.on('auto-updater-channel', function (event, command, arg) {
   switch (command) {
     case 'checking-for-update':
       store.setState('checking')
@@ -26,7 +26,6 @@ ipcRenderer.on('auto-updater-channel', function (event, command, arg) { // <=== 
       blockClosingWindow = false
       break
     case 'update-available':
-      debugger
       store.setInstalledVersionString(arg.appVersion)
       store.setMostRecentVersion(arg.releaseName)
       store.setState('waiting-to-start-download')
