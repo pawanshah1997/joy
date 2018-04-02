@@ -71,7 +71,7 @@
     "electron-config": "^1.0.0",
     "electron-is-dev": "^0.1.2",
     "humanize-duration": "^3.10.0",
-    "joystream-node": "0.2.2",
+    "joystream-node": "0.2.3",
     "jquery": "^3.2.1",
     "level-namespace": "^0.1.0",
     "leveldown": "^1.6.0",
