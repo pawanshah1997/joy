@@ -6,6 +6,7 @@ const request = require('request')
 const assert = require('assert')
 const notifier = require('node-notifier')
 const constants = require('./constants')
+const defaultAppDirectory = require('./defaultAppDirectory')
 
 /**
  * Terminology:
@@ -82,7 +83,7 @@ function stopPeriodicAutoUpdateCheckCycle () {
 
   if(!updateCheckerIntervalID)
     throw Error('Regular checking is already active')
-  
+
   clearInterval(updateCheckerIntervalID)
   updateCheckerIntervalID = null
 
@@ -90,8 +91,6 @@ function stopPeriodicAutoUpdateCheckCycle () {
     updaterWindow.webContents.send('auto-updater-channel', 'quit')
   }
 }
-
-var counter = 0
 
 function startSingleAutoUpdateCheck(showWindowOnCreation) {
 
@@ -188,9 +187,9 @@ function handleUpdateCheckResult(err, updateAvailable, releaseName) {
       // Attract user's attention
       notifier.notify( {
         title: 'JoyStream Update',
-        message: 'Update from to ' + releaseName + ' from ' + APP_VERSION,
+        message: 'Update to ' + releaseName + ' from ' + APP_VERSION,
 
-        icon: path.join(__dirname, 'assets/appicon/icon.png'), // Absolute path (doesn't work on balloons)
+        icon: path.join(defaultAppDirectory(), 'icon.png'), // Absolute path (doesn't work on balloons)
         sound: true, // Only Notification Center or Windows Toasters
         //wait: true // Wait with callback, until user action is taken against notification
       },
