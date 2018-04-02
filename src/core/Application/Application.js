@@ -362,10 +362,16 @@ class Application extends EventEmitter {
 
     // Construct default session settings
     var sessionSettings = {
-      // network port libtorrent session will open a listening socket on
-      port: this.applicationSettings.bittorrentPort(),
-      // Assisted Peer Discovery (APD)
+      libtorrent_settings: {
+        // network interface libtorrent session will open a listening socket on
+        listen_interfaces: '0.0.0.0:' + this.applicationSettings.bittorrentPort(),
+        enable_upnp: true,
+        enable_natpmp: true,
+        enable_dht: true,
+        allow_multiple_connections_per_ip: false
+      },
 
+      // Assisted Peer Discovery (APD)
       assistedPeerDiscovery: this.applicationSettings.useAssistedPeerDiscovery(),
 
       // bitcoin network configuration for payment channels
@@ -583,11 +589,22 @@ class Application extends EventEmitter {
 
         assert(!err)
 
+        // Remove port mapping from router
+        this._joystreamNodeSession.applySettings({
+          enable_upnp: false,
+          enable_natpmp: false
+        })
+
         clearInterval(this._torrentUpdateInterval)
+
         this._joystreamNodeSession = null
         this._torrentUpdateInterval = null
 
-        this._stoppedResource(Application.RESOURCE.JOYSTREAM_NODE_SESSION, onStopped)
+        // Allow some time for calls to unmap ports to complete
+        setTimeout(() => {
+          this._stoppedResource(Application.RESOURCE.JOYSTREAM_NODE_SESSION, onStopped)
+        }, 1500)
+
       })
 
     }
