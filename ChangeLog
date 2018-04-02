@@ -1,3 +1,15 @@
+1.0.5 release April 1 2018
+
+  * Autoupdater will run repeatedly in the background
+  * Update dependency on joystream-node to v0.2.3 (connectivity enhancements)
+  * Ensure port unmapping is done when application shuts down
+  * Do not allow more than one connection to peer in swarm with same ip address
+ 
+1.0.4 release March 31 2018
+
+  * Adding OP_RETURN foranalytics to payment channel contract - #972
+  * Typo on Choose folder button in settings scene - #973
+
 1.0.3 release March 29 2018
   * Fixed security issue caused by small piece sizes - #959
   * Fixed broken seeding flow on uploading scene - #962
