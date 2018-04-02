@@ -9,6 +9,7 @@ class UpdaterStore {
   @observable state
   @observable errorMessage
   @observable mostRecentVersion
+  @observable installedVersionString
 
   @action.bound
   setState (state) {
@@ -23,6 +24,11 @@ class UpdaterStore {
   @action.bound
   setMostRecentVersion(mostRecentVersion) {
     this.mostRecentVersion = mostRecentVersion
+  }
+
+  @action.bound
+  setInstalledVersionString(installedVersionString) {
+    this.installedVersionString = installedVersionString
   }
 }
 

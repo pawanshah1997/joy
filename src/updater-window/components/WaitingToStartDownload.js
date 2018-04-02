@@ -55,7 +55,7 @@ const WaitingToStartDownload = (props) => {
 
 WaitingToStartDownload.propTypes = {
     newVersionString : PropTypes.string.isRequired,
-    installedVersionString : PropTypes.string.isRequired,
+    installedVersionString : PropTypes.string,
     onUseOldVersionClicked : PropTypes.func.isRequired,
     onUpdateClicked : PropTypes.func.isRequired
 }

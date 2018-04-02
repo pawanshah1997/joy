@@ -21,6 +21,15 @@ let win = null
 // Will be set to true after migration tasks are completed
 let preventMainWindowCreationOnActivate = true
 
+/**
+ * Controls whether auto updating will run (periodically).
+ *
+ * Will do so long as we are not on linux, and are either
+ * in production, or environment variable `AUTO_UPDATE`
+ * has been set (effectivel as a means to run it in dev mode also)
+ */
+let runPeriodicAutoUpdateChecking = (process.platform !== 'linux') && (!isDev || process.env.AUTO_UPDATE)
+
 function showMainWindow () {
   if (win == null) return
 
@@ -100,7 +109,11 @@ function main () {
       if(arg === 'user-closed-app') {
 
           // Exit application
-          updater.quit()
+
+          if(runPeriodicAutoUpdateChecking) {
+            updater.stopPeriodicAutoUpdateCheckCycle()
+          }
+
           app.quit()
       }
   })
@@ -178,7 +191,7 @@ function onAppReady () {
   }
 }
 
-function createMainWindow () {
+function createMainWindow (runAutoUpdaterInNonDevMode = true) {
 
   assert(win === null)
 
@@ -191,6 +204,14 @@ function createMainWindow () {
       frame: true,
       backgroundColor: '#1C262B', // same as rgb(28, 38, 43)
       show : true
+  })
+
+  // Emitted when the window is closed.
+  win.on('closed', () => {
+    // Dereference the window object, usually you would store windows
+    // in an array if your app supports multi windows, this is the time
+    // when you should delete the corresponding element.
+    win = null
   })
 
   var template = createTemplate(win)
@@ -217,22 +238,20 @@ function createMainWindow () {
     // Open the DevTools.
     win.webContents.openDevTools()
 
-  } else {
+  }
 
-    /**
-    // Maximize window
-    win.maximize()
-     */
+  // Wait until main wondow is finished loading before we setup the updater code
+  win.webContents.once("did-frame-finish-load", function (event) {
 
-    // Show Updater window and check for updates after main application window finished loading
-    win.webContents.once("did-frame-finish-load", function (event) {
-      updater.init()
-    })
-
-    if (process.env.OPEN_DEVTOOLS) {
-      // Open the DevTools.
-      win.webContents.openDevTools()
+    if(runPeriodicAutoUpdateChecking) {
+      updater.startPeriodicAutoUpdateCheckCycle()
     }
+
+  })
+
+  // Consider opening dev tools, even if we are not in dev mode
+  if (process.env.OPEN_DEVTOOLS) {
+    win.webContents.openDevTools()
   }
 
   // Load file for the app
@@ -244,13 +263,7 @@ function createMainWindow () {
     slashes: true
   }))
 
-  // Emitted when the window is closed.
-  win.on('closed', () => {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
-    win = null
-  })
+
 }
 
 /**
