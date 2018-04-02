@@ -34,7 +34,7 @@ class UpdaterWindow extends Component {
         return <Error errorMessage={this.props.store.errorMessage}
                       onCloseClicked={this.props.onErrorCloseClicked}/>
     else if(state === 'waiting-to-start-download')
-        return <WaitingToStartDownload installedVersionString={this.props.installedVersionString}
+        return <WaitingToStartDownload installedVersionString={this.props.store.installedVersionString}
                                        newVersionString={this.props.store.mostRecentVersion}
                                        onUseOldVersionClicked={this.props.onUseOldVersionClicked}
                                        onUpdateClicked={this.props.onUpdateClicked}/>
@@ -48,7 +48,6 @@ class UpdaterWindow extends Component {
 
 UpdaterWindow.propTypes = {
   store: PropTypes.object.isRequired,
-  installedVersionString: PropTypes.string.isRequired,
   onUseOldVersionClicked: PropTypes.func.isRequired,
   onUpdateClicked: PropTypes.func.isRequired,
   onInstallClicked: PropTypes.func.isRequired,
