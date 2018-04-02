@@ -260,12 +260,6 @@ function beforeWindowUnload(e) {
 
 }
 
-// Debug routine?
-// Hook this up to a menu item ?
-function checkForUpdates () {
-  ipcRenderer.send('auto-updater-channel', 'init')
-}
-
 /**
  * We only export the ui store object when in dev mode,
  * this is for safety reasons. The export allows

@@ -11,6 +11,11 @@ export const WHY_BCH = "https://medium.com/@JoyStream/joystream-is-switching-to-
  */
 export const FAUCET_TOPUP_LIMIT = 25000
 
+/**
+ * Time interval (ms) between each check to the server
+ */
+export const AUTO_UPDATE_CHECK_INTERVAL = 10*60*1000
+
 export const AUTO_UPDATE_BASE_URL ='https://download.joystream.co:7070/update/'
 export const BLOCKEXPLORER_QUERY_STRING_BASE = 'https://bch.btc.com/'
 
