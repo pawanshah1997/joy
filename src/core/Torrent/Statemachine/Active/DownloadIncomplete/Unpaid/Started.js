@@ -313,14 +313,25 @@ function estimateRequiredFundsForContract (suitableAndJoined, minNumberOfSellers
 
 function pickSellers (suitableAndJoined, minNumberOfSellers) {
 
-  let peerComparer = function (sellerA, sellerB) {
+  let fastestThenCheapest = function (sellerA, sellerB) {
       const termsA = sellerA.connection.announcedModeAndTermsFromPeer.seller.terms
       const termsB = sellerB.connection.announcedModeAndTermsFromPeer.seller.terms
-      return termsA.minPrice - termsB.minPrice
+      const latencyA = sellerA.connection.latency
+      const latencyB = sellerB.connection.latency
+
+      // sort by fastest first (lowest 'latency')
+      if(latencyA < latencyB) return -1
+      if(latencyA > latencyB) return 1
+
+      // If two sellers have same speed sort by cheapest (cheapest first)
+      if(termsA.minPrice < termsB.minPrice) return -1
+      if(termsA.minPrice > termsB.minPrice) return 1
+
+      return 0
   }
 
   // Sort suitable sellers using `peerComparer` function
-  var sortedSellers = suitableAndJoined.sort(peerComparer)
+  var sortedSellers = suitableAndJoined.sort(fastestThenCheapest)
 
   // Pick actual sellers to use
   return sortedSellers.slice(0, minNumberOfSellers)

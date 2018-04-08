@@ -1,7 +1,7 @@
 {
   "name": "joystream",
   "productName": "Joystream",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A blockchain powered decentralized media distribution, curation, discovery and monetization platform.",
   "homepage": "https://joystream.co",
   "main": "src/main.js",
@@ -72,7 +72,7 @@
     "electron-config": "^1.0.0",
     "electron-is-dev": "^0.1.2",
     "humanize-duration": "^3.10.0",
-    "joystream-node": "0.2.3",
+    "joystream-node": "0.2.4",
     "jquery": "^3.2.1",
     "level-namespace": "^0.1.0",
     "leveldown": "^1.6.0",
