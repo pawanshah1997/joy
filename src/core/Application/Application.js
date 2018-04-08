@@ -17,9 +17,12 @@ import request from 'request'
 import magnet from 'magnet-uri'
 import StreamServer from '../StreamServer/StreamServer'
 import {computeOptimumPricePerPiece} from '../../common/'
+import semver from 'semver'
 
 var debug = require('debug')('application')
 import {shell} from 'electron'
+
+const APPLICATION_VERSION = require('../../../package.json').version
 
 const FOLDER_NAME = {
   WALLETS: 'wallets',
@@ -368,7 +371,14 @@ class Application extends EventEmitter {
         enable_upnp: true,
         enable_natpmp: true,
         enable_dht: true,
-        allow_multiple_connections_per_ip: false
+        allow_multiple_connections_per_ip: false,
+        peer_fingerprint: {
+          name: 'JS',
+          major: semver.major(APPLICATION_VERSION),
+          minor: semver.minor(APPLICATION_VERSION),
+          revision: semver.patch(APPLICATION_VERSION),
+          tag: 0
+        }
       },
 
       // Assisted Peer Discovery (APD)
