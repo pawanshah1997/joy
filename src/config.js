@@ -13,7 +13,7 @@ const protocolVersion = require('joystream-node').protocolVersion
 let network
 if (protocolVersion) {
   // Only newer version of joystream-node export the protocolVersion
-  if (protocolVersion === 3) {
+  if (protocolVersion > 3) {
     network = 'bitcoincash'
   } else {
     throw new Error('unable to determine network to use from protocolVersion', protocolVersion)
