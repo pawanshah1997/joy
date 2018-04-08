@@ -1,3 +1,9 @@
+1.0.6 release April 8 2018
+
+  * Updated core protocol to version 4, adding support for speed testing sellers
+  * Give priority to fastest sellers when doing paid download
+  * Use application version as fingerprint in bittorent connection
+
 1.0.5 release April 1 2018
 
   * Autoupdater will run repeatedly in the background
