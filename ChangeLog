@@ -1,3 +1,7 @@
+1.0.7 hotfix release April 8 2018
+
+  * Fixed peer selection bug that did not actually pick the fastest seller
+ 
 1.0.6 release April 8 2018
 
   * Updated core protocol to version 4, adding support for speed testing sellers
