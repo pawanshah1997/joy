@@ -9,6 +9,8 @@ var commitmentToOutput = require('joystream-node').paymentChannel.commitmentToOu
 
 var ViabilityOfPaidDownloadInSwarm = require('../../../../ViabilityOfPaidDownloadingSwarm').default
 
+var debug = require('debug')('TorrentStateMachine')
+
 var Started = new BaseMachine({
 
     initialState: "Uninitialized",
@@ -73,8 +75,12 @@ var Started = new BaseMachine({
                   return fn(client.viabilityOfPaidDownloadInSwarm , null)
               }
 
+              debug('picking from sellers:', client.viabilityOfPaidDownloadInSwarm.suitableAndJoined)
+
               // Pick sellers to use
               var pickedSellers = pickSellers(client.viabilityOfPaidDownloadInSwarm.suitableAndJoined, client.buyerTerms.minNumberOfSellers)
+
+              debug('selected:', pickedSellers)
 
               // Iterate sellers to
               // 1) Allocate value
@@ -319,9 +325,11 @@ function pickSellers (suitableAndJoined, minNumberOfSellers) {
       const latencyA = sellerA.connection.latency
       const latencyB = sellerB.connection.latency
 
-      // sort by fastest first (lowest 'latency')
-      if(latencyA < latencyB) return -1
-      if(latencyA > latencyB) return 1
+      // sort by fastest first (lowest 'latency') - if speed tests were performed
+      if(Number.isInteger(latencyA) && Number.isInteger(latencyB)) {
+        if(latencyA < latencyB) return -1
+        if(latencyA > latencyB) return 1
+      }
 
       // If two sellers have same speed sort by cheapest (cheapest first)
       if(termsA.minPrice < termsB.minPrice) return -1
@@ -330,8 +338,13 @@ function pickSellers (suitableAndJoined, minNumberOfSellers) {
       return 0
   }
 
+  // There may be some bias towards a specific peer if a connection is always established first
+  // with it. All else being equal (latency and price) we can add some fairness
+  // if we shuffle before we sort the suitable sellers.
+  var shuffledSellers = suitableAndJoined.sort(() => { return 0.5 - Math.random() })
+
   // Sort suitable sellers using `peerComparer` function
-  var sortedSellers = suitableAndJoined.sort(fastestThenCheapest)
+  var sortedSellers = shuffledSellers.sort(fastestThenCheapest)
 
   // Pick actual sellers to use
   return sortedSellers.slice(0, minNumberOfSellers)
