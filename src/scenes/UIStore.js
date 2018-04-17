@@ -419,8 +419,7 @@ class UIStore {
         satsPrkBFee,
         null,
         '',
-        /*testing*/
-        true || this.applicationStore.walletStore.balance === 0, // allow claiming free BCH
+        true, // allow claiming free BCH functionality
         launchExternalTxViewer,
         this.claimFreeBCH,
         bcoin.protocol.consensus.COIN

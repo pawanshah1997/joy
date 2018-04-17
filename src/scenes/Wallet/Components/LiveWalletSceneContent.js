@@ -158,9 +158,10 @@ const LiveWalletSceneContent = inject('uiConstantsStore')(inject('UIStore')(obse
 
             {
 
-              /** Only display free coins button is the user can actually claim them **/
+              /** Only display free coins button if the user can actually claim them **/
 
               props.UIStore.walletSceneStore.allowAttemptToClaimFreeBCH
+                && props.UIStore.walletSceneStore.totalBalance === 0
               ?
                 <ToolbarButton title="free coins"
                                onClick={props.UIStore.walletSceneStore.claimFreeBCH}

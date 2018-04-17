@@ -151,6 +151,11 @@ class WalletSceneStore {
   }
 
   @computed get
+  totalBalance() {
+    return this._walletStore.totalBalance
+  }
+
+  @computed get
   inboundPayments() {
     this._walletStore.paymentStores.filter((paymentStore) => { return paymentStore.type === Payment.Type.INBOUND})
   }
