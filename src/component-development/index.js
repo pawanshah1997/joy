@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
+import { HashRouter, Route } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 // babel-polyfill for generator (async/await)
 import 'babel-polyfill'
@@ -13,6 +15,7 @@ import Application from '../core/Application'
 import {MockApplication} from '../../test/core/Mocks'
 import UIStore from '../scenes/UIStore'
 
+import IsolatedComponents from './IsolatedComponents'
 import {default as ApplicationScene} from '../scenes/Application'
 import MockApplicationAnimator from './MockApplicationAnimator'
 
@@ -43,16 +46,50 @@ if (module.hot) {
 render()
 
 function render() {
+  // NB: We have to re-require Application every time, or else this won't work
+  var AppContainer = require('react-hot-loader').AppContainer
+  //var ComponentDevelopmentApplication = require('./App').default
 
-    // NB: We have to re-require Application every time, or else this won't work
-    var AppContainer = require('react-hot-loader').AppContainer
-    //var ComponentDevelopmentApplication = require('./App').default
+  let style = {
+    a: {
+      padding: '10px',
+      margin: '20px',
+      backgroundColor: 'green',
+      fontSize: '22px'
+    }
+  }
 
-    ReactDOM.render(
-        <AppContainer>
-          <ApplicationScene UIStore={uiStore} displayMobxDevTools={false}/>
-        </AppContainer>
-        ,
-        document.getElementById('root')
-    )
+  ReactDOM.render(
+    <AppContainer>
+      <HashRouter>
+        <div>
+          <Link to="application" style={style.a}>
+            Application
+          </Link>
+
+          <Link to="isolated_components" style={style.a}>
+            Isolated Components
+          </Link>
+
+          <hr/>
+
+          <Route path="/application" render={(routeProps) => {
+            return (
+              <ApplicationScene UIStore={uiStore} displayMobxDevTools={false}/>
+            )
+          }}
+          />
+          <Route path="/isolated_components" render={(routeProps) => {
+            return (
+              <IsolatedComponents />
+            )
+          }}
+          />
+
+        </div>
+      </HashRouter>
+    </AppContainer>
+    ,
+    document.getElementById('root')
+  )
 }
