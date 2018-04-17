@@ -419,7 +419,8 @@ class UIStore {
         satsPrkBFee,
         null,
         '',
-        !this._application.applicationSettings.claimedFreeBCH(),
+        /*testing*/
+        true || this.applicationStore.walletStore.balance === 0, // allow claiming free BCH
         launchExternalTxViewer,
         this.claimFreeBCH,
         bcoin.protocol.consensus.COIN
@@ -974,31 +975,7 @@ class UIStore {
   @action.bound
   claimFreeBCH = () => {
 
-    this._application.claimFreeBCH((err) => {
-
-      let dialogVisible = this.walletSceneStore.visibleDialog && this.walletSceneStore.visibleDialog.constructor.name === 'ClaimFreeBCHFlowStore'
-
-      if(err) {
-
-        if(dialogVisible) {
-          this.walletSceneStore.visibleDialog.error = err
-          this.walletSceneStore.visibleDialog.setStage(ClaimFreeBCHFlowStore.STAGE.DISPLAY_FAILURE_MESSAGE)
-        } else {
-          debug('Ignored error result of claiming free BCH, dialog abandoned')
-        }
-
-      } else {
-
-        // If there was no error, then hide the button
-        this.walletSceneStore.setAllowAttemptToClaimFreeBCH(false)
-
-        // and if the dialog is visible, we update it with a success message
-        if(dialogVisible)
-          this.walletSceneStore.visibleDialog.setStage(ClaimFreeBCHFlowStore.STAGE.DISPLAY_SUCCESS_MESSAGE)
-
-      }
-
-    })
+    this._application.claimFreeBCH()
 
   }
 

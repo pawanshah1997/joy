@@ -43,7 +43,6 @@ import { EXAMPLE_TORRENTS } from './constants'
 import UIStore from './scenes'
 import assert from 'assert'
 import mkdirp from 'mkdirp'
-import getCoins from './core/Application/faucet'
 import DefaultAppDirectory from './defaultAppDirectory'
 
 /**
@@ -55,6 +54,10 @@ import DefaultAppDirectory from './defaultAppDirectory'
  */
 var injectTapEventPlugin = require('react-tap-event-plugin')
 injectTapEventPlugin()
+
+const getCoins = (address) => {
+  shell.openExternal('http://download.joystream.co:7200/?address=' + address.toString())
+}
 
 // Create app
 const application = new Application(EXAMPLE_TORRENTS, process.env.FORCE_ONBOARDING, true, getCoins)
