@@ -34,17 +34,15 @@ const IsolatedComponents = (props) => {
 
 import StartPaidDownloadingField from '../scenes/Downloading/components/StartPaidDownloadingField'
 import TorrentTableRowStore from '../scenes/Common/TorrentTableRowStore'
-import {CanStart} from '../scenes/Common/ViabilityOfPaidDownloadingTorrent'
+import {CanStart, InsufficientFunds} from '../scenes/Common/ViabilityOfPaidDownloadingTorrent'
 
 class StartPaidDownloadingFieldSection extends Component {
 
-  constructor() {
-    super()
+  static makeStartingPaidDownloadRowStore() {
 
-    // Torrent 1
-    let infoHash_1 = 'info1'
+    let infoHash = 'info1'
     let torrentStore = {
-      infoHash: infoHash_1
+      infoHash: infoHash
     }
     let uiStore = {
       torrentsViabilityOfPaidDownloading : {
@@ -56,15 +54,66 @@ class StartPaidDownloadingFieldSection extends Component {
     let row = new TorrentTableRowStore(torrentStore, uiStore, false)
     row.setStartingPaidDownload(true)
 
+    return row
+  }
+
+  static makeOutOfMoneyRowStore() {
+
+    let infoHash = 'info2'
+    let torrentStore = {
+      infoHash: infoHash
+    }
+    let uiStore = {
+      torrentsViabilityOfPaidDownloading : {
+        get : function() {
+          return new InsufficientFunds(99999, 222)
+        }
+      }
+    }
+    let row = new TorrentTableRowStore(torrentStore, uiStore, false)
+    row.setStartingPaidDownload(true)
+
+    return row
+  }
+
+  constructor() {
+    super()
+
+
+
     this.state = {
-      startPaidDownloadTorrentTableRowStore : row
+      startPaidDownloadTorrentTableRowStore : StartPaidDownloadingFieldSection.makeStartingPaidDownloadRowStore(),
+      outOfMoneyStartPaidDownloadTorrentTableRowStore : StartPaidDownloadingFieldSection.makeOutOfMoneyRowStore()
     }
   }
 
   render() {
 
+    let styles = {
+      root : {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '300px',
+      },
+      wrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        marginBottom: '20px'
+      }
+    }
+
     return (
-      <StartPaidDownloadingField torrentTableRowStore={this.state.startPaidDownloadTorrentTableRowStore}/>
+      <div style={styles.root}>
+
+        <div style={styles.wrapper}>
+          <StartPaidDownloadingField torrentTableRowStore={this.state.startPaidDownloadTorrentTableRowStore}/>
+        </div>
+
+        <div style={styles.wrapper}>
+          <StartPaidDownloadingField torrentTableRowStore={this.state.outOfMoneyStartPaidDownloadTorrentTableRowStore}/>
+        </div>
+
+      </div>
     )
   }
 }

@@ -43,6 +43,15 @@ function getColors(props, state) {
 
     }
 
+  } else if (props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent.constructor.name === 'InsufficientFunds') {
+
+    return {
+      textColor: 'white',
+      subTextColor: 'rgba(255,255,255, 0.7)',
+      borderColor : 'transparent',
+      background : '#ff9800'
+    }
+
   } else if (props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted') {
     return {
       textColor: 'black',
@@ -151,7 +160,8 @@ function getText(torrentTableRowStore) {
       tooltip = "The wallet is still getting ready, please stand by, this should complete shortly."
     }
     else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'InsufficientFunds') {
-      subText = "Insufficient funds"
+      text = "BOOST AVAILABLE"
+      subText = "Needs funds"
       tooltip = "The estimated minimum value of X is required to start a paid download, you only have Y currently available."
     }
     else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'Stopped') {
@@ -327,7 +337,7 @@ const StartPaidDownloadingField = (props) => {
 
   let styles = {
     root : {
-      flex: '0 0 180px'
+      flex: '0 0 220px'
     }
   }
 
