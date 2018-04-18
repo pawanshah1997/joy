@@ -40,11 +40,11 @@ before_install:
       python -c "import ssl; print ssl.OPENSSL_VERSION";
       python -m pip install --upgrade --force pip setuptools;
     fi
-  # Install conan
+  # Install conan and downgrade version of pyopenssl to use openssl 1.0.x
   - if [ "$TRAVIS_OS_NAME" = osx ]; then
       python -m pip install "conan==0.28.1";
-      python -m pip uninstall pyopenssl;
-      python -m pip uninstall cryptography;
+      python -m pip uninstall --yes pyopenssl;
+      python -m pip uninstall --yes cryptography;
       python -m pip install "pyopenssl>=16.0.0, <17.0.0";
     else
       pip install --user "conan==0.28.1";
