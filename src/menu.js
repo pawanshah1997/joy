@@ -1,3 +1,4 @@
+import opn from 'opn'
 
 function createTemplate (win) {
   const template = [
@@ -27,7 +28,7 @@ function createTemplate (win) {
       submenu: [
         {
           label: 'Learn More',
-          click () { require('electron').shell.openExternal('http://joystream.co/') }
+          click () { opn('http://joystream.co/').catch(() => {}) }
         }
       ]
     }

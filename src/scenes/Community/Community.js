@@ -5,7 +5,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { inject } from 'mobx-react'
-import open from 'open'
+import opn from 'opn'
 
 import {TELEGRAM_URL, SLACK_URL, REDDIT_URL} from '../../constants'
 
@@ -63,7 +63,7 @@ const Community = inject('UIStore')((props) => {
 
         <IconButton iconStyle={styles.svgIcon}
           style={styles.iconButton}
-          onClick={() => { open(TELEGRAM_URL) }}>
+          onClick={() => { opn(TELEGRAM_URL).catch(() => {}) }}>
           <TelegramIcon />
         </IconButton>
 
@@ -71,7 +71,7 @@ const Community = inject('UIStore')((props) => {
 
         <IconButton iconStyle={styles.svgIcon}
           style={styles.iconButton}
-          onClick={() => { open(SLACK_URL) }}>
+          onClick={() => { opn(SLACK_URL).catch(() => {}) }}>
           <SlackIcon />
         </IconButton>
 
@@ -79,7 +79,7 @@ const Community = inject('UIStore')((props) => {
 
         <IconButton iconStyle={styles.svgIcon}
           style={styles.iconButton}
-          onClick={() => { open(REDDIT_URL) }}>
+          onClick={() => { opn(REDDIT_URL).catch(() => {}) }}>
           <RedditIcon />
         </IconButton>
 

@@ -35,6 +35,7 @@ import os from 'os'
 import path from 'path'
 import isDev from 'electron-is-dev'
 import React from 'react'
+import opn from 'opn'
 
 import Application from './core/Application'
 
@@ -56,7 +57,8 @@ var injectTapEventPlugin = require('react-tap-event-plugin')
 injectTapEventPlugin()
 
 const getCoins = (address) => {
-  shell.openExternal('http://download.joystream.co:7200/?address=' + address.toString())
+  const url = 'http://download.joystream.co:7200/?address=' + address.toString()
+  opn(url).catch(() => {})
 }
 
 // Create app
