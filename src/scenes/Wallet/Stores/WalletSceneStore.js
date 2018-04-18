@@ -130,19 +130,8 @@ class WalletSceneStore {
   @action.bound
   claimFreeBCH = () => {
 
-    if(!this.allowAttemptToClaimFreeBCH)
-      throw Error('Cannot attempt to claim free BCH at this time')
-    else if(this.visibleDialog)
-      throw Error('Cannot open dialog when another is already open')
-
-    // Create model for flow
-    let flowStore = new ClaimFreeBCHFlowStore(this, ClaimFreeBCHFlowStore.STAGE.WAITING_FOR_SERVER_REPLY, null)
-
-    // Set as active dialog model
-    this.setVisibleDialog(flowStore)
-
-    // Issue request to claim free BCH
     this._claimFreeBCHAttemptHandler()
+
   }
 
   @computed get
@@ -159,6 +148,11 @@ class WalletSceneStore {
     }
 
     return pendingBalance
+  }
+
+  @computed get
+  totalBalance() {
+    return this._walletStore.totalBalance
   }
 
   @computed get
