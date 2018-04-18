@@ -378,7 +378,8 @@ class Application extends EventEmitter {
           minor: semver.minor(APPLICATION_VERSION),
           revision: semver.patch(APPLICATION_VERSION),
           tag: 0
-        }
+        },
+        user_agent: 'JoyStream ' + APPLICATION_VERSION
       },
 
       // Assisted Peer Discovery (APD)
