@@ -76,14 +76,32 @@ class StartPaidDownloadingFieldSection extends Component {
     return row
   }
 
+  static makeOptimisingRowStore() {
+
+    let infoHash = 'info3'
+    let torrentStore = {
+      infoHash: infoHash
+    }
+    let uiStore = {
+      torrentsViabilityOfPaidDownloading : {
+        get : function() {
+          return new CanStart({ }, 123)
+        }
+      }
+    }
+    let row = new TorrentTableRowStore(torrentStore, uiStore, false)
+    row.setBlockedStartingPaidDownloadForSwarmLatencySampling(true)
+
+    return row
+  }
+
   constructor() {
     super()
 
-
-
     this.state = {
       startPaidDownloadTorrentTableRowStore : StartPaidDownloadingFieldSection.makeStartingPaidDownloadRowStore(),
-      outOfMoneyStartPaidDownloadTorrentTableRowStore : StartPaidDownloadingFieldSection.makeOutOfMoneyRowStore()
+      outOfMoneyStartPaidDownloadTorrentTableRowStore : StartPaidDownloadingFieldSection.makeOutOfMoneyRowStore(),
+      optimisingRowStore : StartPaidDownloadingFieldSection.makeOptimisingRowStore()
     }
   }
 
@@ -111,6 +129,10 @@ class StartPaidDownloadingFieldSection extends Component {
 
         <div style={styles.wrapper}>
           <StartPaidDownloadingField torrentTableRowStore={this.state.outOfMoneyStartPaidDownloadTorrentTableRowStore}/>
+        </div>
+
+        <div style={styles.wrapper}>
+          <StartPaidDownloadingField torrentTableRowStore={this.state.optimisingRowStore}/>
         </div>
 
       </div>
