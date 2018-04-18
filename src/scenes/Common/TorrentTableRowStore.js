@@ -26,6 +26,13 @@ class TorrentTableRowStore {
 
   @observable deletingData
 
+  /**
+   * {Boolean} Whether we are currently trying to start
+   * paid downloading, i.e. the user has initiated
+   *
+   */
+  @observable startingPaidDownload
+
   constructor(torrentStore, uiStore, showToolbar) {
 
     this.torrentStore = torrentStore
@@ -34,6 +41,7 @@ class TorrentTableRowStore {
     this.setShowToolbar(showToolbar)
     this.setBeingRemoved(false)
     this.setDeletingData(false)
+    this.setStartingPaidDownload(false)
   }
 
   @action.bound
@@ -59,6 +67,11 @@ class TorrentTableRowStore {
   @action.bound
   setDeletingData (deleting) {
     this.deletingData = deleting
+  }
+
+  @action.bound
+  setStartingPaidDownload(startingPaidDownload) {
+    this.startingPaidDownload = startingPaidDownload
   }
 
   remove () {
@@ -102,6 +115,29 @@ class TorrentTableRowStore {
       let firstPlayableFileIndex = this.playableMediaList[0]
       this._uiStore.playMedia(this.torrentStore.infoHash, firstPlayableFileIndex)
     }
+  }
+
+  /**
+   * Handles user action to initiate paid download
+   */
+  @action.bound
+  handlePaidDownloadClick() {
+
+    if(this.viabilityOfPaidDownloadingTorrent.constructor.name !== 'CanStart')
+      throw Error('Cannot start paid download: not viable')
+    else if(this.startingPaidDownload)
+      throw Error('Cannot start paid download when we are already starting')
+
+    // Update state to reflect that we are trying to start
+    this.setStartingPaidDownload(true)
+
+    // Tell core to try to start
+    this.torrentStore.startPaidDownload((err) => {
+
+      this.setStartingPaidDownload(false)
+
+    })
+
   }
 
   beginPaidUploadWithDefaultTerms() {
