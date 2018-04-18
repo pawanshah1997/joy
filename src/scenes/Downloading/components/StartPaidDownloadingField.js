@@ -23,6 +23,15 @@ function getColors(props, state) {
         background : 'hsla(180, 1%, 80%, 0.4)'
       }
 
+    } else if (props.torrentTableRowStore.blockedStartingPaidDownloadForSwarmLatencySampling) {
+
+      return {
+        textColor: 'rgba(139, 152, 27, 1)',
+        subTextColor: 'rgba(139, 152, 27, 0.7)',
+        borderColor : 'transparent',
+        background : '#cddc39'
+      }
+
     } else {
 
       if (state.hover) {
@@ -41,6 +50,15 @@ function getColors(props, state) {
         }
       }
 
+    }
+
+  } else if (props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent.constructor.name === 'InsufficientFunds') {
+
+    return {
+      textColor: 'white',
+      subTextColor: 'rgba(255,255,255, 0.7)',
+      borderColor : 'transparent',
+      background : '#ff9800'
     }
 
   } else if (props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted') {
@@ -136,6 +154,9 @@ function getText(torrentTableRowStore) {
 
     if(torrentTableRowStore.startingPaidDownload) {
       text = "STARTING BOOST"
+    } else if(torrentTableRowStore.blockedStartingPaidDownloadForSwarmLatencySampling) {
+      text = "OPTIMISING SPEED"
+      subText = "Finding best peers"
     } else {
       text = "BOOST"
       subText="Pay for speedup"
@@ -151,7 +172,8 @@ function getText(torrentTableRowStore) {
       tooltip = "The wallet is still getting ready, please stand by, this should complete shortly."
     }
     else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'InsufficientFunds') {
-      subText = "Insufficient funds"
+      text = "BOOST AVAILABLE"
+      subText = "Needs funds"
       tooltip = "The estimated minimum value of X is required to start a paid download, you only have Y currently available."
     }
     else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'Stopped') {
@@ -238,11 +260,12 @@ class StartPaidDownloadButton extends Component {
       this.props.torrentTableRowStore.handlePaidDownloadClick()
   }
 
-  blockingWhileProcessingStartPaidDownload() {
-    return
-    this.props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart'
-      &&
-      this.props.torrentTableRowStore.startingPaidDownload
+  blocking() {
+    return this.props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart'
+      && (
+      this.props.torrentTableRowStore.startingPaidDownload ||
+      this.props.torrentTableRowStore.blockedStartingPaidDownloadForSwarmLatencySampling
+    )
   }
 
   render() {
@@ -264,14 +287,12 @@ class StartPaidDownloadButton extends Component {
 
         >
           {
-            this.blockingWhileProcessingStartPaidDownload()
+            this.blocking()
             ?
               <CircularProgress size={20} thickness={2} color={styles.colors.textColor}/>
             :
               <InformationSvgIcon style={styles.speedupSvgIcon} data-tip data-for={iconIdentifier} />
           }
-
-
         </div>
 
         <div style={styles.textContainer}>
@@ -327,7 +348,7 @@ const StartPaidDownloadingField = (props) => {
 
   let styles = {
     root : {
-      flex: '0 0 180px'
+      flex: '0 0 220px'
     }
   }
 

@@ -59,6 +59,17 @@ class DownloadingStore {
 
     let row = new TorrentTableRowStore(torrentStore, this._uiStore, false)
 
+    // Block any paid download initiation
+    row.setBlockedStartingPaidDownloadForSwarmLatencySampling(true)
+
+    // Enable it again after some time
+    setTimeout(
+      () => {
+      row.setBlockedStartingPaidDownloadForSwarmLatencySampling(false)
+    },
+      10000 // Moved into application settings later
+    )
+
     this.rowStorefromTorrentInfoHash.set(torrentStore.infoHash, row)
   }
 

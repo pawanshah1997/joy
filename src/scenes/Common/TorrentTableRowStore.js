@@ -33,6 +33,11 @@ class TorrentTableRowStore {
    */
   @observable startingPaidDownload
 
+  /**
+   * {Boolean}
+   */
+  @observable blockedStartingPaidDownloadForSwarmLatencySampling
+
   constructor(torrentStore, uiStore, showToolbar) {
 
     this.torrentStore = torrentStore
@@ -72,6 +77,11 @@ class TorrentTableRowStore {
   @action.bound
   setStartingPaidDownload(startingPaidDownload) {
     this.startingPaidDownload = startingPaidDownload
+  }
+
+  @action.bound
+  setBlockedStartingPaidDownloadForSwarmLatencySampling(blockedStartingPaidDownloadForSwarmLatencySampling) {
+    this.blockedStartingPaidDownloadForSwarmLatencySampling = blockedStartingPaidDownloadForSwarmLatencySampling
   }
 
   remove () {
