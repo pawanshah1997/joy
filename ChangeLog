@@ -1,3 +1,11 @@
+1.0.8 release April 18 2018
+
+  * Integrate with new faucet - #993
+  * Start paid download button allows some time for speed sampling of swarm,
+    before being enabled - #994, #997 
+  * Application sets bittorrent user_agent string - #995
+  * Fix opening external links on Linux - #996
+
 1.0.7 hotfix release April 8 2018
 
   * Fixed peer selection bug that did not actually pick the fastest seller
@@ -17,7 +25,7 @@
  
 1.0.4 release March 31 2018
 
-  * Adding OP_RETURN foranalytics to payment channel contract - #972
+  * Adding OP_RETURN for analytics to payment channel contract - #972
   * Typo on Choose folder button in settings scene - #973
 
 1.0.3 release March 29 2018
