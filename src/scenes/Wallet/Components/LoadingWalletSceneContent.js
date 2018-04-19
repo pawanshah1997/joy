@@ -3,8 +3,6 @@ import PropTypes from 'prop-types'
 import { inject, observer } from 'mobx-react'
 
 import Wallet from '../../../core/Wallet'
-import {REDDIT_URL, SLACK_URL, TELEGRAM_URL} from "../../../constants";
-import open from "open";
 
 function getStyles (props) {
   return {

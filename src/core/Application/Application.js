@@ -378,7 +378,8 @@ class Application extends EventEmitter {
           minor: semver.minor(APPLICATION_VERSION),
           revision: semver.patch(APPLICATION_VERSION),
           tag: 0
-        }
+        },
+        user_agent: 'JoyStream ' + APPLICATION_VERSION
       },
 
       // Assisted Peer Discovery (APD)
@@ -1164,12 +1165,10 @@ class Application extends EventEmitter {
 
   /**
    * Claim free BCH
-   * @param cb {Function} - callback
    */
-  claimFreeBCH(cb) {
+  claimFreeBCH() {
 
     if(this.state === Application.STATE.STOPPING || this.state === Application.STATE.STOPPED) {
-      cb({code : Application.STATE.CLAIM_FREE_BCH_ERROR.APPLICATION_IN_WRONG_STATE})
       return
     }
 
@@ -1186,53 +1185,11 @@ class Application extends EventEmitter {
         this.wallet.state === Wallet.STATE.STARTED
       )
     ) {
-      cb({code : Application.CLAIM_FREE_BCH_ERROR.RECEIVE_ADDRESS_NOT_READY})
-      return
-    }
-
-    // Make sure the application settings are started
-    if(!this.applicationSettings || this.applicationSettings.state != ApplicationSettings.STATE.OPENED) {
-      cb({code : Application.CLAIM_FREE_BCH_ERROR.SETTINS_MUST_BE_OPEN})
-      return
-    }
-
-    // Check whether we are even going to succeed with this,
-    let claimedFreeBCH = this.applicationSettings.claimedFreeBCH()
-
-    if(claimedFreeBCH) {
-      cb({code : Application.CLAIM_FREE_BCH_ERROR.ALREADY_CLAIMED})
       return
     }
 
     // Request coins to our current receive address
-    this._faucetRequestIssuer(this.wallet.receiveAddress, (err, res) => {
-
-      // If the application is shutting down or fully stopped, then
-      // we don't even try to do anything
-      if(this.state === Application.STATE.STOPPING || this.state === Application.STATE.STOPPED) {
-        debug('Ignoring result of getting coins from fauet')
-        return
-      }
-
-      if(err) {
-
-        // Pass on error
-        cb({
-          code : Application.CLAIM_FREE_BCH_ERROR.FAUCET_ERROR,
-          faucetError :  err
-        })
-
-      } else {
-
-        // Mark as claimed
-        this.applicationSettings.setClaimedFreeBCH(true)
-
-        // make user callback
-        cb(null)
-
-      }
-
-    })
+    this._faucetRequestIssuer(this.wallet.receiveAddress)
 
   }
 }

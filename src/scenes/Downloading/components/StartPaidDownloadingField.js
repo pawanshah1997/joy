@@ -8,30 +8,63 @@ import {Field} from './../../../components/Table'
 import { Provider, observer, inject } from 'mobx-react'
 import assert from 'assert'
 import ReactTooltip from 'react-tooltip'
+import CircularProgress from 'material-ui/CircularProgress'
 
 function getColors(props, state) {
 
-  if (props.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart') {
-    if (state.hover) {
+  if (props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart') {
+
+    if(props.torrentTableRowStore.startingPaidDownload) {
+
       return {
-        textColor: 'white',
-        subTextColor: 'rgba(255,255,255, 0.7)',
+        textColor: 'black',
+        subTextColor: 'rgba(0,0,0, 0.7)',
         borderColor : 'transparent',
-        background : '#378b61'
+        background : 'hsla(180, 1%, 80%, 0.4)'
       }
-    } else {
+
+    } else if (props.torrentTableRowStore.blockedStartingPaidDownloadForSwarmLatencySampling) {
+
       return {
-        textColor: 'white',
-        subTextColor: 'rgba(255,255,255, 0.7)',
-        borderColor : 'transparent', //'rgba(92, 184, 92, 0.7)',
-        background : 'rgb(84, 187, 135)' //'rgba(92, 184, 92, 0.3)'
+        textColor: 'rgba(139, 152, 27, 1)',
+        subTextColor: 'rgba(139, 152, 27, 0.7)',
+        borderColor : 'transparent',
+        background : '#cddc39'
       }
+
+    } else {
+
+      if (state.hover) {
+        return {
+          textColor: 'white',
+          subTextColor: 'rgba(255,255,255, 0.7)',
+          borderColor : 'transparent',
+          background : '#378b61'
+        }
+      } else {
+        return {
+          textColor: 'white',
+          subTextColor: 'rgba(255,255,255, 0.7)',
+          borderColor : 'transparent', //'rgba(92, 184, 92, 0.7)',
+          background : 'rgb(84, 187, 135)' //'rgba(92, 184, 92, 0.3)'
+        }
+      }
+
     }
 
-  } else if (props.viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted') {
+  } else if (props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent.constructor.name === 'InsufficientFunds') {
+
+    return {
+      textColor: 'white',
+      subTextColor: 'rgba(255,255,255, 0.7)',
+      borderColor : 'transparent',
+      background : '#ff9800'
+    }
+
+  } else if (props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent.constructor.name === 'AlreadyStarted') {
     return {
       textColor: 'black',
-      subTextColor: 'black',
+      subTextColor: 'rgba(0,0,0, 0.7)',
       borderColor : 'transparent',
       background : 'hsla(180, 1%, 80%, 0.4)'
     }
@@ -52,6 +85,7 @@ function getStyles(props, state) {
   let color = getColors(props, state)
 // rgb(84, 187, 135)
   return {
+    colors: color,
     root : {
       display : 'flex',
       flexDirection : 'row',
@@ -103,7 +137,9 @@ function getStyles(props, state) {
 
 }
 
-function getText(viabilityOfPaidDownloadingTorrent) {
+function getText(torrentTableRowStore) {
+
+  let viabilityOfPaidDownloadingTorrent = torrentTableRowStore.viabilityOfPaidDownloadingTorrent
 
   let text = null
   let subText = null
@@ -115,8 +151,17 @@ function getText(viabilityOfPaidDownloadingTorrent) {
     tooltip = "You are paying, and should now promptly be experiencing a significantly faster and more reliable downloading experience."
   }
   else if (viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart') {
-    text = "BOOST"
-    subText="Pay for speedup"
+
+    if(torrentTableRowStore.startingPaidDownload) {
+      text = "STARTING BOOST"
+    } else if(torrentTableRowStore.blockedStartingPaidDownloadForSwarmLatencySampling) {
+      text = "OPTIMISING SPEED"
+      subText = "Finding best peers"
+    } else {
+      text = "BOOST"
+      subText="Pay for speedup"
+    }
+
     tooltip = "By paying for a boost, you will likely experience faster download speed on this torrent."
   } else {
 
@@ -127,7 +172,8 @@ function getText(viabilityOfPaidDownloadingTorrent) {
       tooltip = "The wallet is still getting ready, please stand by, this should complete shortly."
     }
     else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'InsufficientFunds') {
-      subText = "Insufficient funds"
+      text = "BOOST AVAILABLE"
+      subText = "Needs funds"
       tooltip = "The estimated minimum value of X is required to start a paid download, you only have Y currently available."
     }
     else if(viabilityOfPaidDownloadingTorrent.constructor.name === 'Stopped') {
@@ -208,19 +254,26 @@ class StartPaidDownloadButton extends Component {
 
   handleClick = (props) => {
 
-    console.log('handleClick')
+    if(this.props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart'
+    &&
+     !this.props.torrentTableRowStore.startingPaidDownload)
+      this.props.torrentTableRowStore.handlePaidDownloadClick()
+  }
 
-    if(this.props.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart')
-      this.props.torrent.startPaidDownload()
-
+  blocking() {
+    return this.props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent.constructor.name === 'CanStart'
+      && (
+      this.props.torrentTableRowStore.startingPaidDownload ||
+      this.props.torrentTableRowStore.blockedStartingPaidDownloadForSwarmLatencySampling
+    )
   }
 
   render() {
 
     let styles = getStyles(this.props, this.state)
-    let texts = getText(this.props.viabilityOfPaidDownloadingTorrent)
+    let texts = getText(this.props.torrentTableRowStore)
 
-    let iconIdentifier = "svg-icon-for-" + this.props.torrent.infoHash
+    let iconIdentifier = "svg-icon-for-" + this.props.torrentTableRowStore.torrentStore.infoHash
 
     return (
       <div style={styles.root}
@@ -233,7 +286,13 @@ class StartPaidDownloadButton extends Component {
         <div style={styles.iconContainer}
 
         >
-          <InformationSvgIcon style={styles.speedupSvgIcon} data-tip data-for={iconIdentifier} />
+          {
+            this.blocking()
+            ?
+              <CircularProgress size={20} thickness={2} color={styles.colors.textColor}/>
+            :
+              <InformationSvgIcon style={styles.speedupSvgIcon} data-tip data-for={iconIdentifier} />
+          }
         </div>
 
         <div style={styles.textContainer}>
@@ -282,21 +341,20 @@ class StartPaidDownloadButton extends Component {
 }
 
 StartPaidDownloadButton.propTypes = {
-  torrent : PropTypes.object.isRequired // Instance of torrent store
+  torrentTableRowStore : PropTypes.object.isRequired // Instance of torrent store
 }
 
 const StartPaidDownloadingField = (props) => {
 
   let styles = {
     root : {
-      flex: '0 0 180px'
+      flex: '0 0 220px'
     }
   }
 
   return (
     <Field style={styles.root}>
-      <StartPaidDownloadButton torrent={props.torrentTableRowStore.torrentStore}
-                               viabilityOfPaidDownloadingTorrent={props.torrentTableRowStore.viabilityOfPaidDownloadingTorrent} />
+      <StartPaidDownloadButton torrentTableRowStore={props.torrentTableRowStore}/>
     </Field>
   )
 }

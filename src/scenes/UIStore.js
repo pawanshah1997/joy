@@ -1,7 +1,7 @@
 import {observable, action, computed} from 'mobx'
 import assert from 'assert'
 import {shell, remote} from 'electron'
-import open from 'open'
+import opn from 'opn'
 var debug = require('debug')('UIStore')
 
 // Core
@@ -419,7 +419,7 @@ class UIStore {
         satsPrkBFee,
         null,
         '',
-        !this._application.applicationSettings.claimedFreeBCH(),
+        true, // allow claiming free BCH functionality
         launchExternalTxViewer,
         this.claimFreeBCH,
         bcoin.protocol.consensus.COIN
@@ -974,31 +974,7 @@ class UIStore {
   @action.bound
   claimFreeBCH = () => {
 
-    this._application.claimFreeBCH((err) => {
-
-      let dialogVisible = this.walletSceneStore.visibleDialog && this.walletSceneStore.visibleDialog.constructor.name === 'ClaimFreeBCHFlowStore'
-
-      if(err) {
-
-        if(dialogVisible) {
-          this.walletSceneStore.visibleDialog.error = err
-          this.walletSceneStore.visibleDialog.setStage(ClaimFreeBCHFlowStore.STAGE.DISPLAY_FAILURE_MESSAGE)
-        } else {
-          debug('Ignored error result of claiming free BCH, dialog abandoned')
-        }
-
-      } else {
-
-        // If there was no error, then hide the button
-        this.walletSceneStore.setAllowAttemptToClaimFreeBCH(false)
-
-        // and if the dialog is visible, we update it with a success message
-        if(dialogVisible)
-          this.walletSceneStore.visibleDialog.setStage(ClaimFreeBCHFlowStore.STAGE.DISPLAY_SUCCESS_MESSAGE)
-
-      }
-
-    })
+    this._application.claimFreeBCH()
 
   }
 
@@ -1214,7 +1190,7 @@ function launchExternalTxViewer(txId, outputIndex) {
 
   console.log('Opening payment carried by output ' + outputIndex + ' in tx ' + txId)
 
-  shell.openExternal(constants.BLOCKEXPLORER_QUERY_STRING_BASE + txId)
+  opn(constants.BLOCKEXPLORER_QUERY_STRING_BASE + txId).catch(() => {})
 }
 
 function appStateToUIStorePhase(state) {
