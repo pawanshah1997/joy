@@ -16,18 +16,18 @@ Anyone with spare bandwith can use Joystream Classic and earn Bitcoin Cash, at w
 
 # Joystream - desktop client
 
-This is the main Joystream cross platform (electron) desktop application, which currently works on Windows, OSX and Linux/Debian distros.
+This is the main Joystream Classic cross platform (electron) desktop application, which currently works on Windows, OSX and Linux/Debian distros.
 
 ![screenshot](src/assets/docs/screenshot.png)
 
 ## License
 
-Joystream Desktop is released under the terms of the MIT license.
+Joystream Classic Desktop is released under the terms of the MIT license.
 See [LICENSE](LICENSE) for more information.
 
 ## Disclaimer
 
-Joystream is still in its early stages and may contain bugs. Use at your own risk.
+Joystream Classic is still in its early stages and may contain bugs. Use at your own risk.
 
 ## Download Binaries
 
