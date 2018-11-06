@@ -1,21 +1,37 @@
-# JoyStream - desktop client
+![screenshot](src/assets/img/joystream-classic-color.png)
+A BitTorrent client, with faster speeds, streaming and paid seeding.
 
-This is the main JoyStream cross platform (electron) desktop application, which currently works on Windows, OSX and Linux/Debian distros.
+###### Fast downloads
+Joystream Classic rewards seeders for providing bandwidth with micropayments, and this leads to much higher download speeds on all content.
+
+###### Streaming
+Joystream Classic makes it possible to download and seek to any part of a large HD audio or video file by simply requesting and paying for it directly, which makes streaming work as well as on the web
+
+###### More content
+Joystream Classic gives anyone with a full download a reason to stick around and become a seeder, which radically improves content availability.
+
+###### Paid seeding
+Anyone with spare bandwith can use Joystream Classic and earn Bitcoin, at what ever price they choose, in exchange for seeding to peers. If you have some rare content which no one else has, you are rewarded by being able to charge higher prices.
+
+
+# Joystream - desktop client
+
+This is the main Joystream cross platform (electron) desktop application, which currently works on Windows, OSX and Linux/Debian distros.
 
 ![screenshot](src/assets/docs/screenshot.png)
 
 ## License
 
-JoyStream Desktop is released under the terms of the MIT license.
+Joystream Desktop is released under the terms of the MIT license.
 See [LICENSE](LICENSE) for more information.
 
 ## Disclaimer
 
-JoyStream is still in its early stages and may contain bugs. Use at your own risk.
+Joystream is still in its early stages and may contain bugs. Use at your own risk.
 
 ## Download Binaries
 
-You can download signed prebuilt binaries from the [Releases](https://github.com/JoyStream/joystream-electron/releases) section.
+You can download signed prebuilt binaries from the [Releases](https://github.com/Joystream/joystream-electron/releases) section.
 
 ## Building
 
@@ -39,7 +55,7 @@ pip install "conan==0.28.1"
 ```
 
 ```
-# Add JoyStream conan repository
+# Add Joystream conan repository
 conan remote add joystream https://api.bintray.com/conan/joystream/joystream True
 
 # Configure electron-rebuild to play nice with conan (see notes at end)
@@ -51,7 +67,7 @@ ln -s ~/.local ~/.electron-gyp/.local
 Step-by-Step build instructions:
 ```
 # Clone the repository
-git clone https://github.com/JoyStream/joystream-electron.git
+git clone https://github.com/Joystream/joystream-electron.git
 cd joystream-electron
 
 # If building on windows install npm v4.6.1 (build fails with newer versions of npm)

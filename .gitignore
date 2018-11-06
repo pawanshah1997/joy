@@ -11,3 +11,5 @@ build
 out/
 
 package-lock.json
+
+\.DS_Store
