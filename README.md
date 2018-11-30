@@ -1,20 +1,4 @@
-![screenshot](src/assets/img/joystream-classic-color.png)
-A BitTorrent client, with faster speeds, streaming and paid seeding.
-
-###### Fast downloads
-Joystream Classic rewards seeders for providing bandwidth with micropayments, and this leads to much higher download speeds on all content.
-
-###### Streaming
-Joystream Classic makes it possible to download and seek to any part of a large HD audio or video file by simply requesting and paying for it directly, which makes streaming work as well as on the web
-
-###### More content
-Joystream Classic gives anyone with a full download a reason to stick around and become a seeder, which radically improves content availability.
-
-###### Paid seeding
-Anyone with spare bandwith can use Joystream Classic and earn Bitcoin Cash, at what ever price they choose, in exchange for seeding to peers. If you have some rare content which no one else has, you are rewarded by being able to charge higher prices.
-
-
-# Joystream - desktop client
+# Joystream Classic
 
 This is the main Joystream Classic cross platform (electron) desktop application, which currently works on Windows, OSX and Linux/Debian distros.
 
